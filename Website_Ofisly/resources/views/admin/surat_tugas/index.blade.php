@@ -10,6 +10,20 @@
             </button>
         </div>
         <div class="card-body">
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
             <div class="table-responsive">
                 <table class="table table-bordered table-hover" id="suratTugasTable" width="100%" cellspacing="0">
                     <thead class="bg-light">
@@ -22,7 +36,39 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Data akan diisi via AJAX -->
+                        @foreach($suratTugas as $surat)
+                        <tr>
+                            <td>{{ $surat->no_surat }}</td>
+                            <td>{{ $surat->nama_kandidat }}</td>
+                            <td>{{ \Carbon\Carbon::parse($surat->tgl_penugasan)->format('d/m/Y') }}</td>
+                            <td>{{ \Carbon\Carbon::parse($surat->tgl_surat_pembuatan)->format('d/m/Y') }}</td>
+                            <td class="text-center">
+                                <div class="btn-group">
+                                    <a href="{{ route('surat-tugas.generate-pdf', $surat->id_surat_tugas) }}"
+                                       class="btn btn-sm btn-danger" target="_blank">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </a>
+                                    <a href="{{ route('surat-tugas.generate-word', $surat->id_surat_tugas) }}"
+                                       class="btn btn-sm btn-primary">
+                                        <i class="fas fa-file-word"></i>
+                                    </a>
+                                    <a href="{{ route('surat-tugas.edit', $surat->id_surat_tugas) }}"
+                                       class="btn btn-sm btn-info">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form action="{{ route('surat-tugas.destroy', $surat->id_surat_tugas) }}"
+                                          method="POST" style="display: inline-block;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-danger"
+                                                onclick="return confirm('Apakah Anda yakin ingin menghapus?')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforeach
                     </tbody>
                 </table>
             </div>
@@ -38,28 +84,24 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
                         aria-label="Close"></button>
                 </div>
-                <form id="createForm">
+                <form action="{{ route('surat-tugas.store') }}" method="POST">
                     @csrf
                     <div class="modal-body">
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="nama_kandidat" class="form-label">Nama Kandidat</label>
                                 <input type="text" class="form-control" id="nama_kandidat" name="nama_kandidat" required>
-                                <small class="text-muted">Masukkan nama lengkap karyawan</small>
                             </div>
                             <div class="col-md-6">
                                 <label for="tgl_penugasan" class="form-label">Tanggal Penugasan</label>
-                                <input type="date" class="form-control" id="tgl_penugasan" name="tgl_penugasan" required>
+                                <input type="date" class="form-control" id="tgl_penugasan" name="tgl_penugasan" required
+                                       min="{{ date('Y-m-d') }}">
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="fas fa-times"></i> Batal
-                        </button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Simpan
-                        </button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Simpan</button>
                     </div>
                 </form>
             </div>
@@ -69,87 +111,15 @@
 
 @section('scripts')
     <script>
+        // Inisialisasi DataTable tanpa server-side processing
         $(document).ready(function() {
-            // Inisialisasi Select2
-
-            // Inisialisasi DataTable
             $('#suratTugasTable').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: {
-                    url: "{{ route('surat-tugas.data') }}",
-                    type: 'GET'
-                },
-                columns: [{
-                        data: 'no_surat',
-                        name: 'no_surat'
-                    },
-                    {
-                        data: 'nama_kandidat',
-                        name: 'nama_kandidat'
-                    },
-                    {
-                        data: 'tgl_penugasan',
-                        name: 'tgl_penugasan',
-                        render: function(data) {
-                            return new Date(data).toLocaleDateString('id-ID');
-                        }
-                    },
-                    {
-                        data: 'tgl_surat_pembuatan',
-                        name: 'tgl_surat_pembuatan',
-                        render: function(data) {
-                            return new Date(data).toLocaleDateString('id-ID');
-                        }
-                    },
-                    {
-                        data: 'action',
-                        name: 'action',
-                        orderable: false,
-                        searchable: false,
-                        className: 'text-center'
-                    }
-                ],
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/id.json'
-                }
-            });
-
-            // Submit form
-            $('#createForm').submit(function(e) {
-                e.preventDefault();
-
-                $.ajax({
-                    url: "{{ route('surat-tugas.store') }}",
-                    type: "POST",
-                    data: $(this).serialize(),
-                    success: function(response) {
-                        $('#createModal').modal('hide');
-                        $('#suratTugasTable').DataTable().ajax.reload();
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Berhasil',
-                            text: response.success,
-                            timer: 1500
-                        });
-                        $('#createForm')[0].reset();
-                        $('.select2-karyawan').val(null).trigger('change');
-                    },
-                    error: function(xhr) {
-                        let errors = xhr.responseJSON.errors;
-                        let errorMessage = '';
-
-                        $.each(errors, function(key, value) {
-                            errorMessage += value + '<br>';
-                        });
-
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Gagal',
-                            html: errorMessage
-                        });
-                    }
-                });
+                },
+                columnDefs: [
+                    { orderable: false, targets: 4 } // Kolom aksi tidak diurutkan
+                ]
             });
         });
     </script>
