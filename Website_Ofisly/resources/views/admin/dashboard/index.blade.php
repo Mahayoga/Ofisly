@@ -1,4 +1,4 @@
-@extends('admin/layout/index')
+{{-- @extends('admin/layout/index')
 @section('content')
 <main>
   <div class="container-fluid px-4">
@@ -551,6 +551,23 @@
           </tbody>
         </table>
       </div>
+    </div>
+  </div>
+</main>
+@endsection --}}
+
+@extends('admin/layout/index')
+@section('content')
+<main>
+  <div class="container-fluid px-4">
+    <h1 class="mt-4">Dashboard</h1>
+    <ol class="breadcrumb mb-4">
+      <li class="breadcrumb-item active">Dashboard</li>
+    </ol>
+
+    <div class="text-center my-5">
+      <h2 class="text-muted">🚧 Sedang Dalam Pengerjaan 🚧</h2>
+      <p class="text-secondary">Fitur dashboard ini sedang kami kembangkan. Nantikan update selanjutnya!</p>
     </div>
   </div>
 </main>
