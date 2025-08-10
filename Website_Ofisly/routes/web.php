@@ -26,4 +26,15 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::prefix('surat-tugas')->group(function() {
+    Route::get('/', [SuratTugasController::class, 'index'])->name('surat-tugas.index');
+    Route::post('/', [SuratTugasController::class, 'store'])->name('surat-tugas.store');
+    Route::get('/data', [SuratTugasController::class, 'getData'])->name('surat-tugas.data');
+    Route::get('/generate-pdf/{id}', [SuratTugasController::class, 'generatePDF'])->name('surat-tugas.generate-pdf');
+    Route::get('/generate-word/{id}', [SuratTugasController::class, 'generateWord'])->name('surat-tugas.generate-word');
+});
+
+// Route untuk mendapatkan data karyawan
+Route::get('/get-karyawan', [KaryawanController::class, 'getKaryawan'])->name('get.karyawan');
+
 require __DIR__.'/auth.php';

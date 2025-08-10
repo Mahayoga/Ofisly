@@ -17,6 +17,9 @@ return new class extends Migration
             $table->string('nama_kandidat');
             $table->date('tgl_penugasan');
             $table->date('tgl_surat_pembuatan');
+            $table->string('status')->nullable();
+            $table->string('created_by')->nullable();
+            $table->string('file_path')->nullable();
             /**
              * Tgl penugasan
              * Tgl surat pembuatan
