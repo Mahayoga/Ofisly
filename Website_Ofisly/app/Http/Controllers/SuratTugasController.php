@@ -11,7 +11,7 @@ class SuratTugasController extends Controller
      */
     public function index()
     {
-        dd('Hehe');
+        return view('admin.surat_tugas.index');
     }
 
     /**
