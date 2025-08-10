@@ -11,11 +11,15 @@ Route::get('/dashboard', function () {
     return view('admin.dashboard.index');
 })->middleware(['auth', 'verified', 'role.auth'])->name('dashboard');
 
-Route::middleware(['role.auth', 'auth'])->group(function() {
+Route::middleware(['role.auth', 'auth'])->group(function () {
     Route::resource('surat-tugas', SuratTugasController::class);
 });
 
-Route::get('/error_code', function() {
+//sementara 
+Route::middleware(['role.auth', 'auth'])->get('/cuti-karyawan', function () {
+    return view('admin.cuti_karyawan.index');})->name('cuti-karyawan');
+
+Route::get('/error_code', function () {
     abort(401);
 });
 
@@ -25,7 +29,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::prefix('surat-tugas')->group(function() {
+Route::prefix('surat-tugas')->group(function () {
     Route::get('/', [SuratTugasController::class, 'index'])->name('surat-tugas.index');
     Route::post('/', [SuratTugasController::class, 'store'])->name('surat-tugas.store');
     Route::get('/{id}/edit', [SuratTugasController::class, 'edit'])->name('surat-tugas.edit');
@@ -34,4 +38,4 @@ Route::prefix('surat-tugas')->group(function() {
     Route::get('/generate-pdf/{id}', [SuratTugasController::class, 'generatePDF'])->name('surat-tugas.generate-pdf');
     Route::get('/generate-word/{id}', [SuratTugasController::class, 'generateWord'])->name('surat-tugas.generate-word');
 });
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
