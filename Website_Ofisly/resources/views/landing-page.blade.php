@@ -112,7 +112,7 @@
         </section><!-- /Hero Section -->
 
         <!-- Featured Services Section -->
-        <section id="featured-services" class="featured-services section">
+        {{-- <section id="featured-services" class="featured-services section">
 
             <div class="container">
 
@@ -146,7 +146,7 @@
 
             </div>
 
-        </section><!-- /Featured Services Section -->
+        </section><!-- /Featured Services Section --> --}}
 
         <!-- About Section -->
         <section id="about" class="about section">
@@ -155,7 +155,7 @@
             <div class="container section-title" data-aos="fade-up">
                 <span>About Us<br></span>
                 <h2>About</h2>
-                <p>Necessitatibus eius consequatur ex aliquid fuga eum quidem sint consectetur velit</p>
+                <p>Ofisly adalah web tools yang dirancang untuk membantu Anda bekerja lebih cepat, efisien, dan terorganisir. Dengan fitur yang sederhana namun lengkap, Ofisly mempermudah pengelolaan tugas, kolaborasi tim, dan otomatisasi pekerjaan sehari-hari</p>
             </div><!-- End Section Title -->
 
             <div class="container">
@@ -348,7 +348,7 @@
             <div class="container section-title" data-aos="fade-up">
                 <span>Portfolio</span>
                 <h2>Portfolio</h2>
-                <p>Necessitatibus eius consequatur ex aliquid fuga eum quidem sint consectetur velit</p>
+                <p>Hasil karya, proyek, atau pencapaian yang pernah dikerjakan.</p>
             </div><!-- End Section Title -->
 
             <div class="container">
@@ -537,7 +537,7 @@
             <div class="container section-title" data-aos="fade-up">
                 <span>Testimonials</span>
                 <h2>Testimonials</h2>
-                <p>Necessitatibus eius consequatur ex aliquid fuga eum quidem sint consectetur velit</p>
+                <p>Pendapat atau pengalaman pengguna yang sudah mencoba produk layanan</p>
             </div><!-- End Section Title -->
 
             <div class="container" data-aos="fade-up" data-aos-delay="100">
@@ -651,8 +651,8 @@
         <div class="row justify-content-center" data-aos="zoom-in" data-aos-delay="100">
           <div class="col-xl-10">
             <div class="text-center">
-              <h3>Call To Action</h3>
-              <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+              <h3>Siap bekerja lebih cepat?</h3>
+              <p>Coba Ofisly sekarang dan rasakan kemudahan mengatur pekerjaan Anda dalam satu platform.</p>
               <a class="cta-btn" href="#">Call To Action</a>
             </div>
           </div>
@@ -666,9 +666,9 @@
 
       <!-- Section Title -->
       <div class="container section-title" data-aos="fade-up">
-        <span>Section Title</span>
+        <span>Team</span>
         <h2>Team</h2>
-        <p>Necessitatibus eius consequatur ex aliquid fuga eum quidem sint consectetur velit</p>
+        <p>Tim Ofisly terdiri dari para profesional kreatif dan berdedikasi yang memiliki visi untuk mempermudah pekerjaan Anda. Dengan keahlian di bidang teknologi, desain, dan manajemen, kami bekerja sama untuk menghadirkan solusi digital yang praktis, inovatif, dan mudah digunakan.</p>
       </div><!-- End Section Title -->
 
       <div class="container">
@@ -734,9 +734,9 @@
 
       <!-- Section Title -->
       <div class="container section-title" data-aos="fade-up">
-        <span>Section Title</span>
+        <span>Contact</span>
         <h2>Contact</h2>
-        <p>Necessitatibus eius consequatur ex aliquid fuga eum quidem sint consectetur velit</p>
+        <p>Hubungi kami jika ada pertanyaan lebih lanjut</p>
       </div><!-- End Section Title -->
 
       <div class="container" data-aos="fade-up" data-aos-delay="100">
@@ -750,7 +750,8 @@
                 <i class="bi bi-geo-alt flex-shrink-0"></i>
                 <div>
                   <h3>Address</h3>
-                  <p>A108 Adam Street, New York, NY 535022</p>
+                  <p>Gedung Permata Indonesia, Jl. Kayoon No.26F, 
+                    Embong Kaliasin, Kec. Genteng, Surabaya, Jawa Timur 60271</p>
                 </div>
               </div><!-- End Info Item -->
 
@@ -758,7 +759,7 @@
                 <i class="bi bi-telephone flex-shrink-0"></i>
                 <div>
                   <h3>Call Us</h3>
-                  <p>+1 5589 55488 55</p>
+                  <p> 031 5467541</p>
                 </div>
               </div><!-- End Info Item -->
 
@@ -766,7 +767,7 @@
                 <i class="bi bi-envelope flex-shrink-0"></i>
                 <div>
                   <h3>Email Us</h3>
-                  <p>info@example.com</p>
+                  <p> info@permataindonesia.com</p>
                 </div>
               </div><!-- End Info Item -->
 
@@ -844,10 +845,10 @@
             <span class="sitename">Ofisly</span>
           </a>
           <div class="footer-contact pt-3">
-            <p>A108 Adam Street</p>
-            <p>New York, NY 535022</p>
-            <p class="mt-3"><strong>Phone:</strong> <span>+1 5589 55488 55</span></p>
-            <p><strong>Email:</strong> <span>info@example.com</span></p>
+            <p>Gedung Permata Indonesia, Jl. Kayoon No.26F,</p>
+            <p>Embong Kaliasin, Kec. Genteng, Surabaya, Jawa Timur 60271</p>
+            <p class="mt-3"><strong>Phone:</strong> <span>031 5467541</span></p>
+            <p><strong>Email:</strong> <span>info@permataindonesia.com</span></p>
           </div>
         </div>
 
@@ -873,7 +874,7 @@
 
         <div class="col-lg-4 col-md-12">
           <h4>Follow Us</h4>
-          <p>Cras fermentum odio eu feugiat lide par naso tierra videa magna derita valies</p>
+          {{-- <p>Cras fermentum odio eu feugiat lide par naso tierra videa magna derita valies</p> --}}
           <div class="social-links d-flex">
             <a href=""><i class="bi bi-twitter-x"></i></a>
             <a href=""><i class="bi bi-facebook"></i></a>
@@ -892,7 +893,7 @@
         <!-- You can delete the links only if you've purchased the pro version. -->
         <!-- Licensing information: https://bootstrapmade.com/license/ -->
         <!-- Purchase the pro version with working PHP/AJAX contact form: [buy-url] -->
-        Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a> Distributed by <a href=“https://themewagon.com>ThemeWagon
+        Designed by <a href="">Ofisly Team</a> Distributed by <a href=>PT Permata Indonesia
       </div>
     </div>
 
