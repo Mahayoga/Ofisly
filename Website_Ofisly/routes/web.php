@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SuratTugasController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -10,6 +11,10 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return view('admin.dashboard.index');
 })->middleware(['auth', 'verified', 'role.auth'])->name('dashboard');
+
+Route::middleware(['role.auth', 'auth'])->group(function() {
+    Route::resource('surat-tugas', SuratTugasController::class);
+});
 
 Route::get('/error_code', function() {
     abort(401);
