@@ -5,9 +5,8 @@ use App\Http\Controllers\SuratTugasController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
-})->name('welcome');
-
+    return view('landing-page');
+});
 Route::get('/dashboard', function () {
     return view('admin.dashboard.index');
 })->middleware(['auth', 'verified', 'role.auth'])->name('dashboard');
