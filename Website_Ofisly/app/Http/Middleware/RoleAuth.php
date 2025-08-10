@@ -20,6 +20,7 @@ class RoleAuth
             /**
              * Ini kasih redirect access ditolak atau kode 401
              */
+            return redirect()->route('login');
         }
         return $next($request);
     }
