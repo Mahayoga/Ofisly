@@ -169,7 +169,7 @@
                     placeholder: "Cari...",
                     perPage: "Data per halaman",
                     noRows: "Data tidak ditemukan",
-                    info: "Menampilkan {start} sampai {end} dari {rows} data",
+                    info: "Menampilkan {end} dari {rows} data",
                 }
             });
 
