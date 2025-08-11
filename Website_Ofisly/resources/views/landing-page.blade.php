@@ -61,7 +61,11 @@
                 <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
             </nav>
 
-            <a class="btn-getstarted" href="{{route('login')}}">Login</a>
+            @if (!session('is_logged_in'))
+                <a class="btn-getstarted" href="{{ route('login') }}">Login</a>
+            @else
+                <a class="btn-getstarted" href="{{ route('dashboard.index') }}">Dashboard</a>
+            @endif
 
         </div>
     </header>
@@ -96,7 +100,11 @@
             <div class="container section-title" data-aos="fade-up">
                 <span>About Us<br></span>
                 <h2>About</h2>
-                <p>Ofisly adalah web tools yang dirancang untuk membantu Anda bekerja lebih cepat, efisien, dan terorganisir. Dengan fitur yang sederhana namun lengkap, Ofisly mempermudah pengelolaan tugas, kolaborasi tim, dan otomatisasi pekerjaan sehari-hari</p>
+                <p>Ofisly adalah web tools pintar yang membantu Anda bekerja lebih cepat, efisien, dan tanpa ribet.
+                    Didesain dengan antarmuka yang sederhana namun kaya fitur, Ofisly memudahkan Anda mengatur tugas,
+                    berkolaborasi dengan tim, dan mengotomatisasi pekerjaan sehingga waktu dan energi Anda bisa
+                    digunakan
+                    untuk hal yang lebih penting.</p>
             </div><!-- End Section Title -->
 
             <div class="container">
@@ -104,30 +112,24 @@
                 <div class="row gy-4">
                     <div class="col-lg-6 position-relative align-self-start" data-aos="fade-up" data-aos-delay="100">
                         <img src="assets/img/about.png" class="img-fluid" alt="">
-                        <a href="https://www.youtube.com/watch?v=Y7f98aduVJ8"
-                            class="glightbox pulsating-play-btn"></a>
                     </div>
                     <div class="col-lg-6 content" data-aos="fade-up" data-aos-delay="200">
-                        <h3>Voluptatem dignissimos provident quasi corporis voluptates sit assumenda.</h3>
+                        <h3>Mengapa Memilih Ofisly?</h3>
                         <p class="fst-italic">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-                            labore et dolore
-                            magna aliqua.
+                            Berikut keunggulan web tools Ofisly dibanding yang lain.
                         </p>
                         <ul>
-                            <li><i class="bi bi-check2-all"></i> <span>Ullamco laboris nisi ut aliquip ex ea commodo
-                                    consequat.</span></li>
-                            <li><i class="bi bi-check2-all"></i> <span>Duis aute irure dolor in reprehenderit in
-                                    voluptate velit.</span></li>
-                            <li><i class="bi bi-check2-all"></i> <span>Ullamco laboris nisi ut aliquip ex ea commodo
-                                    consequat. Duis aute irure dolor in reprehenderit in voluptate trideta
-                                    storacalaperda mastiro dolore eu fugiat nulla pariatur.</span></li>
+                            <li><i class="bi bi-check2-all"></i> <span>Mempercepat proses kerja dengan fitur yang
+                                    mudah digunakan.</span></li>
+                            <li><i class="bi bi-check2-all"></i> <span>Mengurangi pekerjaan manual melalui
+                                    otomatisasi proses.</span></li>
+                            <li><i class="bi bi-check2-all"></i> <span>Memberikan tampilan yang sederhana namun
+                                    fungsional untuk semua
+                                    kebutuhan kerja Anda.</span></li>
                         </ul>
                         <p>
-                            Ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
-                            reprehenderit in voluptate
-                            velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-                            proident
+                            Dengan Ofisly, pekerjaan harian menjadi lebih ringan, tim lebih terhubung, dan tujuan Anda
+                            tercapai lebih cepat.
                         </p>
                     </div>
                 </div>
@@ -145,7 +147,7 @@
 
                     <div class="col-lg-3 col-md-6">
                         <div class="stats-item text-center w-100 h-100">
-                            <span data-purecounter-start="0" data-purecounter-end="232" data-purecounter-duration="1"
+                            <span data-purecounter-start="0" data-purecounter-end="3000" data-purecounter-duration="1"
                                 class="purecounter"></span>
                             <p>Clients</p>
                         </div>
@@ -153,7 +155,7 @@
 
                     <div class="col-lg-3 col-md-6">
                         <div class="stats-item text-center w-100 h-100">
-                            <span data-purecounter-start="0" data-purecounter-end="521" data-purecounter-duration="1"
+                            <span data-purecounter-start="0" data-purecounter-end="210" data-purecounter-duration="1"
                                 class="purecounter"></span>
                             <p>Projects</p>
                         </div>
@@ -161,15 +163,15 @@
 
                     <div class="col-lg-3 col-md-6">
                         <div class="stats-item text-center w-100 h-100">
-                            <span data-purecounter-start="0" data-purecounter-end="1453"
-                                data-purecounter-duration="1" class="purecounter"></span>
+                            <span data-purecounter-start="0" data-purecounter-end="12" data-purecounter-duration="1"
+                                class="purecounter"></span>
                             <p>Hours Of Support</p>
                         </div>
                     </div><!-- End Stats Item -->
 
                     <div class="col-lg-3 col-md-6">
                         <div class="stats-item text-center w-100 h-100">
-                            <span data-purecounter-start="0" data-purecounter-end="32" data-purecounter-duration="1"
+                            <span data-purecounter-start="0" data-purecounter-end="11" data-purecounter-duration="1"
                                 class="purecounter"></span>
                             <p>Workers</p>
                         </div>
@@ -188,288 +190,52 @@
             <div class="container section-title" data-aos="fade-up">
                 <span>Services</span>
                 <h2>Services</h2>
-                <p>Necessitatibus eius consequatur ex aliquid fuga eum quidem sint consectetur velit</p>
+                <p>Layanan yang Membuat Kerja Lebih Mudah</p>
             </div><!-- End Section Title -->
 
             <div class="container">
-
                 <div class="row gy-4">
-
                     <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
                         <div class="service-item position-relative">
                             <div class="icon">
-                                <i class="bi bi-activity"></i>
+                                <i class="bi bi-bar-chart-line"></i>
                             </div>
-                            <a href="service-details.html" class="stretched-link">
-                                <h3>Nesciunt Mete</h3>
+                            <a href="" class="">
+                                <h3>Dashboard Interaktif</h3>
                             </a>
-                            <p>Provident nihil minus qui consequatur non omnis maiores. Eos accusantium minus dolores
-                                iure perferendis tempore et consequatur.</p>
+                            <p>Pantau data dan aktivitas secara real-time dengan
+                                tampilan yang informatif dan mudah dipahami.</p>
                         </div>
                     </div><!-- End Service Item -->
 
                     <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
                         <div class="service-item position-relative">
                             <div class="icon">
-                                <i class="bi bi-broadcast"></i>
+                                <i class="bi bi-envelope-paper"></i>
                             </div>
-                            <a href="service-details.html" class="stretched-link">
-                                <h3>Eosle Commodi</h3>
+                            <a href="" class="">
+                                <h3>Surat Tugas</h3>
                             </a>
-                            <p>Ut autem aut autem non a. Sint sint sit facilis nam iusto sint. Libero corrupti neque eum
-                                hic non ut nesciunt dolorem.</p>
+                            <p>Buat, kelola, dan arsipkan surat tugas dengan cepat dan terstruktur,
+                                tanpa proses manual yang rumit.</p>
                         </div>
                     </div><!-- End Service Item -->
 
                     <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
                         <div class="service-item position-relative">
                             <div class="icon">
-                                <i class="bi bi-easel"></i>
+                                <i class="bi bi-calendar2-week"></i>
                             </div>
-                            <a href="service-details.html" class="stretched-link">
-                                <h3>Ledo Markt</h3>
+                            <a href="" class="">
+                                <h3>Cuti Karyawan</h3>
                             </a>
-                            <p>Ut excepturi voluptatem nisi sed. Quidem fuga consequatur. Minus ea aut. Vel qui id
-                                voluptas adipisci eos earum corrupti.</p>
+                            <p>Ajukan dan kelola cuti karyawan secara online, lengkap dengan
+                                status persetujuan yang transparan.</p>
                         </div>
                     </div><!-- End Service Item -->
-
-                    <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
-                        <div class="service-item position-relative">
-                            <div class="icon">
-                                <i class="bi bi-bounding-box-circles"></i>
-                            </div>
-                            <a href="service-details.html" class="stretched-link">
-                                <h3>Asperiores Commodit</h3>
-                            </a>
-                            <p>Non et temporibus minus omnis sed dolor esse consequatur. Cupiditate sed error ea fuga
-                                sit provident adipisci neque.</p>
-                            <a href="service-details.html" class="stretched-link"></a>
-                        </div>
-                    </div><!-- End Service Item -->
-
-                    <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="500">
-                        <div class="service-item position-relative">
-                            <div class="icon">
-                                <i class="bi bi-calendar4-week"></i>
-                            </div>
-                            <a href="service-details.html" class="stretched-link">
-                                <h3>Velit Doloremque</h3>
-                            </a>
-                            <p>Cumque et suscipit saepe. Est maiores autem enim facilis ut aut ipsam corporis aut. Sed
-                                animi at autem alias eius labore.</p>
-                            <a href="service-details.html" class="stretched-link"></a>
-                        </div>
-                    </div><!-- End Service Item -->
-
-                    <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="600">
-                        <div class="service-item position-relative">
-                            <div class="icon">
-                                <i class="bi bi-chat-square-text"></i>
-                            </div>
-                            <a href="service-details.html" class="stretched-link">
-                                <h3>Dolori Architecto</h3>
-                            </a>
-                            <p>Hic molestias ea quibusdam eos. Fugiat enim doloremque aut neque non et debitis iure.
-                                Corrupti recusandae ducimus enim.</p>
-                            <a href="service-details.html" class="stretched-link"></a>
-                        </div>
-                    </div><!-- End Service Item -->
-
                 </div>
-
             </div>
-
         </section><!-- /Services Section -->
-
-        <!-- Portfolio Section -->
-        <section id="portfolio" class="portfolio section">
-
-            <!-- Section Title -->
-            <div class="container section-title" data-aos="fade-up">
-                <span>Portfolio</span>
-                <h2>Portfolio</h2>
-                <p>Hasil karya, proyek, atau pencapaian yang pernah dikerjakan.</p>
-            </div><!-- End Section Title -->
-
-            <div class="container">
-
-                <div class="isotope-layout" data-default-filter="*" data-layout="masonry"
-                    data-sort="original-order">
-
-                    <ul class="portfolio-filters isotope-filters" data-aos="fade-up" data-aos-delay="100">
-                        <li data-filter="*" class="filter-active">All</li>
-                        <li data-filter=".filter-app">App</li>
-                        <li data-filter=".filter-product">Product</li>
-                        <li data-filter=".filter-branding">Branding</li>
-                        <li data-filter=".filter-books">Books</li>
-                    </ul><!-- End Portfolio Filters -->
-
-                    <div class="row gy-4 isotope-container" data-aos="fade-up" data-aos-delay="200">
-
-                        <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-app">
-                            <img src="assets/img/portfolio/app-1.jpg" class="img-fluid" alt="">
-                            <div class="portfolio-info">
-                                <h4>App 1</h4>
-                                <p>Lorem ipsum, dolor sit amet consectetur</p>
-                                <a href="assets/img/portfolio/app-1.jpg" title="App 1"
-                                    data-gallery="portfolio-gallery-app" class="glightbox preview-link"><i
-                                        class="bi bi-zoom-in"></i></a>
-                                <a href="portfolio-details.html" title="More Details" class="details-link"><i
-                                        class="bi bi-link-45deg"></i></a>
-                            </div>
-                        </div><!-- End Portfolio Item -->
-
-                        <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-product">
-                            <img src="assets/img/portfolio/product-1.jpg" class="img-fluid" alt="">
-                            <div class="portfolio-info">
-                                <h4>Product 1</h4>
-                                <p>Lorem ipsum, dolor sit amet consectetur</p>
-                                <a href="assets/img/portfolio/product-1.jpg" title="Product 1"
-                                    data-gallery="portfolio-gallery-product" class="glightbox preview-link"><i
-                                        class="bi bi-zoom-in"></i></a>
-                                <a href="portfolio-details.html" title="More Details" class="details-link"><i
-                                        class="bi bi-link-45deg"></i></a>
-                            </div>
-                        </div><!-- End Portfolio Item -->
-
-                        <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-branding">
-                            <img src="assets/img/portfolio/branding-1.jpg" class="img-fluid" alt="">
-                            <div class="portfolio-info">
-                                <h4>Branding 1</h4>
-                                <p>Lorem ipsum, dolor sit amet consectetur</p>
-                                <a href="assets/img/portfolio/branding-1.jpg" title="Branding 1"
-                                    data-gallery="portfolio-gallery-branding" class="glightbox preview-link"><i
-                                        class="bi bi-zoom-in"></i></a>
-                                <a href="portfolio-details.html" title="More Details" class="details-link"><i
-                                        class="bi bi-link-45deg"></i></a>
-                            </div>
-                        </div><!-- End Portfolio Item -->
-
-                        <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-books">
-                            <img src="assets/img/portfolio/books-1.jpg" class="img-fluid" alt="">
-                            <div class="portfolio-info">
-                                <h4>Books 1</h4>
-                                <p>Lorem ipsum, dolor sit amet consectetur</p>
-                                <a href="assets/img/portfolio/books-1.jpg" title="Branding 1"
-                                    data-gallery="portfolio-gallery-book" class="glightbox preview-link"><i
-                                        class="bi bi-zoom-in"></i></a>
-                                <a href="portfolio-details.html" title="More Details" class="details-link"><i
-                                        class="bi bi-link-45deg"></i></a>
-                            </div>
-                        </div><!-- End Portfolio Item -->
-
-                        <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-app">
-                            <img src="assets/img/portfolio/app-2.jpg" class="img-fluid" alt="">
-                            <div class="portfolio-info">
-                                <h4>App 2</h4>
-                                <p>Lorem ipsum, dolor sit amet consectetur</p>
-                                <a href="assets/img/portfolio/app-2.jpg" title="App 2"
-                                    data-gallery="portfolio-gallery-app" class="glightbox preview-link"><i
-                                        class="bi bi-zoom-in"></i></a>
-                                <a href="portfolio-details.html" title="More Details" class="details-link"><i
-                                        class="bi bi-link-45deg"></i></a>
-                            </div>
-                        </div><!-- End Portfolio Item -->
-
-                        <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-product">
-                            <img src="assets/img/portfolio/product-2.jpg" class="img-fluid" alt="">
-                            <div class="portfolio-info">
-                                <h4>Product 2</h4>
-                                <p>Lorem ipsum, dolor sit amet consectetur</p>
-                                <a href="assets/img/portfolio/product-2.jpg" title="Product 2"
-                                    data-gallery="portfolio-gallery-product" class="glightbox preview-link"><i
-                                        class="bi bi-zoom-in"></i></a>
-                                <a href="portfolio-details.html" title="More Details" class="details-link"><i
-                                        class="bi bi-link-45deg"></i></a>
-                            </div>
-                        </div><!-- End Portfolio Item -->
-
-                        <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-branding">
-                            <img src="assets/img/portfolio/branding-2.jpg" class="img-fluid" alt="">
-                            <div class="portfolio-info">
-                                <h4>Branding 2</h4>
-                                <p>Lorem ipsum, dolor sit amet consectetur</p>
-                                <a href="assets/img/portfolio/branding-2.jpg" title="Branding 2"
-                                    data-gallery="portfolio-gallery-branding" class="glightbox preview-link"><i
-                                        class="bi bi-zoom-in"></i></a>
-                                <a href="portfolio-details.html" title="More Details" class="details-link"><i
-                                        class="bi bi-link-45deg"></i></a>
-                            </div>
-                        </div><!-- End Portfolio Item -->
-
-                        <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-books">
-                            <img src="assets/img/portfolio/books-2.jpg" class="img-fluid" alt="">
-                            <div class="portfolio-info">
-                                <h4>Books 2</h4>
-                                <p>Lorem ipsum, dolor sit amet consectetur</p>
-                                <a href="assets/img/portfolio/books-2.jpg" title="Branding 2"
-                                    data-gallery="portfolio-gallery-book" class="glightbox preview-link"><i
-                                        class="bi bi-zoom-in"></i></a>
-                                <a href="portfolio-details.html" title="More Details" class="details-link"><i
-                                        class="bi bi-link-45deg"></i></a>
-                            </div>
-                        </div><!-- End Portfolio Item -->
-
-                        <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-app">
-                            <img src="assets/img/portfolio/app-3.jpg" class="img-fluid" alt="">
-                            <div class="portfolio-info">
-                                <h4>App 3</h4>
-                                <p>Lorem ipsum, dolor sit amet consectetur</p>
-                                <a href="assets/img/portfolio/app-3.jpg" title="App 3"
-                                    data-gallery="portfolio-gallery-app" class="glightbox preview-link"><i
-                                        class="bi bi-zoom-in"></i></a>
-                                <a href="portfolio-details.html" title="More Details" class="details-link"><i
-                                        class="bi bi-link-45deg"></i></a>
-                            </div>
-                        </div><!-- End Portfolio Item -->
-
-                        <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-product">
-                            <img src="assets/img/portfolio/product-3.jpg" class="img-fluid" alt="">
-                            <div class="portfolio-info">
-                                <h4>Product 3</h4>
-                                <p>Lorem ipsum, dolor sit amet consectetur</p>
-                                <a href="assets/img/portfolio/product-3.jpg" title="Product 3"
-                                    data-gallery="portfolio-gallery-product" class="glightbox preview-link"><i
-                                        class="bi bi-zoom-in"></i></a>
-                                <a href="portfolio-details.html" title="More Details" class="details-link"><i
-                                        class="bi bi-link-45deg"></i></a>
-                            </div>
-                        </div><!-- End Portfolio Item -->
-
-                        <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-branding">
-                            <img src="assets/img/portfolio/branding-3.jpg" class="img-fluid" alt="">
-                            <div class="portfolio-info">
-                                <h4>Branding 3</h4>
-                                <p>Lorem ipsum, dolor sit amet consectetur</p>
-                                <a href="assets/img/portfolio/branding-3.jpg" title="Branding 2"
-                                    data-gallery="portfolio-gallery-branding" class="glightbox preview-link"><i
-                                        class="bi bi-zoom-in"></i></a>
-                                <a href="portfolio-details.html" title="More Details" class="details-link"><i
-                                        class="bi bi-link-45deg"></i></a>
-                            </div>
-                        </div><!-- End Portfolio Item -->
-
-                        <div class="col-lg-4 col-md-6 portfolio-item isotope-item filter-books">
-                            <img src="assets/img/portfolio/books-3.jpg" class="img-fluid" alt="">
-                            <div class="portfolio-info">
-                                <h4>Books 3</h4>
-                                <p>Lorem ipsum, dolor sit amet consectetur</p>
-                                <a href="assets/img/portfolio/books-3.jpg" title="Branding 3"
-                                    data-gallery="portfolio-gallery-book" class="glightbox preview-link"><i
-                                        class="bi bi-zoom-in"></i></a>
-                                <a href="portfolio-details.html" title="More Details" class="details-link"><i
-                                        class="bi bi-link-45deg"></i></a>
-                            </div>
-                        </div><!-- End Portfolio Item -->
-
-                    </div><!-- End Portfolio Container -->
-
-                </div>
-
-            </div>
-
-        </section><!-- /Portfolio Section -->
 
         <!-- Testimonials Section -->
         <section id="testimonials" class="testimonials section light-background">
@@ -513,333 +279,377 @@
                     <div class="swiper-wrapper">
 
                         <div class="swiper-slide">
-                            <div class="testimonial-item" "="">
-            <p>
-              <i class=" bi bi-quote quote-icon-left"></i>
-                <span>Proin iaculis purus consequat sem cure digni ssim donec porttitora entum suscipit rhoncus. Accusantium quam, ultricies eget id, aliquam eget nibh et. Maecen aliquam, risus at semper.</span>
-                <i class="bi bi-quote quote-icon-right"></i>
-                </p>
-                <img src="assets/img/testimonials/testimonials-1.jpg" class="testimonial-img" alt="">
-                <h3>Saul Goodman</h3>
-                <h4>Ceo &amp; Founder</h4>
-              </div>
-            </div><!-- End testimonial item -->
+                            <div class="testimonial-item">
+                                <p>
+                                    <i class="bi bi-quote quote-icon-left"></i>
+                                    <span style="display:block; text-align:justify;">
+                                        Sejak menggunakan Ofisly, pekerjaan administrasi di tim kami menjadi jauh lebih
+                                        efisien.
+                                        Pembuatan surat tugas dan pengaturan cuti karyawan bisa selesai hanya dalam
+                                        beberapa klik,
+                                        sehingga kami tidak perlu lagi repot dengan proses manual yang memakan waktu.
+                                    </span>
+                                    <i class="bi bi-quote quote-icon-right"></i>
+                                </p>
+                                <img src="assets/img/testimonials/testimonials-1.jpg" class="testimonial-img"
+                                    alt="">
+                                <h3>Saul Goodman</h3>
+                                <h4>Ceo &amp; Founder</h4>
+                            </div>
+                        </div><!-- End testimonial item -->
 
-            <div class="swiper-slide">
-              <div class="testimonial-item">
-                <p>
-                  <i class="bi bi-quote quote-icon-left"></i>
-                  <span>Export tempor illum tamen malis malis eram quae irure esse labore quem cillum quid malis quorum velit fore eram velit sunt aliqua noster fugiat irure amet legam anim culpa.</span>
-                  <i class="bi bi-quote quote-icon-right"></i>
-                </p>
-                <img src="assets/img/testimonials/testimonials-2.jpg" class="testimonial-img" alt="">
-                <h3>Sara Wilsson</h3>
-                <h4>Designer</h4>
-              </div>
-            </div><!-- End testimonial item -->
+                        <div class="swiper-slide">
+                            <div class="testimonial-item">
+                                <p>
+                                    <i class="bi bi-quote quote-icon-left"></i>
+                                    <span style="display:block; text-align:justify;">
+                                        Fitur dashboard interaktifnya sangat membantu saya memantau progres proyek.
+                                        Semua data tersaji dengan jelas dan rapi, sehingga saya dapat mengambil
+                                        keputusan
+                                        penting secara cepat dan tepat untuk kemajuan tim.
+                                    </span>
+                                    <i class="bi bi-quote quote-icon-right"></i>
+                                </p>
+                                <img src="assets/img/testimonials/testimonials-2.jpg" class="testimonial-img"
+                                    alt="">
+                                <h3>Sara Wilsson</h3>
+                                <h4>Designer</h4>
+                            </div>
+                        </div><!-- End testimonial item -->
 
-            <div class="swiper-slide">
-              <div class="testimonial-item">
-                <p>
-                  <i class="bi bi-quote quote-icon-left"></i>
-                  <span>Enim nisi quem export duis labore cillum quae magna enim sint quorum nulla quem veniam duis minim tempor labore quem eram duis noster aute amet eram fore quis sint minim.</span>
-                  <i class="bi bi-quote quote-icon-right"></i>
-                </p>
-                <img src="assets/img/testimonials/testimonials-3.jpg" class="testimonial-img" alt="">
-                <h3>Jena Karlis</h3>
-                <h4>Store Owner</h4>
-              </div>
-            </div><!-- End testimonial item -->
+                        <div class="swiper-slide">
+                            <div class="testimonial-item">
+                                <p>
+                                    <i class="bi bi-quote quote-icon-left"></i>
+                                    <span style="display:block; text-align:justify;">
+                                        Saya menyukai kesederhanaan tampilan Ofisly, namun di balik itu fiturnya sangat
+                                        lengkap.
+                                        Dari otomatisasi proses kerja hingga pengelolaan tugas harian, semuanya membuat
+                                        saya
+                                        bisa fokus pada hal-hal penting yang membawa hasil nyata.
+                                    </span>
+                                    <i class="bi bi-quote quote-icon-right"></i>
+                                </p>
+                                <img src="assets/img/testimonials/testimonials-3.jpg" class="testimonial-img"
+                                    alt="">
+                                <h3>Jena Karlis</h3>
+                                <h4>Store Owner</h4>
+                            </div>
+                        </div><!-- End testimonial item -->
 
-            <div class="swiper-slide">
-              <div class="testimonial-item">
-                <p>
-                  <i class="bi bi-quote quote-icon-left"></i>
-                  <span>Fugiat enim eram quae cillum dolore dolor amet nulla culpa multos export minim fugiat dolor enim duis veniam ipsum anim magna sunt elit fore quem dolore labore illum veniam.</span>
-                  <i class="bi bi-quote quote-icon-right"></i>
-                </p>
-                <img src="assets/img/testimonials/testimonials-4.jpg" class="testimonial-img" alt="">
-                <h3>Matt Brandon</h3>
-                <h4>Freelancer</h4>
-              </div>
-            </div><!-- End testimonial item -->
+                        <div class="swiper-slide">
+                            <div class="testimonial-item">
+                                <p>
+                                    <i class="bi bi-quote quote-icon-left"></i>
+                                    <span style="display:block; text-align:justify;">
+                                        Kolaborasi tim menjadi jauh lebih terstruktur sejak memakai Ofisly.
+                                        Kami dapat membagi tugas, memantau perkembangan, dan berkomunikasi
+                                        dalam satu platform yang rapi serta mudah diakses kapan saja.
+                                    </span>
+                                    <i class="bi bi-quote quote-icon-right"></i>
+                                </p>
+                                <img src="assets/img/testimonials/testimonials-4.jpg" class="testimonial-img"
+                                    alt="">
+                                <h3>Matt Brandon</h3>
+                                <h4>Freelancer</h4>
+                            </div>
+                        </div><!-- End testimonial item -->
 
-            <div class="swiper-slide">
-              <div class="testimonial-item">
-                <p>
-                  <i class="bi bi-quote quote-icon-left"></i>
-                  <span>Quis quorum aliqua sint quem legam fore sunt eram irure aliqua veniam tempor noster veniam sunt culpa nulla illum cillum fugiat legam esse veniam culpa fore nisi cillum quid.</span>
-                  <i class="bi bi-quote quote-icon-right"></i>
-                </p>
-                <img src="assets/img/testimonials/testimonials-5.jpg" class="testimonial-img" alt="">
-                <h3>John Larson</h3>
-                <h4>Entrepreneur</h4>
-              </div>
-            </div><!-- End testimonial item -->
+                        <div class="swiper-slide">
+                            <div class="testimonial-item">
+                                <p>
+                                    <i class="bi bi-quote quote-icon-left"></i>
+                                    <span style="display:block; text-align:justify;">
+                                        Ofisly membantu kami menghemat banyak waktu dalam pengelolaan pekerjaan.
+                                        Proses pengajuan dan persetujuan cuti menjadi transparan,
+                                        dan semua dokumen penting bisa diakses kapan saja tanpa hambatan.
+                                    </span>
+                                    <i class="bi bi-quote quote-icon-right"></i>
+                                </p>
+                                <img src="assets/img/testimonials/testimonials-5.jpg" class="testimonial-img"
+                                    alt="">
+                                <h3>John Larson</h3>
+                                <h4>Entrepreneur</h4>
+                            </div>
+                        </div><!-- End testimonial item -->
 
-          </div>
-          <div class="swiper-pagination"></div>
-        </div>
+                    </div>
+                    <div class="swiper-pagination"></div>
+                </div>
 
-      </div>
-
-    </section><!-- /Testimonials Section -->
-
-    <!-- Call To Action Section -->
-    <section id="call-to-action" class="call-to-action section accent-background">
-
-      <div class="container">
-        <div class="row justify-content-center" data-aos="zoom-in" data-aos-delay="100">
-          <div class="col-xl-10">
-            <div class="text-center">
-              <h3>Siap bekerja lebih cepat?</h3>
-              <p>Coba Ofisly sekarang dan rasakan kemudahan mengatur pekerjaan Anda dalam satu platform.</p>
-              <a class="cta-btn" href="#">Call To Action</a>
             </div>
-          </div>
-        </div>
-      </div>
 
-    </section><!-- /Call To Action Section -->
+        </section><!-- /Testimonials Section -->
 
-    <!-- Team Section -->
-    <section id="team" class="team section">
+        <!-- Call To Action Section -->
+        <section id="call-to-action" class="call-to-action section accent-background">
 
-      <!-- Section Title -->
-      <div class="container section-title" data-aos="fade-up">
-        <span>Team</span>
-        <h2>Team</h2>
-        <p>Tim Ofisly terdiri dari para profesional kreatif dan berdedikasi yang memiliki visi untuk mempermudah pekerjaan Anda. Dengan keahlian di bidang teknologi, desain, dan manajemen, kami bekerja sama untuk menghadirkan solusi digital yang praktis, inovatif, dan mudah digunakan.</p>
-      </div><!-- End Section Title -->
-
-      <div class="container">
-
-        <div class="row gy-5">
-
-          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
-            <div class="member">
-              <div class="pic"><img src="assets/img/team/team-1.jpg" class="img-fluid" alt=""></div>
-              <div class="member-info">
-                <h4>Walter White</h4>
-                <span>Chief Executive Officer</span>
-                <div class="social">
-                  <a href=""><i class="bi bi-twitter-x"></i></a>
-                  <a href=""><i class="bi bi-facebook"></i></a>
-                  <a href=""><i class="bi bi-instagram"></i></a>
-                  <a href=""><i class="bi bi-linkedin"></i></a>
+            <div class="container">
+                <div class="row justify-content-center" data-aos="zoom-in" data-aos-delay="100">
+                    <div class="col-xl-10">
+                        <div class="text-center">
+                            <h3>Siap bekerja lebih cepat?</h3>
+                            <p>Coba Ofisly sekarang dan rasakan kemudahan mengatur pekerjaan Anda dalam satu platform.
+                            </p>
+                            <a class="cta-btn" href="#">Call To Action</a>
+                        </div>
+                    </div>
                 </div>
-              </div>
             </div>
-          </div><!-- End Team Member -->
 
-          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
-            <div class="member">
-              <div class="pic"><img src="assets/img/team/team-2.jpg" class="img-fluid" alt=""></div>
-              <div class="member-info">
-                <h4>Sarah Jhonson</h4>
-                <span>Product Manager</span>
-                <div class="social">
-                  <a href=""><i class="bi bi-twitter-x"></i></a>
-                  <a href=""><i class="bi bi-facebook"></i></a>
-                  <a href=""><i class="bi bi-instagram"></i></a>
-                  <a href=""><i class="bi bi-linkedin"></i></a>
+        </section><!-- /Call To Action Section -->
+
+        <!-- Team Section -->
+        <section id="team" class="team section">
+
+            <!-- Section Title -->
+            <div class="container section-title" data-aos="fade-up">
+                <span>Team</span>
+                <h2>Team</h2>
+                <p>Tim Ofisly terdiri dari para profesional kreatif dan berdedikasi yang memiliki visi untuk mempermudah
+                    pekerjaan Anda. Dengan keahlian di bidang teknologi, desain, dan manajemen, kami bekerja sama untuk
+                    menghadirkan solusi digital yang praktis, inovatif, dan mudah digunakan.</p>
+            </div><!-- End Section Title -->
+
+            <div class="container">
+
+                <div class="row gy-5">
+
+                    <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                        <div class="member">
+                            <div class="pic"><img src="assets/img/team/team-1.jpg" class="img-fluid"
+                                    alt=""></div>
+                            <div class="member-info">
+                                <h4>Walter White</h4>
+                                <span>Chief Executive Officer</span>
+                                <div class="social">
+                                    <a href=""><i class="bi bi-twitter-x"></i></a>
+                                    <a href=""><i class="bi bi-facebook"></i></a>
+                                    <a href=""><i class="bi bi-instagram"></i></a>
+                                    <a href=""><i class="bi bi-linkedin"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div><!-- End Team Member -->
+
+                    <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                        <div class="member">
+                            <div class="pic"><img src="assets/img/team/team-2.jpg" class="img-fluid"
+                                    alt=""></div>
+                            <div class="member-info">
+                                <h4>Sarah Jhonson</h4>
+                                <span>Product Manager</span>
+                                <div class="social">
+                                    <a href=""><i class="bi bi-twitter-x"></i></a>
+                                    <a href=""><i class="bi bi-facebook"></i></a>
+                                    <a href=""><i class="bi bi-instagram"></i></a>
+                                    <a href=""><i class="bi bi-linkedin"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div><!-- End Team Member -->
+
+                    <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                        <div class="member">
+                            <div class="pic"><img src="assets/img/team/team-3.jpg" class="img-fluid"
+                                    alt=""></div>
+                            <div class="member-info">
+                                <h4>William Anderson</h4>
+                                <span>CTO</span>
+                                <div class="social">
+                                    <a href=""><i class="bi bi-twitter-x"></i></a>
+                                    <a href=""><i class="bi bi-facebook"></i></a>
+                                    <a href=""><i class="bi bi-instagram"></i></a>
+                                    <a href=""><i class="bi bi-linkedin"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div><!-- End Team Member -->
+
                 </div>
-              </div>
+
             </div>
-          </div><!-- End Team Member -->
 
-          <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
-            <div class="member">
-              <div class="pic"><img src="assets/img/team/team-3.jpg" class="img-fluid" alt=""></div>
-              <div class="member-info">
-                <h4>William Anderson</h4>
-                <span>CTO</span>
-                <div class="social">
-                  <a href=""><i class="bi bi-twitter-x"></i></a>
-                  <a href=""><i class="bi bi-facebook"></i></a>
-                  <a href=""><i class="bi bi-instagram"></i></a>
-                  <a href=""><i class="bi bi-linkedin"></i></a>
+        </section><!-- /Team Section -->
+
+        <!-- Contact Section -->
+        <section id="contact" class="contact section">
+
+            <!-- Section Title -->
+            <div class="container section-title" data-aos="fade-up">
+                <span>Contact</span>
+                <h2>Contact</h2>
+                <p>Hubungi kami jika ada pertanyaan lebih lanjut</p>
+            </div><!-- End Section Title -->
+
+            <div class="container" data-aos="fade-up" data-aos-delay="100">
+
+                <div class="row gy-4">
+
+                    <div class="col-lg-5">
+
+                        <div class="info-wrap">
+                            <div class="info-item d-flex" data-aos="fade-up" data-aos-delay="200">
+                                <i class="bi bi-geo-alt flex-shrink-0"></i>
+                                <div>
+                                    <h3>Address</h3>
+                                    <p>Gedung Permata Indonesia, Jl. Kayoon No.26F,
+                                        Embong Kaliasin, Kec. Genteng, Surabaya, Jawa Timur 60271</p>
+                                </div>
+                            </div><!-- End Info Item -->
+
+                            <div class="info-item d-flex" data-aos="fade-up" data-aos-delay="300">
+                                <i class="bi bi-telephone flex-shrink-0"></i>
+                                <div>
+                                    <h3>Call Us</h3>
+                                    <p> 031 5467541</p>
+                                </div>
+                            </div><!-- End Info Item -->
+
+                            <div class="info-item d-flex" data-aos="fade-up" data-aos-delay="400">
+                                <i class="bi bi-envelope flex-shrink-0"></i>
+                                <div>
+                                    <h3>Email Us</h3>
+                                    <p> info@permataindonesia.com</p>
+                                </div>
+                            </div><!-- End Info Item -->
+
+                            <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3957.886075908615!2d112.7483663759458!3d-7.253634992753386!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd7f95859187a7d%3A0xe2122b0f45209703!2sPermata%20Indonesia!5e0!3m2!1sen!2sid!4v1723469145929!5m2!1sen!2sid" 
+                            width="100%" height="270" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+                            </iframe>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-7">
+                        <form action="forms/contact.php" method="post" class="php-email-form" data-aos="fade-up"
+                            data-aos-delay="200">
+                            <div class="row gy-4">
+
+                                <div class="col-md-6">
+                                    <label for="name-field" class="pb-2">Your Name</label>
+                                    <input type="text" name="name" id="name-field" class="form-control"
+                                        required="">
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="email-field" class="pb-2">Your Email</label>
+                                    <input type="email" class="form-control" name="email" id="email-field"
+                                        required="">
+                                </div>
+
+                                <div class="col-md-12">
+                                    <label for="subject-field" class="pb-2">Subject</label>
+                                    <input type="text" class="form-control" name="subject" id="subject-field"
+                                        required="">
+                                </div>
+
+                                <div class="col-md-12">
+                                    <label for="message-field" class="pb-2">Message</label>
+                                    <textarea class="form-control" name="message" rows="10" id="message-field" required=""></textarea>
+                                </div>
+
+                                <div class="col-md-12 text-center">
+                                    <div class="loading">Loading</div>
+                                    <div class="error-message"></div>
+                                    <div class="sent-message">Your message has been sent. Thank you!</div>
+
+                                    <button type="submit">Send Message</button>
+                                </div>
+
+                            </div>
+                        </form>
+                    </div><!-- End Contact Form -->
+
                 </div>
-              </div>
+
             </div>
-          </div><!-- End Team Member -->
 
-        </div>
+        </section><!-- /Contact Section -->
 
-      </div>
+    </main>
 
-    </section><!-- /Team Section -->
-
-    <!-- Contact Section -->
-    <section id="contact" class="contact section">
-
-      <!-- Section Title -->
-      <div class="container section-title" data-aos="fade-up">
-        <span>Contact</span>
-        <h2>Contact</h2>
-        <p>Hubungi kami jika ada pertanyaan lebih lanjut</p>
-      </div><!-- End Section Title -->
-
-      <div class="container" data-aos="fade-up" data-aos-delay="100">
-
-        <div class="row gy-4">
-
-          <div class="col-lg-5">
-
-            <div class="info-wrap">
-              <div class="info-item d-flex" data-aos="fade-up" data-aos-delay="200">
-                <i class="bi bi-geo-alt flex-shrink-0"></i>
-                <div>
-                  <h3>Address</h3>
-                  <p>Gedung Permata Indonesia, Jl. Kayoon No.26F, 
-                    Embong Kaliasin, Kec. Genteng, Surabaya, Jawa Timur 60271</p>
+    <footer id="footer" class="footer">
+        <div class="container footer-top">
+            <div class="row gy-4">
+                <div class="col-lg-4 col-md-6 footer-about">
+                    <a href="index.html" class="d-flex align-items-center">
+                        <span class="sitename">Ofisly</span>
+                    </a>
+                    <div class="footer-contact pt-3">
+                        <p>Gedung Permata Indonesia, Jl. Kayoon No.26F,</p>
+                        <p>Embong Kaliasin, Kec. Genteng, Surabaya, Jawa Timur 60271</p>
+                        <p class="mt-3"><strong>Phone:</strong> <span>031 5467541</span></p>
+                        <p><strong>Email:</strong> <span>info@permataindonesia.com</span></p>
+                    </div>
                 </div>
-              </div><!-- End Info Item -->
 
-              <div class="info-item d-flex" data-aos="fade-up" data-aos-delay="300">
-                <i class="bi bi-telephone flex-shrink-0"></i>
-                <div>
-                  <h3>Call Us</h3>
-                  <p> 031 5467541</p>
+                <div class="col-lg-2 col-md-3 footer-links">
+                    <h4>Useful Links</h4>
+                    <ul>
+                        <li><i class="bi bi-chevron-right"></i> <a href="#">Home</a></li>
+                        <li><i class="bi bi-chevron-right"></i> <a href="#">About us</a></li>
+                        <li><i class="bi bi-chevron-right"></i> <a href="#">Services</a></li>
+                        <li><i class="bi bi-chevron-right"></i> <a href="#">Terms of service</a></li>
+                    </ul>
                 </div>
-              </div><!-- End Info Item -->
 
-              <div class="info-item d-flex" data-aos="fade-up" data-aos-delay="400">
-                <i class="bi bi-envelope flex-shrink-0"></i>
-                <div>
-                  <h3>Email Us</h3>
-                  <p> info@permataindonesia.com</p>
+                <div class="col-lg-2 col-md-3 footer-links">
+                    <h4>Our Services</h4>
+                    <ul>
+                        <li><i class="bi bi-chevron-right"></i> <a href="#">Dashboard Interaktif</a></li>
+                        <li><i class="bi bi-chevron-right"></i> <a href="#">Surat Tugas</a></li>
+                        <li><i class="bi bi-chevron-right"></i> <a href="#">Cuti Karyawan</a></li>
+                    </ul>
                 </div>
-              </div><!-- End Info Item -->
 
-              <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d48389.78314118045!2d-74.006138!3d40.710059!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25a22a3bda30d%3A0xb89d1fe6bc499443!2sDowntown%20Conference%20Center!5e0!3m2!1sen!2sus!4v1676961268712!5m2!1sen!2sus" frameborder="0" style="border:0; width: 100%; height: 270px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                <div class="col-lg-4 col-md-12">
+                    <h4>Follow Us</h4>
+                    {{-- <p>Cras fermentum odio eu feugiat lide par naso tierra videa magna derita valies</p> --}}
+                    <div class="social-links d-flex">
+                        <a href=""><i class="bi bi-twitter-x"></i></a>
+                        <a href=""><i class="bi bi-facebook"></i></a>
+                        <a href=""><i class="bi bi-instagram"></i></a>
+                        <a href=""><i class="bi bi-linkedin"></i></a>
+                    </div>
+                </div>
+
             </div>
-          </div>
-
-          <div class="col-lg-7">
-            <form action="forms/contact.php" method="post" class="php-email-form" data-aos="fade-up" data-aos-delay="200">
-              <div class="row gy-4">
-
-                <div class="col-md-6">
-                  <label for="name-field" class="pb-2">Your Name</label>
-                  <input type="text" name="name" id="name-field" class="form-control" required="">
-                </div>
-
-                <div class="col-md-6">
-                  <label for="email-field" class="pb-2">Your Email</label>
-                  <input type="email" class="form-control" name="email" id="email-field" required="">
-                </div>
-
-                <div class="col-md-12">
-                  <label for="subject-field" class="pb-2">Subject</label>
-                  <input type="text" class="form-control" name="subject" id="subject-field" required="">
-                </div>
-
-                <div class="col-md-12">
-                  <label for="message-field" class="pb-2">Message</label>
-                  <textarea class="form-control" name="message" rows="10" id="message-field" required=""></textarea>
-                </div>
-
-                <div class="col-md-12 text-center">
-                  <div class="loading">Loading</div>
-                  <div class="error-message"></div>
-                  <div class="sent-message">Your message has been sent. Thank you!</div>
-
-                  <button type="submit">Send Message</button>
-                </div>
-
-              </div>
-            </form>
-          </div><!-- End Contact Form -->
-
         </div>
 
-      </div>
-
-    </section><!-- /Contact Section -->
-
-  </main>
-
-  <footer id="footer" class="footer">
-    <div class="container footer-top">
-      <div class="row gy-4">
-        <div class="col-lg-4 col-md-6 footer-about">
-          <a href="index.html" class="d-flex align-items-center">
-            <span class="sitename">Ofisly</span>
-          </a>
-          <div class="footer-contact pt-3">
-            <p>Gedung Permata Indonesia, Jl. Kayoon No.26F,</p>
-            <p>Embong Kaliasin, Kec. Genteng, Surabaya, Jawa Timur 60271</p>
-            <p class="mt-3"><strong>Phone:</strong> <span>031 5467541</span></p>
-            <p><strong>Email:</strong> <span>info@permataindonesia.com</span></p>
-          </div>
+        <div class="container copyright text-center mt-4">
+            <p>© <span>Copyright</span> <strong class="px-1 sitename">Ofisly</strong> <span>All Rights Reserved</span>
+            </p>
+            <div class="credits">
+                <!-- All the links in the footer should remain intact. -->
+                <!-- You can delete the links only if you've purchased the pro version. -->
+                <!-- Licensing information: https://bootstrapmade.com/license/ -->
+                <!-- Purchase the pro version with working PHP/AJAX contact form: [buy-url] -->
+                Designed by <a href="">Ofisly Team</a> Distributed by <a href=>PT Permata Indonesia
+            </div>
         </div>
 
-        <div class="col-lg-2 col-md-3 footer-links">
-          <h4>Useful Links</h4>
-          <ul>
-            <li><i class="bi bi-chevron-right"></i> <a href="#">Home</a></li>
-            <li><i class="bi bi-chevron-right"></i> <a href="#">About us</a></li>
-            <li><i class="bi bi-chevron-right"></i> <a href="#">Services</a></li>
-            <li><i class="bi bi-chevron-right"></i> <a href="#">Terms of service</a></li>
-          </ul>
-        </div>
+    </footer>
 
-        <div class="col-lg-2 col-md-3 footer-links">
-          <h4>Our Services</h4>
-          <ul>
-            <li><i class="bi bi-chevron-right"></i> <a href="#">Web Design</a></li>
-            <li><i class="bi bi-chevron-right"></i> <a href="#">Web Development</a></li>
-            <li><i class="bi bi-chevron-right"></i> <a href="#">Product Management</a></li>
-            <li><i class="bi bi-chevron-right"></i> <a href="#">Marketing</a></li>
-          </ul>
-        </div>
+    <!-- Scroll Top -->
+    <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i
+            class="bi bi-arrow-up-short"></i></a>
 
-        <div class="col-lg-4 col-md-12">
-          <h4>Follow Us</h4>
-          {{-- <p>Cras fermentum odio eu feugiat lide par naso tierra videa magna derita valies</p> --}}
-          <div class="social-links d-flex">
-            <a href=""><i class="bi bi-twitter-x"></i></a>
-            <a href=""><i class="bi bi-facebook"></i></a>
-            <a href=""><i class="bi bi-instagram"></i></a>
-            <a href=""><i class="bi bi-linkedin"></i></a>
-          </div>
-        </div>
+    <!-- Preloader -->
+    <div id="preloader"></div>
 
-      </div>
-    </div>
+    <!-- Vendor JS Files -->
+    <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/vendor/php-email-form/validate.js"></script>
+    <script src="assets/vendor/aos/aos.js"></script>
+    <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
+    <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
+    <script src="assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"></script>
+    <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
+    <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
 
-    <div class="container copyright text-center mt-4">
-      <p>© <span>Copyright</span> <strong class="px-1 sitename">Ofisly</strong> <span>All Rights Reserved</span></p>
-      <div class="credits">
-        <!-- All the links in the footer should remain intact. -->
-        <!-- You can delete the links only if you've purchased the pro version. -->
-        <!-- Licensing information: https://bootstrapmade.com/license/ -->
-        <!-- Purchase the pro version with working PHP/AJAX contact form: [buy-url] -->
-        Designed by <a href="">Ofisly Team</a> Distributed by <a href=>PT Permata Indonesia
-      </div>
-    </div>
-
-  </footer>
-
-  <!-- Scroll Top -->
-  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-
-  <!-- Preloader -->
-  <div id="preloader"></div>
-
-  <!-- Vendor JS Files -->
-  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="assets/vendor/php-email-form/validate.js"></script>
-  <script src="assets/vendor/aos/aos.js"></script>
-  <script src="assets/vendor/glightbox/js/glightbox.min.js"></script>
-  <script src="assets/vendor/purecounter/purecounter_vanilla.js"></script>
-  <script src="assets/vendor/imagesloaded/imagesloaded.pkgd.min.js"></script>
-  <script src="assets/vendor/isotope-layout/isotope.pkgd.min.js"></script>
-  <script src="assets/vendor/swiper/swiper-bundle.min.js"></script>
-
-  <!-- Main JS File -->
-  <script src="assets/js/main.js"></script>
+    <!-- Main JS File -->
+    <script src="assets/js/main.js"></script>
 
 </body>
 

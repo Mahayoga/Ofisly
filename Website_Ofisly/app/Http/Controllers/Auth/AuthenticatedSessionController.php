@@ -32,7 +32,7 @@ class AuthenticatedSessionController extends Controller
             'is_logged_in' => true
         ]);
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->intended(route('dashboard.index', absolute: false));
     }
 
     /**

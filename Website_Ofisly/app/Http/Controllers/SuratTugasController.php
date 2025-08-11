@@ -38,20 +38,41 @@ class SuratTugasController extends Controller
                 'created_by' => auth()->id(),
             ]);
 
-            return redirect()->route('surat-tugas.index')
-                ->with('success', 'Surat Tugas berhasil dibuat');
+            // return redirect()->route('surat-tugas.index')
+            //     ->with('success', 'Surat Tugas berhasil dibuat');
+            return response()->json([
+                'success' => true,
+                'message' => 'Surat Tugas berhasil dibuat',
+                'data' => [
+                    'no_surat' => $no_surat,
+                    'nama_kandidat' => $request->nama_kandidat,
+                    'tgl_penugasan' => Carbon::parse($request->tgl_penugasan)->format('d/m/Y'),
+                    'tgl_surat_pembuatan' => Carbon::now()->format('d/m/Y')
+                ]
+            ]);
 
         } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
-                ->withInput();
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
         }
     }
 
     public function edit($id)
     {
         $surat = SuratTugasModel::findOrFail($id);
-        return view('admin.surat_tugas.edit', compact('surat'));
+        $tglPenugasan = (string) $surat->tgl_penugasan;
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id_surat_tugas' => $surat->id_surat_tugas,
+                'no_surat' => $surat->no_surat,
+                'nama_kandidat' => $surat->nama_kandidat,
+                'tgl_penugasan' => explode(' ', $tglPenugasan)[0],
+                'tgl_surat_pembuatan' => $surat->tgl_surat_pembuatan
+            ]
+        ]);
     }
 
     public function update(Request $request, $id)
@@ -68,13 +89,21 @@ class SuratTugasController extends Controller
                 'tgl_penugasan' => $request->tgl_penugasan,
             ]);
 
-            return redirect()->route('surat-tugas.index')
-                ->with('success', 'Surat Tugas berhasil diperbarui');
+            return response()->json([
+                'success' => true,
+                'message' => 'Surat Tugas berhasil diperbarui',
+                'updatedData' => $surat->fresh(),
+                'formattedDates' => [
+                    'tgl_penugasan' => Carbon::parse($surat->tgl_penugasan)->format('d/m/Y'),
+                    'tgl_surat_pembuatan' => Carbon::parse($surat->tgl_surat_pembuatan)->format('d/m/Y')
+                ]
+            ]);
 
         } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
-                ->withInput();
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -84,12 +113,16 @@ class SuratTugasController extends Controller
             $surat = SuratTugasModel::findOrFail($id);
             $surat->delete();
 
-            return redirect()->route('surat-tugas.index')
-                ->with('success', 'Surat Tugas berhasil dihapus');
+            return response()->json([
+                'success' => true,
+                'message' => 'Surat Tugas berhasil dihapus'
+            ]);
 
         } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -105,8 +138,10 @@ class SuratTugasController extends Controller
             return $pdf->stream($fileName);
 
         } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Gagal menghasilkan PDF: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -133,7 +168,7 @@ class SuratTugasController extends Controller
             $section->addTextBreak(2);
 
             $footer = $section->addTextRun(['alignment' => 'right']);
-            $footer->addText('Jakarta, ' . Carbon::parse($surat->tgl_surat_pembuatan)->format('d F Y'));
+            $footer->addText('Surabaya, ' . Carbon::parse($surat->tgl_surat_pembuatan)->format('d F Y'));
             $footer->addTextBreak(3);
             $footer->addText('(_______________________)');
 
@@ -146,8 +181,10 @@ class SuratTugasController extends Controller
             return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
 
         } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Gagal menghasilkan Word: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
         }
     }
 }
