@@ -198,9 +198,9 @@
                     <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
                         <div class="service-item position-relative">
                             <div class="icon">
-                                <i class="bi bi-activity"></i>
+                                <i class="bi bi-bar-chart-line"></i>
                             </div>
-                            <a href="service-details.html" class="stretched-link">
+                            <a href="" class="">
                                 <h3>Dashboard Interaktif</h3>
                             </a>
                             <p>Pantau data dan aktivitas secara real-time dengan
@@ -211,9 +211,9 @@
                     <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
                         <div class="service-item position-relative">
                             <div class="icon">
-                                <i class="bi bi-broadcast"></i>
+                                <i class="bi bi-envelope-paper"></i>
                             </div>
-                            <a href="service-details.html" class="stretched-link">
+                            <a href="" class="">
                                 <h3>Surat Tugas</h3>
                             </a>
                             <p>Buat, kelola, dan arsipkan surat tugas dengan cepat dan terstruktur,
@@ -224,9 +224,9 @@
                     <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
                         <div class="service-item position-relative">
                             <div class="icon">
-                                <i class="bi bi-easel"></i>
+                                <i class="bi bi-calendar2-week"></i>
                             </div>
-                            <a href="service-details.html" class="stretched-link">
+                            <a href="" class="">
                                 <h3>Cuti Karyawan</h3>
                             </a>
                             <p>Ajukan dan kelola cuti karyawan secara online, lengkap dengan
@@ -515,9 +515,9 @@
                             </div><!-- End Info Item -->
 
                             <iframe
-                                src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d48389.78314118045!2d-74.006138!3d40.710059!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25a22a3bda30d%3A0xb89d1fe6bc499443!2sDowntown%20Conference%20Center!5e0!3m2!1sen!2sus!4v1676961268712!5m2!1sen!2sus"
-                                frameborder="0" style="border:0; width: 100%; height: 270px;" allowfullscreen=""
-                                loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3957.886075908615!2d112.7483663759458!3d-7.253634992753386!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd7f95859187a7d%3A0xe2122b0f45209703!2sPermata%20Indonesia!5e0!3m2!1sen!2sid!4v1723469145929!5m2!1sen!2sid" 
+                            width="100%" height="270" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+                            </iframe>
                         </div>
                     </div>
 
