@@ -146,7 +146,7 @@
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                             <button type="submit" class="btn btn-primary" id="editSubmitBtn">
-                                <span id="editSubmitText">Simpan Perubahan</span>
+                                <span id="editSubmitText">Simpan</span>
                                 <span id="editSubmitSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                             </button>
                         </div>
@@ -269,9 +269,6 @@
                             document.getElementById('edit_tgl_penugasan').value = data.data
                                 .tgl_penugasan.split(' ')[0];
                             document.getElementById('editForm').action = updateUrl;
-
-                            // Show modal
-                            new bootstrap.Modal(document.getElementById('editModal')).show();
                         })
                         .catch(error => {
                             console.error('Error:', error);
