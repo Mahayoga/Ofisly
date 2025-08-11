@@ -62,14 +62,14 @@ class SuratTugasController extends Controller
     public function edit($id)
     {
         $surat = SuratTugasModel::findOrFail($id);
-
+        $tglPenugasan = (string) $surat->tgl_penugasan;
         return response()->json([
             'success' => true,
             'data' => [
                 'id_surat_tugas' => $surat->id_surat_tugas,
                 'no_surat' => $surat->no_surat,
                 'nama_kandidat' => $surat->nama_kandidat,
-                'tgl_penugasan' => $surat->tgl_penugasan,
+                'tgl_penugasan' => explode(' ', $tglPenugasan)[0],
                 'tgl_surat_pembuatan' => $surat->tgl_surat_pembuatan
             ]
         ]);

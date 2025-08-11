@@ -8,13 +8,13 @@
                 <li class="breadcrumb-item active">Kumpulan data surat tugas</li>
             </ol>
         </div>
-        <div class="card mb-4">
+        <div class="card border-0 mb-4 px-4">
             <div class="card-header py-3 d-flex justify-content-between align-items-center">
                 <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createModal">
                     <i class="fas fa-plus"></i> Tambah Surat
                 </button>
             </div>
-            <div class="card-body">
+            <div class="card-body border">
                 @if (session('success'))
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         {{ session('success') }}
