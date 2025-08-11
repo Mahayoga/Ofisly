@@ -26,6 +26,11 @@ Route::middleware(['role.auth', 'auth'])->group(function () {
         });
     
     Route::resource('cuti-karyawan', CutiKaryawanController::class);
+
+    // Blank Page
+    Route::get('/blank', function() {
+        return view('admin.layout.blank');
+    })->name('blank.index');
 });
 
 Route::middleware('auth')->group(function () {
