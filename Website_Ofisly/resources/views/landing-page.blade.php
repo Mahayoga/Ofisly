@@ -61,7 +61,11 @@
                 <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
             </nav>
 
-            <a class="btn-getstarted" href="{{route('login')}}">Login</a>
+            @if (!session('is_logged_in'))
+              <a class="btn-getstarted" href="{{route('login')}}">Login</a>
+            @else
+              <a class="btn-getstarted" href="{{route('dashboard.index')}}">Dashboard</a>
+            @endif
 
         </div>
     </header>
