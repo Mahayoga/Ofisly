@@ -1,11 +1,28 @@
 from docx import Document
 
-document = Document('template1.docx')
+document = Document('template.docx')
 
-for i in range(len(document.paragraphs)):
-    # print('__DATANAMA__' in document.paragraphs[i].text)
-    document.paragraphs[i].text = document.paragraphs[i].text.replace('__DATANAMA__', 'Mahayoga')
-    # document.paragraphs[i].text = document.paragraphs[i].text.replace('__DATAPRODI__', 'MIF')
-    # document.paragraphs[i].text = document.paragraphs[i].text.replace('__DATAJURUSAN__', 'Teknologi Informasi')
+# for table in document.tables:
+#     for row in table.rows:
+#         for cell in row.cells:
+#             for para in cell.paragraphs:
+#                 if '__' in para.text:
+#                     for run in para.runs:
+#                         run.bold = True
+#                         print(para.text)
 
-document.save('template1.docx')
+table = document.tables[1]
+cell1 = table.rows[3].cells[0]
+cell2 = table.rows[4].cells[0]
+
+for para in cell1.paragraphs:
+    for run in para.runs:
+        run.bold = True
+        run.underline = True
+        print(para.text)
+
+for para in cell2.paragraphs:
+    for run in para.runs:
+        run.italic = True
+        print(para.text)    
+# document.save('template1.docx')
