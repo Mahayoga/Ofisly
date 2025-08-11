@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\CutiKaryawanController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SuratTugasController;
 use Illuminate\Support\Facades\Route;
@@ -7,11 +9,10 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('landing-page');
 });
-Route::get('/dashboard', function () {
-    return view('admin.dashboard.index');
-})->middleware(['auth', 'verified', 'role.auth'])->name('dashboard');
 
 Route::middleware(['role.auth', 'auth'])->group(function () {
+    Route::resource('dashboard', DashboardController::class);
+
     Route::resource('surat-tugas', SuratTugasController::class);
         Route::get('/get-data/surat-tugas', [SuratTugasController::class, 'getData'])->name('surat-tugas.getData');
         Route::prefix('surat-tugas')->group(function () {
@@ -23,14 +24,8 @@ Route::middleware(['role.auth', 'auth'])->group(function () {
             Route::get('/generate-pdf/{id}', [SuratTugasController::class, 'generatePDF'])->name('surat-tugas.generate-pdf');
             Route::get('/generate-word/{id}', [SuratTugasController::class, 'generateWord'])->name('surat-tugas.generate-word');
         });
-});
-
-//sementara 
-Route::middleware(['role.auth', 'auth'])->get('/cuti-karyawan', function () {
-    return view('admin.cuti_karyawan.index');})->name('cuti-karyawan');
-
-Route::get('/error_code', function () {
-    abort(401);
+    
+    Route::resource('cuti-karyawan', CutiKaryawanController::class);
 });
 
 Route::middleware('auth')->group(function () {
