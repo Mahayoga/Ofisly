@@ -37,7 +37,7 @@
     </div>
 
     <div class="footer">
-        <p>Jakarta, {{ \Carbon\Carbon::parse($surat->tgl_surat_pembuatan)->format('d F Y') }}</p>
+        <p>Surabaya, {{ \Carbon\Carbon::parse($surat->tgl_surat_pembuatan)->format('d F Y') }}</p>
         <br><br><br>
         <p>(_______________________)</p>
     </div>
