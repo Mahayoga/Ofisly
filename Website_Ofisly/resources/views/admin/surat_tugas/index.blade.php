@@ -1,7 +1,13 @@
 @extends('admin.layout.index')
 @section('title', 'Surat Tugas')
-
 @section('content')
+<main>
+  <div class="container-fluid px-4">
+    <h1 class="mt-4">Data Surat Tugas</h1>
+    <ol class="breadcrumb mb-4">
+      <li class="breadcrumb-item active">Kumpulan data surat tugas</li>
+    </ol>
+  </div>
     <div class="card mb-4">
         <div class="card-header py-3 d-flex justify-content-between align-items-center">
             <h6 class="m-0 font-weight-bold text-primary">Daftar Surat Tugas</h6>
@@ -107,6 +113,7 @@
             </div>
         </div>
     </div>
+  </main>
 @endsection
 
 @section('scripts')

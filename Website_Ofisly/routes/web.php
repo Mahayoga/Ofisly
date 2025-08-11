@@ -13,6 +13,7 @@ Route::get('/dashboard', function () {
 
 Route::middleware(['role.auth', 'auth'])->group(function () {
     Route::resource('surat-tugas', SuratTugasController::class);
+        Route::get('/get-data/surat-tugas', [SuratTugasController::class, 'getData'])->name('surat-tugas.getData');
 });
 
 //sementara 
