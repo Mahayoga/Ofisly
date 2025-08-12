@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SuratTugasController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 
 Route::get('/', function () {
     return view('landing-page');
@@ -38,5 +39,23 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+// // Nyoba Request File
+// Route::post('/nyoba/file', function(Request $request) {
+//     if ($request->hasFile('file')) {
+//         $file = $request->file('file');
+//         // $path = $file->storeAs('uploads', $file->getClientOriginalName(), 'public');
+
+//         return response()->json([
+//             'success' => true,
+//             // 'path' => $path
+//         ]);
+//     }
+//     return response()->json([
+//         'success' => false,
+//         'message' => 'No file received',
+//         'data' => $request->all()
+//     ]);
+// });
 
 require __DIR__ . '/auth.php';

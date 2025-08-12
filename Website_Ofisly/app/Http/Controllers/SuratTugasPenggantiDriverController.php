@@ -5,11 +5,12 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\SuratTugasModel;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Http;
 use PDF;
 use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\IOFactory;
 
-class SuratTugasController extends Controller
+class SuratTugasPenggantiDriverController extends Controller
 {
     public function index()
     {
@@ -147,38 +148,22 @@ class SuratTugasController extends Controller
 
     public function generateWord($id)
     {
+        dd($id);
         try {
-            $surat = SuratTugasModel::findOrFail($id);
-            $phpWord = new PhpWord();
+            $apiURL = env('FLASK_API_URL') . '/generate/surat/penggati/driver';
+            $responses = Http::post($apiURL, [
+                'id_surat_tugas' => $id
+            ]);
+            $responsesData = $responses->json();
+            if($responses->successful() && $responsesData['status'] == 'success') {
+                return response()->json([
+                    'status' => 'success',
+                    'result' => $responsesData['result'],
+                    'data' => $responsesData['data']
+                ]);
+            }
 
-            $section = $phpWord->addSection();
-
-            $titleStyle = ['bold' => true, 'size' => 16];
-            $center = ['alignment' => 'center'];
-
-            $section->addText('SURAT TUGAS', $titleStyle, $center);
-            $section->addText($surat->no_surat, ['bold' => true], $center);
-            $section->addTextBreak(2);
-
-            $section->addText('Yang bertanda tangan di bawah ini, memberikan tugas kepada:');
-            $section->addText('Nama: ' . $surat->nama_kandidat);
-            $section->addText('Tanggal Penugasan: ' . Carbon::parse($surat->tgl_penugasan)->format('d F Y'));
-            $section->addTextBreak(2);
-            $section->addText('Demikian surat tugas ini dibuat untuk dapat dipergunakan sebagaimana mestinya.');
-            $section->addTextBreak(2);
-
-            $footer = $section->addTextRun(['alignment' => 'right']);
-            $footer->addText('Surabaya, ' . Carbon::parse($surat->tgl_surat_pembuatan)->format('d F Y'));
-            $footer->addTextBreak(3);
-            $footer->addText('(_______________________)');
-
-            $fileName = 'surat_tugas_' . str_replace('/', '-', $surat->no_surat) . '.docx';
-            $tempFile = tempnam(sys_get_temp_dir(), 'surat_tugas_') . '.docx';
-
-            $objWriter = IOFactory::createWriter($phpWord, 'Word2007');
-            $objWriter->save($tempFile);
-
-            return response()->download($tempFile, $fileName)->deleteFileAfterSend(true);
+            return response()->download('C:\\Users\\myoga\\Documents\\Politeknik Negeri Jember\\Mahayoga Semester 5\\Project Magang\\Ofisly\\Website_Ofisly\\public\\storage\\uploads\\surat_template\\template.docx', 'template.docx')->deleteFileAfterSend(true);
 
         } catch (\Exception $e) {
             return response()->json([

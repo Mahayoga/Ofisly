@@ -3,14 +3,25 @@ import comtypes.client
 import os
 import sys
 from docx import Document
-from flask import Flask
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from datetime import datetime
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+import requests
+import mysql.connector
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 CORS(app)
+load_dotenv()
 wdFormatPDF = 17
+
+mydb = mysql.connector.connect(
+  host=os.getenv('DB_HOST'),
+  user=os.getenv('DB_USERNAME'),
+  password=os.getenv('DB_PASSWORD'),
+  database=os.getenv('DB_DATABASE')
+)
 
 @app.route('/nyoba/pdf', methods=['GET'])
 def nyoba_pdf():
@@ -67,3 +78,26 @@ def nyoba_pdf():
     return {
         'status': 'success',        
     }
+
+@app.route('/generate/surat/penggati/driver', methods=['POST'])
+def nyoba_file():
+    laravel_url = 'http://localhost:8000/api/send/surat/pengganti/driver'
+    file_template_path = 'Contoh Template/template_surat_pengganti_driver.docx'
+
+    mycursor = mydb.cursor()
+    mycursor.execute(f"SELECT * FROM surat_tugas WHERE id_surat_tugas = '{request.json['id_surat_tugas']}'")
+    myresult = mycursor.fetchone()
+
+    print(myresult)
+
+    # with open(file_path, 'rb') as f:
+    #     file = {
+    #         'file_docx': (file_path, f, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'),
+    #         'file_pdf': '' # TODO
+    #     }
+    #     res = requests.post(laravel_url, files=file)
+    #     print(res)
+    
+    return jsonify({
+        'status': 'success'
+    })
