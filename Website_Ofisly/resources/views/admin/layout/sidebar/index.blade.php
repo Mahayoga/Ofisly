@@ -2,7 +2,7 @@
 
   <!-- Sidebar - Brand -->
   <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
-    <img src="{{ asset('assets/img/logo-ofisly.png') }}"alt="Ofisly Logo"style="max-width: 180px; height: auto; display: block;">
+    <img src="{{ asset('assets/img/logo-ofisly-putih.png') }}"alt="Ofisly Logo"style="max-width: 120px; height: auto; display: block;">
     <div class="sidebar-brand-text mx-3">
     </div>
   </a>
