@@ -1,3 +1,5 @@
+import pythoncom
+import comtypes.client
 import os
 import sys
 from docx import Document
@@ -12,6 +14,8 @@ wdFormatPDF = 17
 
 @app.route('/nyoba/pdf', methods=['GET'])
 def nyoba_pdf():
+    pythoncom.CoInitialize()
+    word = comtypes.client.CreateObject('Word.Application')
     now = datetime.now()
     document = Document('template.docx')
     for i in range(len(document.paragraphs)):
@@ -52,8 +56,6 @@ def nyoba_pdf():
     dirname = os.path.dirname(__file__)
     filename = os.path.join(dirname, 'Surat Tugas_Yusuf Hilya.docx')
 
-    import comtypes.client
-    word = comtypes.client.CreateObject('Word.Application')
     word.Visible = False
     print('In file...')
     doc = word.Documents.Open(filename, ReadOnly=True)
