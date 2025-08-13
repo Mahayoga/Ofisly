@@ -147,7 +147,7 @@
 </div>
 
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
     document.querySelectorAll('.toggle-card').forEach(card => {
         card.addEventListener('click', function() {
@@ -187,11 +187,11 @@
 
     // chart dummy surat tugas
     new Chart(
-        document.getElementById('SuratTugasChart'),
+        document.getElementById('miniChart'),
         {
             type: 'line',
             data: {
-                labels: ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Aug','Spt','Oct','Nov','Dec'],
+                labels: ['Jan','Feb','Mar','Apr','Mei','Jun'],
                 datasets: [{
                     data: [8,12,7,9,11,13],
                     borderColor: '#4e73df',
@@ -232,10 +232,6 @@
     .toggle-card.active {
         border-left-width: 4px !important;
         background-color: #f8f9fa;
-    }
-
-    #SuratTugasChart {
-      width: 100% !important;               
     }
 
 </style>

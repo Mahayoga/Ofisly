@@ -6,7 +6,7 @@
 .history
 .phpactor.json
 .phpunit.result.cache
-.history/
+./
 /.fleet
 /.idea
 /.nova

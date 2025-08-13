@@ -235,7 +235,7 @@
     }
 
     #SuratTugasChart {
-      width: 100% !important;               
+      width: 
     }
 
 </style>

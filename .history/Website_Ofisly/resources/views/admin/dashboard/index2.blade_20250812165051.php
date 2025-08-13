@@ -56,20 +56,6 @@
       <div class="text-center">
         <h4>Surat Tugas</h4>
       </div>
-      <div class="row mb-4">
-        <div class="col-12">
-            <div class="card shadow">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Statistik Surat Tugas</h6>
-                </div>
-                <div class="card-body">
-                    <div class="chart-area">
-                        <canvas id="SuratTugasChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-      </div>
       <div class="card shadow mb-4">
           <div class="card-header py-3 bg-primary text-white">
               <h6 class="m-0 font-weight-bold">Daftar Surat Tugas Terbaru</h6>
@@ -128,26 +114,41 @@
           </div>
       </div>
   </div>
+</div>
 
-  {{-- Lowongan Content --}}
-<div id="lowongan-content" class="dashboard-content" style="display: none;">
-    <div class="text-center">
+{{-- Lowongan Content --}}
+<div id="user-content" class="dashboard-content" style="display: none;">
+      <div class="text-center">
         <h4>Lowongan</h4>
-    </div>
-    <div class="card shadow mb-4">
-        <div class="card-header py-3 bg-danger text-white">
-            <h6 class="m-0 font-weight-bold">Daftar Lowongan Terbaru</h6>
-        </div>
-        <div class="card-body">
-          <p class="text-center">?</p>
-        </div>
-    </div>
+      </div>
+      <div class="card shadow mb-4">
+          <div class="card-header py-3 bg-success text-white">
+              <h6 class="m-0 font-weight-bold">Daftar Lowongan Terbaru</h6>
+          </div>
+          <div class="card-body p-0">
+              <ul class="list-group list-group-flush">
+                  @forelse($usersTerbaru as $user)
+                      <li class="list-group-item">
+                          <div class="d-flex justify-content-between align-items-center">
+                              <div>
+                                  <strong>{{ $user->name }}</strong><br>
+                                  <small class="text-muted">{{ $user->email }}</small>
+                              </div>
+                              <div class="text-end">
+                                  <small class="text-muted">Bergabung:
+                                      {{ $user->created_at->format('d M Y') }}</small>
+                              </div>
+                          </div>
+                      </li>
+                  @empty
+                      <li class="list-group-item text-center text-muted">Belum ada user</li>
+                  @endforelse
+              </ul>
+          </div>
+      </div>
+  </div>
 </div>
 
-</div>
-
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.querySelectorAll('.toggle-card').forEach(card => {
         card.addEventListener('click', function() {
@@ -182,39 +183,7 @@
     });
 
     document.querySelector('.toggle-card[data-target="surat-content"]')
-    .classList.add('border-primary', 'active');
-
-
-    // chart dummy surat tugas
-    new Chart(
-        document.getElementById('SuratTugasChart'),
-        {
-            type: 'line',
-            data: {
-                labels: ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Aug','Spt','Oct','Nov','Dec'],
-                datasets: [{
-                    data: [8,12,7,9,11,13],
-                    borderColor: '#4e73df',
-                    borderWidth: 2,
-                    tension: 0.3,
-                    fill: false
-                }]
-            },
-            options: {
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: { display: false },
-                    x: { 
-                        grid: { display: false },
-                        ticks: { color: '#858796' }
-                    }
-                },
-                responsive: true
-            }
-        }
-    );
+        .classList.add('border-primary', 'active');
 </script>
 
 <style>
@@ -234,9 +203,8 @@
         background-color: #f8f9fa;
     }
 
-    #SuratTugasChart {
-      width: 100% !important;               
-    }
-
+    .border-primary { border-left-color: #4e73df !important; }
+    .border-success { border-left-color: #1cc88a !important; }
+    .border-danger { border-left-color: #f6c23e !important; }
 </style>
 @endsection

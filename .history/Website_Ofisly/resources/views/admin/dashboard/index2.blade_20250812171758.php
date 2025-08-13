@@ -234,9 +234,5 @@
         background-color: #f8f9fa;
     }
 
-    #SuratTugasChart {
-      width: 100% !important;               
-    }
-
 </style>
 @endsection

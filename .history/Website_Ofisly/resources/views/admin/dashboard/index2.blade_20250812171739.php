@@ -191,7 +191,7 @@
         {
             type: 'line',
             data: {
-                labels: ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Aug','Spt','Oct','Nov','Dec'],
+                labels: ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Aug','Spt'],
                 datasets: [{
                     data: [8,12,7,9,11,13],
                     borderColor: '#4e73df',
@@ -232,10 +232,6 @@
     .toggle-card.active {
         border-left-width: 4px !important;
         background-color: #f8f9fa;
-    }
-
-    #SuratTugasChart {
-      width: 100% !important;               
     }
 
 </style>

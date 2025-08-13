@@ -16,7 +16,7 @@
                   <i class="fas fa-file-alt text-primary fa-lg"></i>
                   <div style="margin-left: 13px">
                       <div class="font-weight-bold text-primary mb-0">Surat Tugas</div>
-                      <small class="text-muted"> Total : {{ $totalSurat }} </small>
+                      <small class="text-muted">{{ $totalSurat }} Total</small>
                   </div>
               </div>
           </div>
@@ -30,7 +30,7 @@
                   <i class="fas fa-users text-success fa-lg"></i>
                   <div style="margin-left: 13px">
                       <div class="font-weight-bold text-success mb-0">User</div>
-                      <small class="text-muted">Total : {{ $totalUsers }} </small>
+                      <small class="text-muted">{{ $totalUsers }} Total</small>
                   </div>
               </div>
           </div>
@@ -38,13 +38,13 @@
 
       {{-- Card Lowongan --}}
       <div class="col-auto ps-1">
-          <div class="card border-left-danger shadow-sm toggle-card" data-target="lowongan-content"
+          <div class="card border-left-warning shadow-sm toggle-card" data-target="lowongan-content"
               style="width: 200px; height: 80px; cursor: pointer;">
               <div class="card-body p-2 d-flex align-items-center">
-                  <i class="fas fa-briefcase text-danger fa-lg"></i>
+                  <i class="fas fa-briefcase text-warning fa-lg"></i>
                   <div style="margin-left: 13px">
-                      <div class="font-weight-bold text-danger mb-0">Lowongan</div>
-                      <small class="text-muted">Total : ?</small>
+                      <div class="font-weight-bold text-warning mb-0">Lowongan</div>
+                      <small class="text-muted">Total</small>
                   </div>
               </div>
           </div>
@@ -56,23 +56,9 @@
       <div class="text-center">
         <h4>Surat Tugas</h4>
       </div>
-      <div class="row mb-4">
-        <div class="col-12">
-            <div class="card shadow">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Statistik Surat Tugas</h6>
-                </div>
-                <div class="card-body">
-                    <div class="chart-area">
-                        <canvas id="SuratTugasChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-      </div>
       <div class="card shadow mb-4">
-          <div class="card-header py-3 bg-primary text-white">
-              <h6 class="m-0 font-weight-bold">Daftar Surat Tugas Terbaru</h6>
+          <div class="card-header py-3">
+              <h6 class="m-0 font-weight-bold text-primary">Daftar Surat Tugas Terbaru</h6>
           </div>
           <div class="card-body p-0">
               <ul class="list-group list-group-flush">
@@ -103,8 +89,8 @@
         <h4>User</h4>
       </div>
       <div class="card shadow mb-4">
-          <div class="card-header py-3 bg-success text-white">
-              <h6 class="m-0 font-weight-bold">Daftar User Terbaru</h6>
+          <div class="card-header py-3">
+              <h6 class="m-0 font-weight-bold text-primary">Daftar User Terbaru</h6>
           </div>
           <div class="card-body p-0">
               <ul class="list-group list-group-flush">
@@ -128,26 +114,8 @@
           </div>
       </div>
   </div>
-
-  {{-- Lowongan Content --}}
-<div id="lowongan-content" class="dashboard-content" style="display: none;">
-    <div class="text-center">
-        <h4>Lowongan</h4>
-    </div>
-    <div class="card shadow mb-4">
-        <div class="card-header py-3 bg-danger text-white">
-            <h6 class="m-0 font-weight-bold">Daftar Lowongan Terbaru</h6>
-        </div>
-        <div class="card-body">
-          <p class="text-center">?</p>
-        </div>
-    </div>
 </div>
 
-</div>
-
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.querySelectorAll('.toggle-card').forEach(card => {
         card.addEventListener('click', function() {
@@ -158,63 +126,24 @@
             });
 
             document.getElementById(target).style.display = 'block';
-
+            
             document.querySelectorAll('.toggle-card').forEach(c => {
                 c.classList.remove(
                     'border-primary', 
                     'border-success', 
-                    'border-danger',
-                    'active'
+                    'border-warning'
                 );
             });
 
-            let borderClass;
-            if (target === 'surat-content') {
-                borderClass = 'border-primary';
-            } else if (target === 'user-content') {
-                borderClass = 'border-success';
-            } else if (target === 'lowongan-content') {
-                borderClass = 'border-danger';
-            }
+            let borderClass = 'border-primary';
+            if (target === 'user-content') borderClass = 'border-success';
+            else if (target === 'lowongan-content') borderClass = 'border-warning';
             
-            this.classList.add(borderClass, 'active');
+            this.classList.add(borderClass);
         });
     });
 
-    document.querySelector('.toggle-card[data-target="surat-content"]')
-    .classList.add('border-primary', 'active');
-
-
-    // chart dummy surat tugas
-    new Chart(
-        document.getElementById('SuratTugasChart'),
-        {
-            type: 'line',
-            data: {
-                labels: ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Aug','Spt','Oct','Nov','Dec'],
-                datasets: [{
-                    data: [8,12,7,9,11,13],
-                    borderColor: '#4e73df',
-                    borderWidth: 2,
-                    tension: 0.3,
-                    fill: false
-                }]
-            },
-            options: {
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: { display: false },
-                    x: { 
-                        grid: { display: false },
-                        ticks: { color: '#858796' }
-                    }
-                },
-                responsive: true
-            }
-        }
-    );
+    document.querySelector('.toggle-card[data-target="surat-content"]').classList.add('border-primary');
 </script>
 
 <style>
@@ -226,17 +155,11 @@
     .toggle-card:hover {
         transform: translateY(-1px);
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
-        border-left-width: 3px !important;
     }
 
     .toggle-card.active {
         border-left-width: 4px !important;
         background-color: #f8f9fa;
     }
-
-    #SuratTugasChart {
-      width: 100% !important;               
-    }
-
 </style>
 @endsection

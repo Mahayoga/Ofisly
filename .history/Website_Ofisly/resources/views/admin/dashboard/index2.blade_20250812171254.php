@@ -60,11 +60,11 @@
         <div class="col-12">
             <div class="card shadow">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Statistik Surat Tugas</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Statistik Surat Tugas (12 Bulan Terakhir)</h6>
                 </div>
                 <div class="card-body">
                     <div class="chart-area">
-                        <canvas id="SuratTugasChart"></canvas>
+                        <canvas id="suratTugasChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -147,7 +147,7 @@
 </div>
 
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
     document.querySelectorAll('.toggle-card').forEach(card => {
         card.addEventListener('click', function() {
@@ -182,39 +182,7 @@
     });
 
     document.querySelector('.toggle-card[data-target="surat-content"]')
-    .classList.add('border-primary', 'active');
-
-
-    // chart dummy surat tugas
-    new Chart(
-        document.getElementById('SuratTugasChart'),
-        {
-            type: 'line',
-            data: {
-                labels: ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Aug','Spt','Oct','Nov','Dec'],
-                datasets: [{
-                    data: [8,12,7,9,11,13],
-                    borderColor: '#4e73df',
-                    borderWidth: 2,
-                    tension: 0.3,
-                    fill: false
-                }]
-            },
-            options: {
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    y: { display: false },
-                    x: { 
-                        grid: { display: false },
-                        ticks: { color: '#858796' }
-                    }
-                },
-                responsive: true
-            }
-        }
-    );
+        .classList.add('border-primary', 'active');
 </script>
 
 <style>
@@ -232,10 +200,6 @@
     .toggle-card.active {
         border-left-width: 4px !important;
         background-color: #f8f9fa;
-    }
-
-    #SuratTugasChart {
-      width: 100% !important;               
     }
 
 </style>
