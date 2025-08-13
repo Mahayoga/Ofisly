@@ -7,7 +7,7 @@
 
     <div class="card shadow mb-4">
         <div class="card-body">
-            <form action="{{ route('lowongan-pekerjaan.update', $lowonganPekerjaan->id) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('lowongan-pekerjaan.update', $lowonganPekerjaan->id_lowongan_pekerjaan) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
 

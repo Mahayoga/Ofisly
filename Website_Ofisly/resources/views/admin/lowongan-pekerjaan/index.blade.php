@@ -43,9 +43,13 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @php
+                            $i = 1;
+                        @endphp
                         @foreach ($lowonganPekerjaan as $lowongan)
                             <tr>
-                                <td>{{ $lowongan->id }}</td>
+                                <td>{{ $i }}</td>
+                                {{-- <td>{{ $lowongan->id_lowongan_pekerjaan}}</td> --}}
                                 <td>{{ $lowongan->judul }}</td>
                                 <td>{{ $lowongan->deskripsi }}</td>
                                 <td>
@@ -58,22 +62,25 @@
                                 <td>{{ \Carbon\Carbon::parse($lowongan->tanggal_post)->format('d/m/Y') }}</td>
                                 <td class="text-center">
                                     <div class="btn-group">
-                                        <a href="{{ route('lowongan-pekerjaan.show', $lowongan->id) }}" class="btn btn-sm btn-info">
+                                        <a href="{{ route('lowongan-pekerjaan.show',  ['lowongan_pekerjaan' => $lowongan->id_lowongan_pekerjaan]) }}" class="btn btn-sm btn-info">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a href="{{ route('lowongan-pekerjaan.edit', $lowongan->id) }}" class="btn btn-sm btn-success">
+                                        <a href="{{ route('lowongan-pekerjaan.edit', ['lowongan_pekerjaan' => $lowongan->id_lowongan_pekerjaan]) }}" class="btn btn-sm btn-success">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <form id="form-{{ $lowongan->id }}" action="{{ route('lowongan-pekerjaan.destroy', $lowongan->id) }}" method="POST" style="display:inline-block;">
+                                        <form id="form-{{ $lowongan->id_lowongan_pekerjaan }}" action="{{ route('lowongan-pekerjaan.destroy', ['lowongan_pekerjaan' => $lowongan->id_lowongan_pekerjaan]) }}" method="POST" style="display:inline-block;">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="button" class="btn btn-sm btn-danger button-delete" data-id="{{ $lowongan->id }}">
+                                            <button type="button" class="btn btn-sm btn-danger button-delete" data-id="{{ $lowongan->id_lowongan_pekerjaan }}">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
                                     </div>
                                 </td>
                             </tr>
+                            @php
+                        $i++;
+                    @endphp
                         @endforeach
                     </tbody>
                 </table>
