@@ -96,20 +96,20 @@
   @endif
 
   <!-- Nav Item - Lowongan Pekerjaan -->
-  @if (Route::currentRouteName() == 'blank.index')
-    <li class="nav-item active">
-      <a class="nav-link" href="{{ route('blank.index') }}">
-        <i class="fas fa-fw fa-briefcase"></i>
-        <span>Lowongan Pekerjaan</span>
-      </a>
-    </li>
+  @if (Route::currentRouteName() == 'lowongan-pekerjaan.index')
+      <li class="nav-item active">
+          <a class="nav-link" href="{{ route('lowongan-pekerjaan.index') }}">
+              <i class="fas fa-fw fa-briefcase"></i>
+              <span>Lowongan Pekerjaan</span>
+          </a>
+      </li>
   @else
-    <li class="nav-item">
-      <a class="nav-link" href="{{ route('blank.index') }}">
-        <i class="fas fa-fw fa-briefcase"></i>
-        <span>Lowongan Pekerjaan</span>
-      </a>
-    </li>
+      <li class="nav-item">
+          <a class="nav-link" href="{{ route('lowongan-pekerjaan.index') }}">
+              <i class="fas fa-fw fa-briefcase"></i>
+              <span>Lowongan Pekerjaan</span>
+          </a>
+      </li>
   @endif
 
   <!-- Divider -->
