@@ -2,6 +2,8 @@ import pythoncom
 import comtypes.client
 import os
 import sys
+import asyncio
+import threading
 from docx import Document
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -150,27 +152,15 @@ def nyoba_file():
         word.Quit()
         print('Done!')
 
-        f = open(filename_docx, 'rb')
-        pdf = open(filename_pdf, 'rb')
-        
-        files = {
-            'file_docx': (filename_docx, f, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'),
-            'file_pdf': (filename_pdf, pdf, 'application/pdf')
-        }
-
-        print('Sending file to Laravel...')
-        # res = requests.get('http://localhost:8000/api/nyoba/ajax')
-        # print(res.json())
-        res = requests.post(laravel_url, files=files, stream=True)
-        print('Done!')
-        print('Update PATH in Database...')
-        dataJsonFromRes = res.json()
-        print(dataJsonFromRes)
-        mycursor = mydb.cursor()
-        mycursor.execute(f"UPDATE surat_tugas_pengganti_driver SET file_path_docx = '{dataJsonFromRes['files']['docx']}', file_path_pdf = '{dataJsonFromRes['files']['pdf']}' WHERE id_surat_tugas = '{request.json['id_surat_tugas']}'")
-        mydb.commit()
-        print(mycursor.rowcount, "record(s) affected")
-        print('Done!')
+        print('Start threading in background...')
+        # TODO
+        t = threading.Thread(
+            target=background_generate_file,
+            args=(filename_docx, filename_pdf, laravel_url, request.json['id_surat_tugas'])
+        )
+        t.start()
+        print('After threading...')
+        print('Sending response!')
 
         return jsonify({
             'status': 'success'
@@ -179,3 +169,47 @@ def nyoba_file():
         return jsonify({
             'status': 'error'
         })
+
+def background_generate_file(filename_docx, filename_pdf, laravel_url, surat_id):
+    asyncio.run(generateFile(filename_docx, filename_pdf, laravel_url, surat_id))
+
+async def generateFile(filename_docx, filename_pdf, laravel_url, id_surat):
+    print('Start Async Function....')
+    print('Start Await Sleep....')
+    await asyncio.sleep(2)
+    print('Done Await Sleep....')
+    f = open(filename_docx, 'rb')
+    pdf = open(filename_pdf, 'rb')
+    
+    files = {
+        'file_docx': (filename_docx, f, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'),
+        'file_pdf': (filename_pdf, pdf, 'application/pdf')
+    }
+
+    print('Sending file to Laravel...')
+    res = requests.post(laravel_url, files=files, stream=True)
+    print('Done!')
+    print('Update PATH in Database...')
+    dataJsonFromRes = res.json()
+    print(dataJsonFromRes)
+    mycursor = mydb.cursor()
+    mycursor.execute(f"UPDATE surat_tugas_pengganti_driver SET file_path_docx = '{dataJsonFromRes['files']['docx']}', file_path_pdf = '{dataJsonFromRes['files']['pdf']}' WHERE id_surat_tugas = '{id_surat}'")
+    mydb.commit()
+    print(mycursor.rowcount, "record(s) affected")
+    print('Done!')
+    f.close()
+    pdf.close()
+    print('Deleting the temporary file...')
+    if os.path.exists(filename_docx):
+        os.remove(filename_docx)
+        print('Success deleting the docx file!')
+    else:
+        print('File docx not found')
+
+    if os.path.exists(filename_pdf):
+        os.remove(filename_pdf)
+        print('Success deleting the pdf file!')
+    else:
+        print('File pdf not found')
+
+    print('Done!')
