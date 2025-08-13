@@ -45,10 +45,10 @@
       <div id="collapseSurat" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
         <div class="bg-white py-2 collapse-inner rounded">
           <h6 class="collapse-header">Daftar Menu:</h6>
-          <a class="collapse-item active" href="{{ route('surat-tugas.index') }}">Surat Penugasan A</a>
-          <a class="collapse-item" href="register.html">Surat Penugasan B</a>
-          <a class="collapse-item" href="forgot-password.html">Surat Penugasan C</a>
-          <a class="collapse-item" href="forgot-password.html">Surat Penugasan D</a>
+          <a class="collapse-item active" href="{{ route('surat-tugas.index') }}">Surat Pengganti Driver</a>
+          <a class="collapse-item" href="{{ route('blank.index') }}">Surat Penugasan B</a>
+          <a class="collapse-item" href="{{ route('blank.index') }}">Surat Penugasan C</a>
+          <a class="collapse-item" href="{{ route('blank.index') }}">Surat Penugasan D</a>
         </div>
       </div>
     </li>
@@ -62,10 +62,10 @@
       <div id="collapseSurat" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
         <div class="bg-white py-2 collapse-inner rounded">
           <h6 class="collapse-header">Daftar Menu:</h6>
-          <a class="collapse-item" href="{{ route('surat-tugas.index') }}">Surat Penugasan A</a>
-          <a class="collapse-item" href="register.html">Surat Penugasan B</a>
-          <a class="collapse-item" href="forgot-password.html">Surat Penugasan C</a>
-          <a class="collapse-item" href="forgot-password.html">Surat Penugasan D</a>
+          <a class="collapse-item" href="{{ route('surat-tugas.index') }}">Surat Pengganti Driver</a>
+          <a class="collapse-item" href="{{ route('blank.index') }}">Surat Penugasan B</a>
+          <a class="collapse-item" href="{{ route('blank.index') }}">Surat Penugasan C</a>
+          <a class="collapse-item" href="{{ route('blank.index') }}">Surat Penugasan D</a>
         </div>
       </div>
     </li>

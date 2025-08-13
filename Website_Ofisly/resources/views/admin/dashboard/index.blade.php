@@ -1,4 +1,5 @@
 @extends('admin/layout/app')
+@section('title', 'Dashboard')
 @section('content')
   <div class="container-fluid px-4">
     <h1 class="h3 text-gray-800">Maintenance</h1>
