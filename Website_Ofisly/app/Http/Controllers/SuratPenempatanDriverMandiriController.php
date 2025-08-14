@@ -34,6 +34,7 @@ class SuratPenempatanDriverMandiriController extends Controller
                 'nama_kandidat' => $request->nama_kandidat,
                 'jabatan_kandidat' => $request->jabatan_kandidat,
                 'tgl_mulai_penempatan' => $request->tgl_mulai_penempatan,
+                'tgl_surat_pembuatan' => Carbon::now()->format('Y-m-d'),
             ]);
 
             return redirect()->route('surat-penempatan-driver-mandiri.index')
@@ -60,6 +61,7 @@ class SuratPenempatanDriverMandiriController extends Controller
                 'nomor_surat' => $suratPenempatan->nomor_surat,
                 'nama_kandidat' => $suratPenempatan->nama_kandidat,
                 'jabatan_kandidat' => $suratPenempatan->jabatan_kandidat,
+                'tgl_surat_pembuatan' => $suratPenempatan->tgl_surat_pembuatan,
                 'tgl_mulai_penempatan' => $suratPenempatan->tgl_mulai_penempatan,
                 'file_path_docx' => $suratPenempatan->file_path_docx,
                 'file_path_pdf' => $suratPenempatan->file_path_pdf,
@@ -83,6 +85,7 @@ class SuratPenempatanDriverMandiriController extends Controller
                 'nama_kandidat' => $request->nama_kandidat,
                 'jabatan_kandidat'=> $request->jabatan_kandidat,
                 'tgl_mulai_penempatan' => $request->tgl_mulai_penempatan,
+                'tgl_surat_pembuatan' => Carbon::now()->format('Y-m-d'),
             ]);
 
             return redirect()->route('surat-penempatan-driver-mandiri.index')

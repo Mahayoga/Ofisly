@@ -17,13 +17,15 @@ class SuratPenempatanDriverMandiriModel extends Model
         'nama_kandidat',
         'jabatan_kandidat',
         'tgl_mulai_penempatan',
+        'tgl_surat_pembuatan',
         'file_path_docx',
         'file_path_pdf',
     ];
 
     protected $casts = [
         'id_surat_penempatan' => 'string',
-        'tgl_mulai_penempatan' => 'date'
+        'tgl_mulai_penempatan' => 'date',
+        'tgl_surat_pembuatan' => 'date'
     ];
 
     protected static function boot()

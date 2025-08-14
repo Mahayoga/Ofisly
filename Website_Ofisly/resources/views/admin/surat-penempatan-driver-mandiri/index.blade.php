@@ -44,6 +44,7 @@
                 <th>Nomor Surat</th>
                 <th>Nama Kandidat</th>
                 <th>Jabatan</th>
+                <th>Tanggal Pembuatan</th>
                 <th>Tanggal Penempatan</th>
                 <th>Aksi</th>
               </tr>
@@ -58,6 +59,7 @@
                   <td class="nomor-surat">{{ $surat->nomor_surat }}</td>
                   <td class="nama-kandidat">{{ $surat->nama_kandidat }}</td>
                   <td class="jabatan-kandidat">{{ $surat->jabatan_kandidat }}</td>
+                  <td>{{ \Carbon\Carbon::parse($surat->tgl_surat_pembuatan)->format('d/m/Y') }}</td>
                   <td class="tgl-penempatan">{{ \Carbon\Carbon::parse($surat->tgl_mulai_penempatan)->format('d/m/Y') }}</td>
                   <td class="text-center">
                     <div class="btn-group">

@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('surat_penempatan_driver_mandiri', function (Blueprint $table) {
             $table->uuid('id_surat_penempatan')->primary();
             $table->string('nomor_surat');
+            $table->date('tgl_surat_pembuatan');
             $table->string('nama_kandidat');
             $table->string('jabatan_kandidat');
             $table->date('tgl_mulai_penempatan');
