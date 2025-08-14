@@ -4,6 +4,8 @@ use App\Http\Controllers\CutiKaryawanController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SuratTugasPenggantiDriverController;
+use App\Http\Controllers\SuratTugasController;
+use App\Http\Controllers\LowonganPekerjaanController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
@@ -28,7 +30,10 @@ Route::middleware(['role.auth', 'auth'])->group(function () {
         });
     
     Route::resource('cuti-karyawan', CutiKaryawanController::class);
-
+    //lowongan pekerjaan
+    Route::resource('lowongan-pekerjaan', LowonganPekerjaanController::class);
+    // Route::get('/', [LowonganPekerjaanController::class, 'landing'])->name('landing');
+    // Route::get('/lowongan/detail/{id}', [LowonganPekerjaanController::class, 'showLanding'])->name('lowongan-pekerjaan.detail');
     // Blank Page
     Route::get('/blank', function() {
         return view('admin.layout.blank');

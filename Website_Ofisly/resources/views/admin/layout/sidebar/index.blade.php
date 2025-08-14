@@ -1,11 +1,10 @@
 <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
   <!-- Sidebar - Brand -->
-  <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
-    <div class="sidebar-brand-icon rotate-n-15">
-      <i class="fas fa-laugh-wink"></i>
+  <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
+    <img src="{{ asset('assets/img/logo-ofisly-putih.png') }}"alt="Ofisly Logo"style="max-width: 120px; height: auto; display: block;">
+    <div class="sidebar-brand-text mx-3">
     </div>
-    <div class="sidebar-brand-text mx-3">SB Admin <sup>2</sup></div>
   </a>
 
   <!-- Divider -->
@@ -94,6 +93,23 @@
         <span>Dummy</span>
       </a>
     </li>
+  @endif
+
+  <!-- Nav Item - Lowongan Pekerjaan -->
+  @if (Route::currentRouteName() == 'lowongan-pekerjaan.index')
+      <li class="nav-item active">
+          <a class="nav-link" href="{{ route('lowongan-pekerjaan.index') }}">
+              <i class="fas fa-fw fa-briefcase"></i>
+              <span>Lowongan Pekerjaan</span>
+          </a>
+      </li>
+  @else
+      <li class="nav-item">
+          <a class="nav-link" href="{{ route('lowongan-pekerjaan.index') }}">
+              <i class="fas fa-fw fa-briefcase"></i>
+              <span>Lowongan Pekerjaan</span>
+          </a>
+      </li>
   @endif
 
   <!-- Divider -->
