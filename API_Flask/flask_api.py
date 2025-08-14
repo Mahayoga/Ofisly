@@ -201,12 +201,14 @@ async def generateFile(filename_docx, filename_pdf, laravel_url, id_surat):
     pdf.close()
     print('Deleting the temporary file...')
     if os.path.exists(filename_docx):
+        print(filename_docx)
         os.remove(filename_docx)
         print('Success deleting the docx file!')
     else:
         print('File docx not found')
 
     if os.path.exists(filename_pdf):
+        print(filename_pdf)
         os.remove(filename_pdf)
         print('Success deleting the pdf file!')
     else:
