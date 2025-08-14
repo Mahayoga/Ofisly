@@ -144,19 +144,19 @@
               <div class="row mb-3">
                 <div class="col-md-6">
                   <label>Nomor Surat</label>
-                  <input type="text" class="form-control" id="edit_nomor_surat" name="edit_nomor_surat" required>
+                  <input type="text" class="form-control" id="edit_nomor_surat" name="nomor_surat" required>
                 </div>
                 <div class="col-md-6">
                   <label>Nama Kandidat</label>
-                  <input type="text" class="form-control" id="edit_nama_kandidat" name="edit_nama_kandidat" required>
+                  <input type="text" class="form-control" id="edit_nama_kandidat" name="nama_kandidat" required>  
                 </div>
                 <div class="col-md-6">
                   <label>Jabatan Kandidat</label>
-                  <input type="text" class="form-control" id="edit_jabatan_kandidat" name="edit_jabatan_kandidat" required>
+                  <input type="text" class="form-control" id="edit_jabatan_kandidat" name="jabatan_kandidat" required>
                 </div>
                 <div class="col-md-6">
                   <label>Tanggal Mulai Penempatan</label>
-                  <input type="date" class="form-control" id="edit_tgl_mulai_penempatan" name="edit_tgl_mulai_penempatan" required min="{{ date('Y-m-d') }}">
+                  <input type="date" class="form-control" id="edit_tgl_mulai_penempatan" name="tgl_mulai_penempatan" required>
                 </div>
               </div>
             </div>

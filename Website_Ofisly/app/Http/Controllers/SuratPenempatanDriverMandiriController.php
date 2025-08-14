@@ -69,7 +69,6 @@ class SuratPenempatanDriverMandiriController extends Controller
 
     public function update(Request $request, $id)
     {
-        ($request->all());
         $request->validate([
             'nomor_surat' => 'required|string|max:30',
             'nama_kandidat' => 'required|string|max:255',
@@ -86,11 +85,12 @@ class SuratPenempatanDriverMandiriController extends Controller
                 'tgl_mulai_penempatan' => $request->tgl_mulai_penempatan,
             ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Surat Penempatan Driver Mandiri berhasil diperbarui',
-                ]
-            );
+            return redirect()->route('surat-penempatan-driver-mandiri.index')
+                ->with([
+                    'success' => 'Surat Tugas berhasil di edit',
+                    'action' => true,
+                    'id_generate' => $suratPenempatan->id_nomor_penempatan
+                ]);
 
         } catch (\Exception $e) {
             return response()->json([
