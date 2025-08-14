@@ -239,7 +239,7 @@
 @endsection
 
 @section('script')
-  @if (session('action') == 'generate_surat')
+  @if (session('action'))
     <script>
       console.log('Masuk brokk')
       $(document).ready(function() {
