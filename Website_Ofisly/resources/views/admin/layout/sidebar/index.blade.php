@@ -1,11 +1,10 @@
 <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
   <!-- Sidebar - Brand -->
-  <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
-    <div class="sidebar-brand-icon rotate-n-15">
-      <i class="fas fa-laugh-wink"></i>
+  <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/">
+    <img src="{{ asset('assets/img/logo-ofisly-putih.png') }}"alt="Ofisly Logo"style="max-width: 120px; height: auto; display: block;">
+    <div class="sidebar-brand-text mx-3">
     </div>
-    <div class="sidebar-brand-text mx-3">SB Admin <sup>2</sup></div>
   </a>
 
   <!-- Divider -->
@@ -45,10 +44,10 @@
       <div id="collapseSurat" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
         <div class="bg-white py-2 collapse-inner rounded">
           <h6 class="collapse-header">Daftar Menu:</h6>
-          <a class="collapse-item active" href="{{ route('surat-tugas.index') }}">Surat Penugasan A</a>
-          <a class="collapse-item" href="register.html">Surat Penugasan B</a>
-          <a class="collapse-item" href="forgot-password.html">Surat Penugasan C</a>
-          <a class="collapse-item" href="forgot-password.html">Surat Penugasan D</a>
+          <a class="collapse-item active" href="{{ route('surat-tugas.index') }}">Surat Pengganti Driver</a>
+          <a class="collapse-item" href="{{ route('blank.index') }}">Surat Penugasan B</a>
+          <a class="collapse-item" href="{{ route('blank.index') }}">Surat Penugasan C</a>
+          <a class="collapse-item" href="{{ route('blank.index') }}">Surat Penugasan D</a>
         </div>
       </div>
     </li>
@@ -62,10 +61,10 @@
       <div id="collapseSurat" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
         <div class="bg-white py-2 collapse-inner rounded">
           <h6 class="collapse-header">Daftar Menu:</h6>
-          <a class="collapse-item" href="{{ route('surat-tugas.index') }}">Surat Penugasan A</a>
-          <a class="collapse-item" href="register.html">Surat Penugasan B</a>
-          <a class="collapse-item" href="forgot-password.html">Surat Penugasan C</a>
-          <a class="collapse-item" href="forgot-password.html">Surat Penugasan D</a>
+          <a class="collapse-item" href="{{ route('surat-tugas.index') }}">Surat Pengganti Driver</a>
+          <a class="collapse-item" href="{{ route('blank.index') }}">Surat Penugasan B</a>
+          <a class="collapse-item" href="{{ route('blank.index') }}">Surat Penugasan C</a>
+          <a class="collapse-item" href="{{ route('blank.index') }}">Surat Penugasan D</a>
         </div>
       </div>
     </li>
@@ -94,6 +93,23 @@
         <span>Dummy</span>
       </a>
     </li>
+  @endif
+
+  <!-- Nav Item - Lowongan Pekerjaan -->
+  @if (Route::currentRouteName() == 'lowongan-pekerjaan.index')
+      <li class="nav-item active">
+          <a class="nav-link" href="{{ route('lowongan-pekerjaan.index') }}">
+              <i class="fas fa-fw fa-briefcase"></i>
+              <span>Lowongan Pekerjaan</span>
+          </a>
+      </li>
+  @else
+      <li class="nav-item">
+          <a class="nav-link" href="{{ route('lowongan-pekerjaan.index') }}">
+              <i class="fas fa-fw fa-briefcase"></i>
+              <span>Lowongan Pekerjaan</span>
+          </a>
+      </li>
   @endif
 
   <!-- Divider -->
