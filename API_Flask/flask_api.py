@@ -12,6 +12,8 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 import requests
 import mysql.connector
 from dotenv import load_dotenv
+import re
+import json
 
 app = Flask(__name__)
 CORS(app)
@@ -215,3 +217,177 @@ async def generateFile(filename_docx, filename_pdf, laravel_url, id_surat):
         print('File pdf not found')
 
     print('Done!')
+
+
+def background_generate_promotor_file(docx_path, pdf_path, laravel_url, surat_id):
+    """Background task to upload generated files to Laravel"""
+    asyncio.run(upload_promotor_files(docx_path, pdf_path, laravel_url, surat_id))
+
+async def upload_promotor_files(docx_path, pdf_path, laravel_url, surat_id):
+    """Async function to handle file uploads"""
+    try:
+        await asyncio.sleep(2)  # Small delay
+        
+        with open(docx_path, 'rb') as docx_file, open(pdf_path, 'rb') as pdf_file:
+            files = {
+                'file_docx': (os.path.basename(docx_path), docx_file, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'),
+                'file_pdf': (os.path.basename(pdf_path), pdf_file, 'application/pdf')
+            }
+            
+            data = {
+                'id_surat_tugas_promotor': surat_id
+            }
+            
+            response = requests.post(laravel_url, files=files, data=data)
+            response.raise_for_status()
+            response_data = response.json()
+
+            if response.status_code == 200:
+                mycursor = mydb.cursor()
+                update_sql = f"""
+                    UPDATE surat_tugas_promotor 
+                    SET file_path_docx = '{response_data['files']['docx']}', 
+                        file_path_pdf = '{response_data['files']['pdf']}' 
+                    WHERE id_surat_tugas_promotor = '{surat_id}'
+                """
+                mycursor.execute(update_sql)
+                mydb.commit()
+
+    except Exception as e:
+        print(f"Error in background process: {str(e)}")
+    finally:
+        # Clean up files
+        for path in [docx_path, pdf_path]:
+            try:
+                if os.path.exists(path):
+                    os.remove(path)
+                    print(f"Successfully deleted {path}")
+            except Exception as e:
+                print(f"Error deleting file {path}: {str(e)}")
+
+@app.route('/generate/surat/promotor', methods=['POST'])
+def generate_surat_promotor():
+    laravel_url = 'http://localhost:8000/api/send/surat/promotor'
+    file_template_path = 'Contoh Template/275-Surat Tugas Promotor Indosat-ahmad.docx'
+    
+    pythoncom.CoInitialize()
+    word = comtypes.client.CreateObject('Word.Application')
+    
+    try:
+        # Get data from database
+        mycursor = mydb.cursor(dictionary=True)  # Use dictionary cursor for easier column access
+        sqlStr = f"SELECT * FROM surat_tugas_promotor WHERE id_surat_tugas_promotor = '{request.json['id_surat_tugas_promotor']}'"
+        print("Executing SQL:", sqlStr)
+        mycursor.execute(sqlStr)
+        result = mycursor.fetchone()
+
+        if not result:
+            print("No data found for ID:", request.json['id_surat_tugas_promotor'])
+            return jsonify({
+                'status': 'error',
+                'message': f'Data not found for ID: {request.json["id_surat_tugas_promotor"]}'
+            })
+
+        print("Database result:", result)
+
+        # Load template document
+        try:
+            document = Document(file_template_path)
+        except Exception as e:
+            return jsonify({
+                'status': 'error',
+                'message': f'Failed to load template document: {str(e)}'
+            })
+
+        # Process date fields
+        def format_date(date_value):
+            if not date_value:
+                return ""
+            if isinstance(date_value, str):
+                try:
+                    date_parts = date_value.split('-')
+                    if len(date_parts) != 3:
+                        return ""
+                    return f"{date_parts[2]} {bulan[int(date_parts[1]) - 1]} {date_parts[0]}"
+                except (IndexError, ValueError):
+                    return ""
+            elif hasattr(date_value, 'strftime'):  # For datetime.date objects
+                try:
+                    date_parts = str(date_value).split('-')
+                    return f"{date_parts[2]} {bulan[int(date_parts[1]) - 1]} {date_parts[0]}"
+                except (IndexError, ValueError):
+                    return ""
+            return ""
+
+        # Get values from result
+        nama_kandidat = result.get('nama_kandidat', '')
+        penempatan = result.get('penempatan', '[]')
+        tgl_penugasan = result.get('tgl_penugasan')
+        tgl_surat_pembuatan = result.get('tgl_surat_pembuatan')
+
+        # Replace placeholders in paragraphs
+        for paragraph in document.paragraphs:
+            paragraph.text = paragraph.text.replace('__DATATGLSURATPEMBUATAN__', format_date(tgl_surat_pembuatan))
+            paragraph.text = paragraph.text.replace('__NAMAKANDIDAT__', str(nama_kandidat))
+            paragraph.text = paragraph.text.replace('__DATATGLPENUGASAN__', format_date(tgl_penugasan))
+
+        # Process penempatan data
+        try:
+            if isinstance(penempatan, str):
+                try:
+                    penempatan = json.loads(penempatan)
+                except json.JSONDecodeError:
+                    penempatan = [penempatan] if penempatan else []
+            elif not isinstance(penempatan, (list, tuple)):
+                penempatan = []
+        except Exception as e:
+            print(f"Error processing penempatan: {str(e)}")
+            penempatan = []
+
+        # Replace placeholders in tables
+        for table in document.tables:
+            for row in table.rows:
+                for cell in row.cells:
+                    cell.text = cell.text.replace('__NAMAKANDIDAT__', str(nama_kandidat))
+                    cell.text = cell.text.replace('__PENEMPATAN__', ', '.join(penempatan) if penempatan else "")
+
+        # Save documents
+        docx_filename = f"Surat Tugas Promotor_{nama_kandidat}.docx"
+        pdf_filename = f"Surat Tugas Promotor_{nama_kandidat}.pdf"
+        
+        document.save(docx_filename)
+        dirname = os.path.dirname(__file__)
+        abs_docx_path = os.path.join(dirname, docx_filename)
+        abs_pdf_path = os.path.join(dirname, pdf_filename)
+
+        # Convert to PDF
+        word.Visible = False
+        try:
+            doc = word.Documents.Open(abs_docx_path, ReadOnly=True)
+            doc.SaveAs(abs_pdf_path, FileFormat=wdFormatPDF)
+            doc.Close()
+        except Exception as e:
+            return jsonify({
+                'status': 'error',
+                'message': f'Failed to convert to PDF: {str(e)}'
+            })
+        finally:
+            word.Quit()
+
+        # Start background thread for file upload
+        t = threading.Thread(
+            target=background_generate_promotor_file,
+            args=(abs_docx_path, abs_pdf_path, laravel_url, request.json['id_surat_tugas_promotor'])
+        )
+        t.start()
+
+        return jsonify({
+            'status': 'success',
+            'message': 'Document generation started'
+        })
+
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
