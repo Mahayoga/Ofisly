@@ -20,8 +20,6 @@ class SuratTugasPenggantiDriverModel extends Model
         'tgl_mulai_penugasan',
         'tgl_selesai_penugasan',
         'tgl_surat_pembuatan',
-        'status',
-        'created_by',
         'file_path_docx',
         'file_path_pdf',
     ];
