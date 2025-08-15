@@ -13,6 +13,7 @@ import requests
 import mysql.connector
 from dotenv import load_dotenv
 import re
+from docx.shared import Pt
 import json
 
 app = Flask(__name__)
@@ -172,6 +173,8 @@ def nyoba_file():
             'status': 'error'
         })
 
+# Surat Tugas Promotor Indosat
+
 def background_generate_file(filename_docx, filename_pdf, laravel_url, surat_id):
     asyncio.run(generateFile(filename_docx, filename_pdf, laravel_url, surat_id))
 
@@ -275,106 +278,103 @@ def generate_surat_promotor():
     
     try:
         # Get data from database
-        mycursor = mydb.cursor(dictionary=True)  # Use dictionary cursor for easier column access
+        mycursor = mydb.cursor(dictionary=True)
         sqlStr = f"SELECT * FROM surat_tugas_promotor WHERE id_surat_tugas_promotor = '{request.json['id_surat_tugas_promotor']}'"
-        print("Executing SQL:", sqlStr)
         mycursor.execute(sqlStr)
         result = mycursor.fetchone()
 
         if not result:
-            print("No data found for ID:", request.json['id_surat_tugas_promotor'])
             return jsonify({
                 'status': 'error',
-                'message': f'Data not found for ID: {request.json["id_surat_tugas_promotor"]}'
+                'message': 'Data not found'
             })
-
-        print("Database result:", result)
 
         # Load template document
-        try:
-            document = Document(file_template_path)
-        except Exception as e:
-            return jsonify({
-                'status': 'error',
-                'message': f'Failed to load template document: {str(e)}'
-            })
+        document = Document(file_template_path)
 
-        # Process date fields
-        def format_date(date_value):
-            if not date_value:
+        # Format date function
+        def format_date(date_str):
+            if not date_str:
                 return ""
-            if isinstance(date_value, str):
-                try:
-                    date_parts = date_value.split('-')
-                    if len(date_parts) != 3:
-                        return ""
-                    return f"{date_parts[2]} {bulan[int(date_parts[1]) - 1]} {date_parts[0]}"
-                except (IndexError, ValueError):
-                    return ""
-            elif hasattr(date_value, 'strftime'):  # For datetime.date objects
-                try:
-                    date_parts = str(date_value).split('-')
-                    return f"{date_parts[2]} {bulan[int(date_parts[1]) - 1]} {date_parts[0]}"
-                except (IndexError, ValueError):
-                    return ""
-            return ""
+            try:
+                date_obj = datetime.strptime(str(date_str), '%Y-%m-%d')
+                return f"{date_obj.day} {bulan[date_obj.month-1]} {date_obj.year}"
+            except:
+                return ""
 
-        # Get values from result
-        nama_kandidat = result.get('nama_kandidat', '')
+        # Process penempatan data - FIXED VERSION
         penempatan = result.get('penempatan', '[]')
-        tgl_penugasan = result.get('tgl_penugasan')
-        tgl_surat_pembuatan = result.get('tgl_surat_pembuatan')
+        try:
+            # Handle case where penempatan is a comma-separated string
+            if isinstance(penempatan, str):
+                if penempatan.startswith('[') and penempatan.endswith(']'):
+                    # If it's a JSON array string
+                    penempatan = json.loads(penempatan)
+                else:
+                    # If it's a comma-separated string
+                    penempatan = [item.strip() for item in penempatan.split(',') if item.strip()]
+            
+            # Ensure we have a list
+            if not isinstance(penempatan, list):
+                penempatan = [str(penempatan)]
+        except Exception as e:
+            print(f"Error processing penempatan: {str(e)}")
+            penempatan = ["-"]  # Default value if error occurs
+
+        # Format penempatan for document - IMPROVED FORMATTING
+        penempatan_text = ""
+        if len(penempatan) == 1:
+            penempatan_text = penempatan[0]
+        else:
+            # Create bullet points with proper Word formatting
+            penempatan_text = "\n• ".join(penempatan)
+            penempatan_text = "• " + penempatan_text  # Add first bullet
 
         # Replace placeholders in paragraphs
         for paragraph in document.paragraphs:
-            paragraph.text = paragraph.text.replace('__DATATGLSURATPEMBUATAN__', format_date(tgl_surat_pembuatan))
-            paragraph.text = paragraph.text.replace('__NAMAKANDIDAT__', str(nama_kandidat))
-            paragraph.text = paragraph.text.replace('__DATATGLPENUGASAN__', format_date(tgl_penugasan))
+            if '__PENEMPATAN__' in paragraph.text:
+                # Special handling for penempatan to preserve formatting
+                for run in paragraph.runs:
+                    if '__PENEMPATAN__' in run.text:
+                        run.text = run.text.replace('__PENEMPATAN__', penempatan_text)
+            
+            paragraph.text = paragraph.text.replace('__DATATGLSURATPEMBUATAN__', format_date(result.get('tgl_surat_pembuatan')))
+            paragraph.text = paragraph.text.replace('__NAMAKANDIDAT__', result.get('nama_kandidat', '-'))
+            paragraph.text = paragraph.text.replace('__DATATGLPENUGASAN__', format_date(result.get('tgl_penugasan')))
 
-        # Process penempatan data
-        try:
-            if isinstance(penempatan, str):
-                try:
-                    penempatan = json.loads(penempatan)
-                except json.JSONDecodeError:
-                    penempatan = [penempatan] if penempatan else []
-            elif not isinstance(penempatan, (list, tuple)):
-                penempatan = []
-        except Exception as e:
-            print(f"Error processing penempatan: {str(e)}")
-            penempatan = []
-
-        # Replace placeholders in tables
+        # Handle tables if needed
         for table in document.tables:
             for row in table.rows:
                 for cell in row.cells:
-                    cell.text = cell.text.replace('__NAMAKANDIDAT__', str(nama_kandidat))
-                    cell.text = cell.text.replace('__PENEMPATAN__', ', '.join(penempatan) if penempatan else "")
+                    if '__PENEMPATAN__' in cell.text:
+                        # Clear cell and add formatted content
+                        cell.text = ''
+                        paragraph = cell.paragraphs[0]
+                        runner = paragraph.add_run(penempatan_text)
+                        runner.font.name = 'Arial'  # Match template font
+                        runner.font.size = Pt(11)   # Match template font size
+                    else:
+                        cell.text = cell.text.replace('__DATATGLSURATPEMBUATAN__', format_date(result.get('tgl_surat_pembuatan')))
+                        cell.text = cell.text.replace('__NAMAKANDIDAT__', result.get('nama_kandidat', '-'))
+                        cell.text = cell.text.replace('__DATATGLPENUGASAN__', format_date(result.get('tgl_penugasan')))
 
         # Save documents
-        docx_filename = f"Surat Tugas Promotor_{nama_kandidat}.docx"
-        pdf_filename = f"Surat Tugas Promotor_{nama_kandidat}.pdf"
+        nama_kandidat = result.get('nama_kandidat', 'Surat_Tugas').replace(' ', '_')
+        docx_filename = f"Surat_Tugas_Promotor_{nama_kandidat}.docx"
+        pdf_filename = f"Surat_Tugas_Promotor_{nama_kandidat}.pdf"
         
         document.save(docx_filename)
-        dirname = os.path.dirname(__file__)
-        abs_docx_path = os.path.join(dirname, docx_filename)
-        abs_pdf_path = os.path.join(dirname, pdf_filename)
+        abs_docx_path = os.path.abspath(docx_filename)
+        abs_pdf_path = os.path.abspath(pdf_filename)
 
         # Convert to PDF
         word.Visible = False
-        try:
-            doc = word.Documents.Open(abs_docx_path, ReadOnly=True)
-            doc.SaveAs(abs_pdf_path, FileFormat=wdFormatPDF)
-            doc.Close()
-        except Exception as e:
-            return jsonify({
-                'status': 'error',
-                'message': f'Failed to convert to PDF: {str(e)}'
-            })
-        finally:
-            word.Quit()
+        doc = word.Documents.Open(abs_docx_path)
+        doc.SaveAs(abs_pdf_path, FileFormat=wdFormatPDF)
+        doc.Close()
+        word.Quit()
 
-        # Start background thread for file upload
+        # Start background upload
         t = threading.Thread(
             target=background_generate_promotor_file,
             args=(abs_docx_path, abs_pdf_path, laravel_url, request.json['id_surat_tugas_promotor'])
@@ -383,7 +383,8 @@ def generate_surat_promotor():
 
         return jsonify({
             'status': 'success',
-            'message': 'Document generation started'
+            'message': 'Document generation started',
+            'penempatan_format': penempatan_text  # For debugging
         })
 
     except Exception as e:
