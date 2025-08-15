@@ -45,7 +45,7 @@
         <div class="bg-white py-2 collapse-inner rounded">
           <h6 class="collapse-header">Daftar Menu:</h6>
           <a class="collapse-item active" href="{{ route('surat-tugas.index') }}">Surat Pengganti Driver</a>
-          <a class="collapse-item" href="{{ route('blank.index') }}">Surat Penugasan B</a>
+          <a class="collapse-item" href="{{ route('surat-penempatan-driver-mandiri.index') }}">Surat Penempatan Driver</a>
           <a class="collapse-item" href="{{ route('blank.index') }}">Surat Penugasan C</a>
           <a class="collapse-item" href="{{ route('blank.index') }}">Surat Penugasan D</a>
         </div>
@@ -62,7 +62,7 @@
         <div class="bg-white py-2 collapse-inner rounded">
           <h6 class="collapse-header">Daftar Menu:</h6>
           <a class="collapse-item" href="{{ route('surat-tugas.index') }}">Surat Pengganti Driver</a>
-          <a class="collapse-item" href="{{ route('blank.index') }}">Surat Penugasan B</a>
+          <a class="collapse-item" href="{{ route('surat-penempatan-driver-mandiri.index') }}">Surat Penempatan Driver</a>
           <a class="collapse-item" href="{{ route('blank.index') }}">Surat Penugasan C</a>
           <a class="collapse-item" href="{{ route('blank.index') }}">Surat Penugasan D</a>
         </div>

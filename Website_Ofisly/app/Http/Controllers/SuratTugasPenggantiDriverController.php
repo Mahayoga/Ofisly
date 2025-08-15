@@ -64,7 +64,7 @@ class SuratTugasPenggantiDriverController extends Controller
             return redirect()->route('surat-tugas.index')
                 ->with([
                     'success' => 'Surat Tugas berhasil dibuat',
-                    'action' => 'generate_surat',
+                    'action' => true,
                     'id_generate' => $resultCreate->id_surat_tugas
                 ]);
             // return response()->json([
@@ -104,24 +104,42 @@ class SuratTugasPenggantiDriverController extends Controller
 
     public function update(Request $request, $id)
     {
-        dd($request->all());
+        // dd($request->all());
         $request->validate([
-            'nama_kandidat' => 'required|string|max:255',
-            'tgl_penugasan' => 'required|date',
+            'edit_nama_kandidat' => 'required|string|max:255',
+            "edit_nik_kandidat" => "required|string|max:16",
+            "edit_jabatan_kandidat" => "required|string|max:255",
+            "edit_nama_pengganti_kandidat" => "required|string|max:255",
+            "edit_tgl_mulai_penugasan" => "required|date",
+            "edit_tgl_selesai_penugasan" => "required|date",
         ]);
 
         try {
             $surat = SuratTugasPenggantiDriverModel::findOrFail($id);
+            // dd($surat);
             $surat->update([
-                'nama_kandidat' => $request->nama_kandidat,
-                'tgl_penugasan' => $request->tgl_penugasan,
+                'nama_kandidat' => $request->edit_nama_kandidat,
+                'nik_kandidat' => $request->edit_nik_kandidat,
+                'jabatan_kandidat' => $request->edit_jabatan_kandidat,
+                'nama_pengganti_kandidat' => $request->edit_nama_pengganti_kandidat,
+                'tgl_mulai_penugasan' => $request->edit_tgl_mulai_penugasan,
+                'tgl_selesai_penugasan' => $request->edit_tgl_selesai_penugasan,
+                'tgl_surat_pembuatan' => Carbon::now()->format('Y-m-d'),
             ]);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'Surat Tugas berhasil diperbarui',
-                ]
-            );
+            return redirect()->route('surat-tugas.index')
+                ->with([
+                    'success' => 'Surat Tugas berhasil di edit',
+                    'action' => true,
+                    'id_generate' => $surat->id_surat_tugas
+                ]);
+
+            // return response()->json([
+            //     'success' => true,
+            //     'action' => true,
+            //     'message' => 'Surat Tugas berhasil diperbarui',
+            //     ]
+            // );
 
         } catch (\Exception $e) {
             return response()->json([

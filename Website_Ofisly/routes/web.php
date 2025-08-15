@@ -4,6 +4,7 @@ use App\Http\Controllers\CutiKaryawanController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SuratTugasPenggantiDriverController;
+use App\Http\Controllers\SuratPenempatanDriverMandiriController;
 use App\Http\Controllers\SuratTugasController;
 use App\Http\Controllers\LowonganPekerjaanController;
 use Illuminate\Support\Facades\Route;
@@ -29,6 +30,13 @@ Route::middleware(['role.auth', 'auth'])->group(function () {
             Route::post('/generate/file', [SuratTugasPenggantiDriverController::class, 'generateFile'])->name('surat-tugas.generate-file');
         });
     
+    //route penempatan driver mandiri   
+    Route::resource('surat-penempatan-driver-mandiri', SuratPenempatanDriverMandiriController::class);
+    Route::get('/generate-pdf/{id}', [SuratPenempatanDriverMandiriController::class, 'generatePDF'])->name('surat-penempatan-driver-mandiri.generate-pdf');
+    Route::get('/generate-word/{id}', [SuratPenempatanDriverMandiriController::class, 'generateWord'])->name('surat-penempatan-driver-mandiri.generate-word');
+    Route::post('/generate/file', [SuratPenempatanDriverMandiriController::class, 'generateFile'])->name('surat-penempatan-driver-mandiri.generate-file');
+    
+
     Route::resource('cuti-karyawan', CutiKaryawanController::class);
     //lowongan pekerjaan
     Route::resource('lowongan-pekerjaan', LowonganPekerjaanController::class);
