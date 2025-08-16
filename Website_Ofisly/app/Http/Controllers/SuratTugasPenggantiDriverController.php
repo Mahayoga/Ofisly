@@ -176,13 +176,10 @@ class SuratTugasPenggantiDriverController extends Controller
             $surat = SuratTugasPenggantiDriverModel::findOrFail($id);
             $relativePath = str_replace('/storage/', '', $surat->file_path_pdf);
             $filePath = storage_path('app/public/' . $relativePath);
-            return response()->download($filePath)->deleteFileAfterSend(true);
+            return response()->download($filePath)->deleteFileAfterSend(false);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
+            abort(500, 'Hehe');
         }
     }
 
@@ -192,20 +189,20 @@ class SuratTugasPenggantiDriverController extends Controller
             $surat = SuratTugasPenggantiDriverModel::findOrFail($id);
             $relativePath = str_replace('/storage/', '', $surat->file_path_docx);
             $filePath = storage_path('app/public/' . $relativePath);
-            return response()->download($filePath)->deleteFileAfterSend(true);
+            return response()->download($filePath)->deleteFileAfterSend(false);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
+            abort(500, 'Hehe');
         }
     }
 
     public function generateFile(Request $request) {
         $apiURL = env('FLASK_API_URL') . '/generate/surat/penggati/driver';
+        $model = new SuratTugasPenggantiDriverModel();
         $responses = Http::post($apiURL, [
             'id_surat_tugas' => $request->id,
+            'table' => $model->getTable(),
+
         ]);
 
         $responsesData = $responses->json();

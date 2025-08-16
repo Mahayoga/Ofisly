@@ -1,4 +1,4 @@
-@extends('admin.layout.index')
+{{-- @extends('admin.layout.index')
 @section('title', 'Edit Surat Penempatan')
 
 @section('content')
@@ -51,4 +51,4 @@
             </form>
         </div>
     </div>
-@endsection
+@endsection --}}
