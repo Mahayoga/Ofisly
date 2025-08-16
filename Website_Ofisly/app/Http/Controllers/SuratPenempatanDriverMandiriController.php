@@ -150,13 +150,10 @@ class SuratPenempatanDriverMandiriController extends Controller
             $surat = SuratPenempatanDriverMandiriModel::findOrFail($id);
             $relativePath = str_replace('/storage/', '', $surat->file_path_pdf);
             $filePath = storage_path('app/public/' . $relativePath);
-            return response()->download($filePath)->deleteFileAfterSend(true);
+            return response()->download($filePath)->deleteFileAfterSend(false);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
+            abort(500, 'Hehe');
         }
     }
 
@@ -166,13 +163,10 @@ class SuratPenempatanDriverMandiriController extends Controller
             $surat = SuratPenempatanDriverMandiriModel::findOrFail($id);
             $relativePath = str_replace('/storage/', '', $surat->file_path_docx);
             $filePath = storage_path('app/public/' . $relativePath);
-            return response()->download($filePath)->deleteFileAfterSend(true);
+            return response()->download($filePath)->deleteFileAfterSend(false);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
+            abort(500, 'Hehe');
         }
     }
 

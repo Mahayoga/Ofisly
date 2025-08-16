@@ -204,7 +204,7 @@ def nyoba_file():
         # TODO
         t = threading.Thread(
             target=background_generate_file,
-            args=(filename_docx, filename_pdf, laravel_url, request.json['id_surat_tugas'])
+            args=(filename_docx, filename_pdf, laravel_url, request.json['id_surat_tugas'], request.json['table'], 'id_surat_tugas')
         )
         t.start()
         print('After threading...')
