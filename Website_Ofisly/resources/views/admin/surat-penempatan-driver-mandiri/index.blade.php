@@ -3,9 +3,9 @@
 
 @section('content')
   <div class="container-fluid">
-    <h1 class="h3 text-gray-800">Data Surat Penempatan Driver Mandiri</h1>
+    <h1 class="h3 text-gray-800">Data Surat Tugas Mandiri</h1>
     <ol class="breadcrumb mb-4">
-      <li class="breadcrumb-item">Kumpulan data surat Penempatan driver mandiri</li>
+      <li class="breadcrumb-item">Kumpulan data surat Tugas mandiri</li>
     </ol>
 
     <div class="card border-0 mb-4">
@@ -110,7 +110,11 @@
                 </div>
                 <div class="col-md-6">
                   <label>Jabatan Kandidat</label>
-                  <input type="text" class="form-control" id="jabatan_kandidat" name="jabatan_kandidat" required>
+                  <select name="jabatan_kandidat" id="jabatan_kandidat" class="form-control" required>
+                    <option value="">-- Pilih Jabatan --</option>
+                    <option value="Driver">Driver</option>
+                    <option value="Pramubakti">Pramubakti</option>
+                  </select>
                 </div>
                 <div class="col-md-6">
                   <label>Tanggal Mulai Penempatan</label>
@@ -208,6 +212,7 @@
       $(document).ready(function() {
         let idGenerate = '{{ session('id_generate') }}';
         let urlGenerate = '{{ route('surat-penempatan-driver-mandiri.generate-file') }}';
+        console.log(idGenerate)
         $.post(urlGenerate.replace('__ID__', idGenerate), {
           '_token': '{{ csrf_token() }}',
           'id': idGenerate
