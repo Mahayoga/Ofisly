@@ -266,7 +266,6 @@ def driver_mandiri():
                 run.underline = True
 
         for para in cell3.paragraphs:
-            para.alignment = WD_ALIGN_PARAGRAPH.CENTER
             for run in para.runs:
                 run.italic = True
 
