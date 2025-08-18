@@ -106,9 +106,9 @@ class SuratPenempatanDriverMandiriController extends Controller
             $suratPenempatan = SuratPenempatanDriverMandiriModel::findOrFail($id);
             $suratPenempatan->update([
                 // 'nomor_surat' => $request->nomor_surat,
-                'nama_kandidat' => $request->nama_kandidat,
-                'jabatan_kandidat' => $request->jabatan_kandidat,
-                'tgl_mulai_penempatan' => $request->tgl_mulai_penempatan,
+                'nama_kandidat' => $request->edit_nama_kandidat,
+                'jabatan_kandidat' => $request->edit_jabatan_kandidat,
+                'tgl_mulai_penempatan' => $request->edit_tgl_mulai_penempatan,
                 'tgl_surat_pembuatan' => Carbon::now()->format('Y-m-d'),
             ]);
 

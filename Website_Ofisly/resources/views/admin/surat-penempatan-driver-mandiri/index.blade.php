@@ -150,15 +150,15 @@
                 </div> --}}
                 <div class="col-md-6">
                   <label>Nama Kandidat</label>
-                  <input type="text" class="form-control" id="edit_nama_kandidat" name="nama_kandidat" required>  
+                  <input type="text" class="form-control" id="edit_nama_kandidat" name="edit_nama_kandidat" required>  
                 </div>
                 <div class="col-md-6">
                   <label>Jabatan Kandidat</label>
-                  <input type="text" class="form-control" id="edit_jabatan_kandidat" name="jabatan_kandidat" required>
+                  <input type="text" class="form-control" id="edit_jabatan_kandidat" name="edit_jabatan_kandidat" required>
                 </div>
                 <div class="col-md-6">
                   <label>Tanggal Mulai Penempatan</label>
-                  <input type="date" class="form-control" id="edit_tgl_mulai_penempatan" name="tgl_mulai_penempatan" required>
+                  <input type="date" class="form-control" id="edit_tgl_mulai_penempatan" name="edit_tgl_mulai_penempatan" required>
                 </div>
               </div>
             </div>
