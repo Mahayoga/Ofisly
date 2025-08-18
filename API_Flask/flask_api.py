@@ -218,7 +218,7 @@ def nyoba_file():
             'status': 'error'
         })
 
-@app.route('/generate/surat/penempatan/driver/mandiri', methods=['POST'])
+@app.route('/generate/surat/tugas/mandiri', methods=['POST'])
 def driver_mandiri():
     laravel_url = 'http://localhost:8000/api/send/surat/pengganti/driver'
     file_template_path = 'Contoh Template/template_surat_penempatan_driver_mandiri.docx'
@@ -228,7 +228,7 @@ def driver_mandiri():
     document = Document(file_template_path)
 
     mycursor = mydb.cursor()
-    sqlStr = f"SELECT * FROM surat_penempatan_driver_mandiri WHERE id_surat_penempatan = '{request.json['id_surat_penempatan']}'"
+    sqlStr = f"SELECT * FROM surat_tugas_mandiri WHERE id_surat_penempatan = '{request.json['id_surat_penempatan']}'"
     print(sqlStr)
     mycursor.execute(sqlStr)
     myresult = mycursor.fetchone()
