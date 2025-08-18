@@ -1,107 +1,142 @@
 <?php
 
 namespace App\Http\Controllers;
-use App\Models\LowonganPekerjaanModel;
+
 use Illuminate\Http\Request;
+use App\Models\LowonganPekerjaanModel;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
 
 class LowonganPekerjaanController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $lowonganPekerjaan = LowonganPekerjaanModel::latest()->get();
         return view('admin.lowongan-pekerjaan.index', compact('lowonganPekerjaan'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        return view('admin.lowongan-pekerjaan.create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'judul' => 'required|string|max:255',
             'deskripsi' => 'required|string',
             'tanggal_post' => 'required|date',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ], [
+            'gambar.max' => 'Ukuran file tidak boleh lebih dari 2MB',
+            'gambar.mimes' => 'Format file harus jpg, jpeg, atau png',
         ]);
 
-        if ($request->hasFile('gambar')) {
-            $path = $request->file('gambar')->store('lowongan-images', 'public');
-            $validated['gambar'] = $path;
+        try {
+            $data = [
+                'judul' => $request->judul,
+                'deskripsi' => $request->deskripsi,
+                'tanggal_post' => $request->tanggal_post,
+            ];
+
+            if ($request->hasFile('gambar')) {
+                $path = $request->file('gambar')->store('lowongan-images', 'public');
+                $data['gambar'] = $path;
+            }
+
+            $result = LowonganPekerjaanModel::create($data);
+
+            return redirect()->route('lowongan-pekerjaan.index')
+                ->with([
+                    'success' => 'Lowongan pekerjaan berhasil ditambahkan',
+                    'action' => true,
+                    'id_generate' => $result->id
+                ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
         }
-
-        LowonganPekerjaanModel::create($validated);
-        return redirect()->route('lowongan-pekerjaan.index')->with('success', 'Lowongan pekerjaan berhasil ditambahkan.');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function edit($id)
     {
         $lowonganPekerjaan = LowonganPekerjaanModel::findOrFail($id);
-        return view('admin.lowongan-pekerjaan.show', compact('lowonganPekerjaan'));
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $lowonganPekerjaan->id,
+                'judul' => $lowonganPekerjaan->judul,
+                'deskripsi' => $lowonganPekerjaan->deskripsi,
+                'tanggal_post' => $lowonganPekerjaan->tanggal_post,
+                'gambar' => $lowonganPekerjaan->gambar,
+            ]
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function update(Request $request, $id)
     {
-        $lowonganPekerjaan = LowonganPekerjaanModel::findOrFail($id);
-        return view('admin.lowongan-pekerjaan.edit', compact('lowonganPekerjaan'));      
+        $request->validate([
+            'edit_judul' => 'required|string|max:255',
+            'edit_deskripsi' => 'required|string',
+            'edit_tanggal_post' => 'required|date',
+            'edit_gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ], [
+            'edit_gambar.max' => 'Ukuran file tidak boleh lebih dari 2MB',
+            'edit_gambar.mimes' => 'Format file harus jpg, jpeg, atau png',
+        ]);
+
+        try {
+            $lowonganPekerjaan = LowonganPekerjaanModel::findOrFail($id);
+
+            $data = [
+                'judul' => $request->edit_judul,
+                'deskripsi' => $request->edit_deskripsi,
+                'tanggal_post' => $request->edit_tanggal_post,
+            ];
+
+            if ($request->hasFile('edit_gambar')) {
+                if ($lowonganPekerjaan->gambar && Storage::disk('public')->exists($lowonganPekerjaan->gambar)) {
+                    Storage::disk('public')->delete($lowonganPekerjaan->gambar);
+                }
+                $path = $request->file('edit_gambar')->store('lowongan-images', 'public');
+                $data['gambar'] = $path;
+            }
+
+            $lowonganPekerjaan->update($data);
+
+            return redirect()->route('lowongan-pekerjaan.index')
+                ->with([
+                    'success' => 'Lowongan pekerjaan berhasil diperbarui',
+                    'action' => true,
+                    'id_generate' => $lowonganPekerjaan->id
+                ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function destroy($id)
     {
-        $lowonganPekerjaan = LowonganPekerjaanModel::findOrFail($id);
-        $validated = $request->validate([
-            'judul' => 'required|string|max:255',
-            'deskripsi' => 'required|string',
-            'tanggal_post' => 'required|date',
-            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-    ]);
+        try {
+            $lowonganPekerjaan = LowonganPekerjaanModel::findOrFail($id);
 
-
-        if ($request->hasFile('gambar')) {
             if ($lowonganPekerjaan->gambar && Storage::disk('public')->exists($lowonganPekerjaan->gambar)) {
                 Storage::disk('public')->delete($lowonganPekerjaan->gambar);
             }
-            $path = $request->file('gambar')->store('lowongan-images', 'public');
-            $validated['gambar'] = $path;
-    }
 
-            $lowonganPekerjaan->update($validated);
-            return redirect()->route('lowongan-pekerjaan.index')->with('success', 'Lowongan berhasil diperbarui.');
-    }
+            $lowonganPekerjaan->delete();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        $lowonganPekerjaan = LowonganPekerjaanModel::findOrFail($id);
-    
-        if ($lowonganPekerjaan->gambar && Storage::disk('public')->exists($lowonganPekerjaan->gambar)) {
-            Storage::disk('public')->delete($lowonganPekerjaan->gambar);
-    }
+            return redirect()->route('lowongan-pekerjaan.index')
+                ->with('delete_success', 'Lowongan pekerjaan berhasil dihapus');
 
-    $lowonganPekerjaan->delete();
-
-    return redirect()->route('lowongan-pekerjaan.index')->with('success', 'Lowongan berhasil dihapus.');
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
