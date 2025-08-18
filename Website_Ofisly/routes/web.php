@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 
 Route::get('/', function () {
     return view('landing-page');
-});
+})->name('welcome');
 
 Route::middleware(['role.auth', 'auth'])->group(function () {
     Route::resource('dashboard', DashboardController::class);

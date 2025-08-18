@@ -45,8 +45,5 @@ Route::post('/send/surat/pengganti/driver', function(Request $request) {
 });
 
 Route::get('/nyoba/ajax', function() {
-    return response()->json([
-        'status' => 'success',
-        // 'data' => $request->all()
-    ]);
+    abort(500);
 })->name('nyoba.ajax');
