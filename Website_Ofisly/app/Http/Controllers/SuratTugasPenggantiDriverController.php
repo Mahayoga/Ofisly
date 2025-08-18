@@ -126,6 +126,15 @@ class SuratTugasPenggantiDriverController extends Controller
                 'tgl_selesai_penugasan' => $request->edit_tgl_selesai_penugasan,
                 'tgl_surat_pembuatan' => Carbon::now()->format('Y-m-d'),
             ]);
+            
+            $pathDocx = $surat->file_path_docx;
+            $pathPDF = $surat->file_path_pdf;
+            if(is_file(public_path() . $pathDocx)) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $pathDocx));
+            }
+            if(is_file(public_path() . $pathPDF)) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $pathPDF));
+            }
 
             return redirect()->route('surat-tugas.index')
                 ->with([
@@ -153,7 +162,16 @@ class SuratTugasPenggantiDriverController extends Controller
     {
         try {
             $surat = SuratTugasPenggantiDriverModel::findOrFail($id);
-            $surat->delete();
+            if($surat->delete()) {
+                $pathDocx = $surat->file_path_docx;
+                $pathPDF = $surat->file_path_pdf;
+                if(is_file(public_path() . $pathDocx)) {
+                    Storage::disk('public')->delete(str_replace('/storage/', '', $pathDocx));
+                }
+                if(is_file(public_path() . $pathPDF)) {
+                    Storage::disk('public')->delete(str_replace('/storage/', '', $pathPDF));
+                }
+            }
 
             // return response()->json([
             //     'success' => true,
