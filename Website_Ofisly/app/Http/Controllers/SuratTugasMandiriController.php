@@ -112,6 +112,15 @@ class SuratTugasMandiriController extends Controller
                 'tgl_surat_pembuatan' => Carbon::now()->format('Y-m-d'),
             ]);
 
+            $pathDocx = $suratPenempatan->file_path_docx;
+            $pathPDF = $suratPenempatan->file_path_pdf;
+            if(is_file(public_path() . $pathDocx)) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $pathDocx));
+            }
+            if(is_file(public_path() . $pathPDF)) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $pathPDF));
+            }
+
             return redirect()->route('surat-tugas-mandiri.index')
                 ->with([
                     'success' => 'Surat Tugas berhasil di edit',
@@ -130,12 +139,24 @@ class SuratTugasMandiriController extends Controller
     public function destroy($id)
     {
         try {
-            $surat = SuratTugasMandiriModel::findOrFail($id);
-            $surat->delete();
+            $suratPenempatan = SuratTugasMandiriModel::findOrFail($id);
+            $suratPenempatan->delete();
+
+            if($suratPenempatan->delete()) {
+                $pathDocx = $suratPenempatan->file_path_docx;
+                $pathPDF = $suratPenempatan->file_path_pdf;
+                if(is_file(public_path() . $pathDocx)) {
+                    Storage::disk('public')->delete(str_replace('/storage/', '', $pathDocx));
+                }
+                if(is_file(public_path() . $pathPDF)) {
+                    Storage::disk('public')->delete(str_replace('/storage/', '', $pathPDF));
+                }
+            }
 
             return redirect()->route('surat-tugas-mandiri.index')
                 ->with('delete_success', 'Surat Penempatan Driver Mandiri berhasil dihapus');
 
+                
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
