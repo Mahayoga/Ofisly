@@ -5,9 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
-class SuratPenempatanDriverMandiriModel extends Model
+class SuratTugasMandiriModel extends Model
 {
-   protected $table = 'surat_penempatan_driver_mandiri';
+   protected $table = 'surat_tugas_mandiri';
     protected $primaryKey = 'id_surat_penempatan';
     protected $keyType = 'string';
     public $incrementing = false;

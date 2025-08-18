@@ -4,7 +4,7 @@ use App\Http\Controllers\CutiKaryawanController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SuratTugasPenggantiDriverController;
-use App\Http\Controllers\SuratPenempatanDriverMandiriController;
+use App\Http\Controllers\SuratTugasMandiriController;
 use App\Http\Controllers\SuratTugasController;
 use App\Http\Controllers\LowonganPekerjaanController;
 use Illuminate\Support\Facades\Route;
@@ -31,10 +31,10 @@ Route::middleware(['role.auth', 'auth'])->group(function () {
         });
     
     //route penempatan driver mandiri   
-    Route::resource('surat-penempatan-driver-mandiri', SuratPenempatanDriverMandiriController::class);
-    Route::get('/generate-pdf/{id}', [SuratPenempatanDriverMandiriController::class, 'generatePDF'])->name('surat-penempatan-driver-mandiri.generate-pdf');
-    Route::get('/generate-word/{id}', [SuratPenempatanDriverMandiriController::class, 'generateWord'])->name('surat-penempatan-driver-mandiri.generate-word');
-    Route::post('/generate/file', [SuratPenempatanDriverMandiriController::class, 'generateFile'])->name('surat-penempatan-driver-mandiri.generate-file');
+    Route::resource('surat-tugas-mandiri', SuratTugasMandiriController::class);
+    Route::get('/generate-pdf/{id}', [SuratTugasMandiriController::class, 'generatePDF'])->name('surat-tugas-mandiri.generate-pdf');
+    Route::get('/generate-word/{id}', [SuratTugasMandiriController::class, 'generateWord'])->name('surat-tugas-mandiri.generate-word');
+    Route::post('/generate/file', [SuratTugasMandiriController::class, 'generateFile'])->name('surat-tugas-mandiri.generate-file');
     
 
     Route::resource('cuti-karyawan', CutiKaryawanController::class);
