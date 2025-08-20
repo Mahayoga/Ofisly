@@ -109,9 +109,11 @@
                 <label for="deskripsi" class="form-label">Deskripsi</label>
                 <input type="text" class="form-control" id="deskripsi" name="deskripsi" required>
               </div>
-              <div class="col-md-6">
-                <label for="gambar" class="form-label">Gambar</label>
-                <input type="file" class="form-control" id="gambar" name="gambar" accept="image/*" required>
+              <div class="col-md-6 mt-2">
+                <div class="form-group">
+                  <label for="gambar">Upload Poster Lowongan</label>
+                  <input type="file" class="form-control-file" id="gambar" name="gambar" accept="image/*" required>
+                </div>
               </div>
             </div>
           </div>
