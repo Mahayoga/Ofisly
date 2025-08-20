@@ -33,7 +33,7 @@ class LowonganPekerjaanController extends Controller
             ];
 
             if ($request->hasFile('gambar')) {
-                $path = $request->file('gambar')->store('lowongan-images', 'public');
+                $path = $request->file('gambar')->store('uploads/lowongan_images', 'public');
                 $data['gambar'] = $path;
             }
 
@@ -92,7 +92,7 @@ class LowonganPekerjaanController extends Controller
                 if ($lowonganPekerjaan->gambar && Storage::disk('public')->exists($lowonganPekerjaan->gambar)) {
                     Storage::disk('public')->delete($lowonganPekerjaan->gambar);
                 }
-                $path = $request->file('edit_gambar')->store('lowongan-images', 'public');
+                $path = $request->file('edit_gambar')->store('uploads/lowongan_images', 'public');
                 $data['gambar'] = $path;
             }
 
