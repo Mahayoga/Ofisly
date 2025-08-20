@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('surat_penempatan_driver_mandiri', function (Blueprint $table) {
+        Schema::create('surat_tugas_mandiri', function (Blueprint $table) {
             $table->uuid('id_surat_penempatan')->primary();
             $table->string('nomor_surat');
             $table->date('tgl_surat_pembuatan');
@@ -30,5 +30,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('surat_penempatan_driver_mandiri');
+        Schema::dropIfExists('surat_tugas_mandiri');
     }
 };

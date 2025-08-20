@@ -3,9 +3,9 @@
 
 @section('content')
   <div class="container-fluid">
-    <h1 class="h3 text-gray-800">Data Surat Penempatan Driver Mandiri</h1>
+    <h1 class="h3 text-gray-800">Data Surat Tugas Mandiri</h1>
     <ol class="breadcrumb mb-4">
-      <li class="breadcrumb-item">Kumpulan data surat Penempatan driver mandiri</li>
+      <li class="breadcrumb-item">Kumpulan data surat Tugas mandiri</li>
     </ol>
 
     <div class="card border-0 mb-4">
@@ -50,8 +50,8 @@
               </tr>
             </thead>
             <tbody>
-              @php 
-              $i = 1; 
+              @php
+              $i = 1;
               @endphp
               @foreach ($suratPenempatan as $surat)
                 <tr data-id="{{ $surat->id_surat_penempatan }}">
@@ -63,10 +63,10 @@
                   <td class="tgl-penempatan">{{ \Carbon\Carbon::parse($surat->tgl_mulai_penempatan)->format('d/m/Y') }}</td>
                   <td class="text-center">
                     <div class="btn-group">
-                      <a href="{{ route('surat-penempatan-driver-mandiri.generate-pdf', $surat->id_surat_penempatan) }}" class="btn btn-sm btn-danger" target="_blank">
+                      <a href="{{ route('surat-tugas-mandiri.generate-pdf', $surat->id_surat_penempatan) }}" class="btn btn-sm btn-danger" target="_blank">
                         <i class="fas fa-file-pdf"></i>
                       </a>
-                      <a href="{{ route('surat-penempatan-driver-mandiri.generate-word', $surat->id_surat_penempatan) }}" class="btn btn-sm btn-primary">
+                      <a href="{{ route('surat-tugas-mandiri.generate-word', $surat->id_surat_penempatan) }}" class="btn btn-sm btn-primary">
                         <i class="fas fa-file-word"></i>
                       </a>
                       <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#editModal" onclick="getDataEdit(this)" data-id="{{ $surat->id_surat_penempatan }}">
@@ -96,21 +96,25 @@
             <h5 class="modal-title">Buat Surat Penempatan Baru</h5>
             <button type="button" class="close" data-dismiss="modal">&times;</button>
           </div>
-          <form id="createForm" action="{{ route('surat-penempatan-driver-mandiri.store') }}" method="POST">
+          <form id="createForm" action="{{ route('surat-tugas-mandiri.store') }}" method="POST">
             @csrf
             <div class="modal-body">
               <div class="row mb-3">
-                <div class="col-md-6">
+                {{-- <div class="col-md-6">
                   <label>Nomor Surat</label>
                   <input type="text" class="form-control" id="nomor_surat" name="nomor_surat" required>
-                </div>
+                </div> --}}
                 <div class="col-md-6">
                   <label>Nama Kandidat</label>
                   <input type="text" class="form-control" id="nama_kandidat" name="nama_kandidat" required>
                 </div>
                 <div class="col-md-6">
                   <label>Jabatan Kandidat</label>
-                  <input type="text" class="form-control" id="jabatan_kandidat" name="jabatan_kandidat" required>
+                  <select name="jabatan_kandidat" id="jabatan_kandidat" class="form-control" required>
+                    <option value="">-- Pilih Jabatan --</option>
+                    <option value="Driver">Driver</option>
+                    <option value="Pramubakti">Pramubakti</option>
+                  </select>
                 </div>
                 <div class="col-md-6">
                   <label>Tanggal Mulai Penempatan</label>
@@ -139,26 +143,30 @@
             <h5 class="modal-title">Edit Surat Penempatan</h5>
             <button type="button" class="close" data-dismiss="modal">&times;</button>
           </div>
-          <form id="editForm" action="{{ route('surat-penempatan-driver-mandiri.update', ['surat_penempatan_driver_mandiri' => '__ID__']) }}" method="POST">
+          <form id="editForm" action="{{ route('surat-tugas-mandiri.update', ['surat_tugas_mandiri' => '__ID__']) }}" method="POST">
             @csrf
             @method('PUT')
             <div class="modal-body">
               <div class="row mb-3">
-                <div class="col-md-6">
+                {{-- <div class="col-md-6">
                   <label>Nomor Surat</label>
                   <input type="text" class="form-control" id="edit_nomor_surat" name="nomor_surat" required>
-                </div>
+                </div> --}}
                 <div class="col-md-6">
                   <label>Nama Kandidat</label>
-                  <input type="text" class="form-control" id="edit_nama_kandidat" name="nama_kandidat" required>  
+                  <input type="text" class="form-control" id="edit_nama_kandidat" name="edit_nama_kandidat" required>
                 </div>
                 <div class="col-md-6">
                   <label>Jabatan Kandidat</label>
-                  <input type="text" class="form-control" id="edit_jabatan_kandidat" name="jabatan_kandidat" required>
+                  <select name="edit_jabatan_kandidat" id="edit_jabatan_kandidat" class="form-control" required>
+                    <option value="">-- Pilih Jabatan --</option>
+                    <option value="Driver">Driver</option>
+                    <option value="Pramubakti">Pramubakti</option>
+                  </select>
                 </div>
                 <div class="col-md-6">
                   <label>Tanggal Mulai Penempatan</label>
-                  <input type="date" class="form-control" id="edit_tgl_mulai_penempatan" name="tgl_mulai_penempatan" required>
+                  <input type="date" class="form-control" id="edit_tgl_mulai_penempatan" name="edit_tgl_mulai_penempatan" required>
                 </div>
               </div>
             </div>
@@ -182,7 +190,7 @@
             <h5 class="modal-title">Hapus Surat Penempatan</h5>
             <button type="button" class="close" data-dismiss="modal">&times;</button>
           </div>
-          <form id="deleteForm" action="{{ route('surat-penempatan-driver-mandiri.destroy', ['surat_penempatan_driver_mandiri' => '__ID__']) }}" method="POST">
+          <form id="deleteForm" action="{{ route('surat-tugas-mandiri.destroy', ['surat_tugas_mandiri' => '__ID__']) }}" method="POST">
             @csrf
             @method('DELETE')
             <div class="modal-body">
@@ -207,7 +215,8 @@
     <script>
       $(document).ready(function() {
         let idGenerate = '{{ session('id_generate') }}';
-        let urlGenerate = '{{ route('surat-penempatan-driver-mandiri.generate-file', ['id' => '__ID__']) }}';
+        let urlGenerate = '{{ route('surat-tugas-mandiri.generate-file') }}';
+        console.log(idGenerate)
         $.post(urlGenerate.replace('__ID__', idGenerate), {
           '_token': '{{ csrf_token() }}',
           'id': idGenerate
@@ -234,12 +243,12 @@
 
     function getDataEdit(element) {
       let idEdit = element.getAttribute('data-id');
-      let urlEdit = '{{ route('surat-penempatan-driver-mandiri.edit', ['surat_penempatan_driver_mandiri' => '__ID__']) }}';
-      let urlUpdate = '{{ route('surat-penempatan-driver-mandiri.update', ['surat_penempatan_driver_mandiri' => '__ID__']) }}';
+      let urlEdit = '{{ route('surat-tugas-mandiri.edit', ['surat_tugas_mandiri' => '__ID__']) }}';
+      let urlUpdate = '{{ route('surat-tugas-mandiri.update', ['surat_tugas_mandiri' => '__ID__']) }}';
       $.get(urlEdit.replace('__ID__', idEdit), function(data) {
         $('#editForm').attr('action', urlUpdate.replace('__ID__', idEdit));
         if(data.success) {
-          $('#edit_nomor_surat').val(data.data.nomor_surat);
+          // $('#edit_nomor_surat').val(data.data.nomor_surat);
           $('#edit_nama_kandidat').val(data.data.nama_kandidat);
           $('#edit_jabatan_kandidat').val(data.data.jabatan_kandidat);
           $('#edit_tgl_mulai_penempatan').val(data.data.tgl_mulai_penempatan.substring(0, 10));
@@ -249,8 +258,8 @@
 
     function getDataHapus(element) {
       let idEdit = element.getAttribute('data-id');
-      let urlEdit = '{{ route('surat-penempatan-driver-mandiri.edit', ['surat_penempatan_driver_mandiri' => '__ID__']) }}';
-      let urlDelete = '{{ route('surat-penempatan-driver-mandiri.destroy', ['surat_penempatan_driver_mandiri' => '__ID__']) }}';
+      let urlEdit = '{{ route('surat-tugas-mandiri.edit', ['surat_tugas_mandiri' => '__ID__']) }}';
+      let urlDelete = '{{ route('surat-tugas-mandiri.destroy', ['surat_tugas_mandiri' => '__ID__']) }}';
       $.get(urlEdit.replace('__ID__', idEdit), function(data) {
         $('#deleteForm').attr('action', urlDelete.replace('__ID__', idEdit));
         if(data.success) {

@@ -29,6 +29,54 @@ mydb = mysql.connector.connect(
   database=os.getenv('DB_DATABASE')
 )
 
+def background_generate_file(filename_docx, filename_pdf, laravel_url, surat_id, table_name, id_column_name):
+    asyncio.run(generateFile(filename_docx, filename_pdf, laravel_url, surat_id, table_name, id_column_name))
+
+async def generateFile(filename_docx, filename_pdf, laravel_url, id_surat, table_name, id_column_name):
+    print('Start Async Function....')
+    print('Start Await Sleep....')
+    await asyncio.sleep(2)
+    print('Done Await Sleep....')
+    f = open(filename_docx, 'rb')
+    pdf = open(filename_pdf, 'rb')
+    
+    files = {
+        'file_docx': (filename_docx, f, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'),
+        'file_pdf': (filename_pdf, pdf, 'application/pdf')
+    }
+
+    print('Sending file to Laravel...')
+    res = requests.post(laravel_url, files=files, stream=True)
+    print('Done!')
+    print('Update PATH in Database...')
+    dataJsonFromRes = res.json()
+
+    mycursor = mydb.cursor()
+    mycursor.execute(
+    f"UPDATE {table_name} "f"SET file_path_docx = '{dataJsonFromRes['files']['docx']}', "f"file_path_pdf = '{dataJsonFromRes['files']['pdf']}' "f"WHERE {id_column_name} = '{id_surat}'")
+    mydb.commit()
+    print(mycursor.rowcount, "record(s) affected")
+    print('Done!')
+    f.close()
+    pdf.close()
+    print('Deleting the temporary file...')
+    if os.path.exists(filename_docx):
+        print(filename_docx)
+        os.remove(filename_docx)
+        print('Success deleting the docx file!')
+    else:
+        print('File docx not found')
+
+    if os.path.exists(filename_pdf):
+        print(filename_pdf)
+        os.remove(filename_pdf)
+        print('Success deleting the pdf file!')
+    else:
+        print('File pdf not found')
+
+    print('Done!')
+
+
 @app.route('/nyoba/pdf', methods=['GET'])
 def nyoba_pdf():
     pythoncom.CoInitialize()
@@ -159,7 +207,7 @@ def nyoba_file():
         # TODO
         t = threading.Thread(
             target=background_generate_file,
-            args=(filename_docx, filename_pdf, laravel_url, request.json['id_surat_tugas'])
+            args=(filename_docx, filename_pdf, laravel_url, request.json['id_surat_tugas'], request.json['table'], 'id_surat_tugas')
         )
         t.start()
         print('After threading...')
@@ -173,123 +221,149 @@ def nyoba_file():
             'status': 'error'
         })
 
-# Surat Tugas Promotor Indosat
+@app.route('/generate/surat/tugas/mandiri', methods=['POST'])
+def driver_mandiri():
+    laravel_url = 'http://localhost:8000/api/send/surat/pengganti/driver'
+    file_template_path = 'Contoh Template/template_surat_penempatan_driver_mandiri.docx'
+    pythoncom.CoInitialize()
+    word = comtypes.client.CreateObject('Word.Application')
+    now = datetime.now()
+    document = Document(file_template_path)
 
-def background_generate_file(filename_docx, filename_pdf, laravel_url, surat_id):
-    asyncio.run(generateFile(filename_docx, filename_pdf, laravel_url, surat_id))
-
-async def generateFile(filename_docx, filename_pdf, laravel_url, id_surat):
-    print('Start Async Function....')
-    print('Start Await Sleep....')
-    await asyncio.sleep(2)
-    print('Done Await Sleep....')
-    f = open(filename_docx, 'rb')
-    pdf = open(filename_pdf, 'rb')
-    
-    files = {
-        'file_docx': (filename_docx, f, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'),
-        'file_pdf': (filename_pdf, pdf, 'application/pdf')
-    }
-
-    print('Sending file to Laravel...')
-    res = requests.post(laravel_url, files=files, stream=True)
-    print('Done!')
-    print('Update PATH in Database...')
-    dataJsonFromRes = res.json()
-    print(dataJsonFromRes)
     mycursor = mydb.cursor()
-    mycursor.execute(f"UPDATE surat_tugas_pengganti_driver SET file_path_docx = '{dataJsonFromRes['files']['docx']}', file_path_pdf = '{dataJsonFromRes['files']['pdf']}' WHERE id_surat_tugas = '{id_surat}'")
-    mydb.commit()
-    print(mycursor.rowcount, "record(s) affected")
-    print('Done!')
-    f.close()
-    pdf.close()
-    print('Deleting the temporary file...')
-    if os.path.exists(filename_docx):
-        print(filename_docx)
-        os.remove(filename_docx)
-        print('Success deleting the docx file!')
+    sqlStr = f"SELECT * FROM surat_tugas_mandiri WHERE id_surat_penempatan = '{request.json['id_surat_penempatan']}'"
+    print(sqlStr)
+    mycursor.execute(sqlStr)
+    myresult = mycursor.fetchone()
+
+    print(myresult)
+    if myresult is not None:
+
+        """
+        __NOMORSURAT__
+        __TANGGALPEMBUATAN__
+        __NAMAKANDIDAT__
+        __JABATANKANDIDAT__
+        __TANGGALPENEMPATAN__
+        """
+
+        for i in range(len(document.paragraphs)):
+            document.paragraphs[i].text = document.paragraphs[i].text.replace('__NOMORSURAT__', myresult[1])
+            document.paragraphs[i].text = document.paragraphs[i].text.replace('__TANGGALPEMBUATAN__',f'{str(myresult[2]).split("-")[2]} {bulan[int(str(myresult[2]).split("-")[1]) - 1]} {str(myresult[2]).split("-")[0]}')
+            document.paragraphs[i].text = document.paragraphs[i].text.replace('__NAMAKANDIDAT__', myresult[3])
+            document.paragraphs[i].text = document.paragraphs[i].text.replace('__JABATANKANDIDAT__', myresult[4])
+            document.paragraphs[i].text = document.paragraphs[i].text.replace('__TANGGALPENEMPATAN__',f'{str(myresult[5]).split("-")[2]} {bulan[int(str(myresult[5]).split("-")[1]) - 1]} {str(myresult[5]).split("-")[0]}')
+
+        table = document.tables[0]
+        cell1 = table.rows[1].cells[0]
+        cell2 = table.rows[3].cells[0]
+        cell3 = table.rows[4].cells[0]
+
+        for para in cell1.paragraphs:
+            for run in para.runs:
+                run.bold = True
+
+        for para in cell2.paragraphs:
+            for run in para.runs:
+                run.bold = True
+                run.underline = True
+
+        for para in cell3.paragraphs:
+            for run in para.runs:
+                run.italic = True
+
+        print('Saving Docx...')
+        document.save(f'Surat Penempatan_{myresult[3]}.docx')
+        dirname = os.path.dirname(__file__)
+        filename_docx = os.path.join(dirname, f'Surat Penempatan_{myresult[3]}.docx')
+        filename_pdf = os.path.join(dirname, f'Surat Penempatan_{myresult[3]}.pdf')
+        word.Visible = False
+        doc = word.Documents.Open(filename_docx, ReadOnly=True)
+        print('Saving PDF...')
+        doc.SaveAs(filename_pdf, FileFormat=wdFormatPDF)
+        doc.Close()
+        word.Quit()
+        print('Done!')
+
+        print('Start threading in background...')
+        t = threading.Thread(
+        target=background_generate_file,
+        args=(
+        filename_docx, filename_pdf, laravel_url, request.json['id_surat_penempatan'], request.json['table'], "id_surat_penempatan")
+        )
+        t.start()
+        print('After threading...')
+        print('Sending response!')
+
+        return jsonify({'status': 'success'})
     else:
-        print('File docx not found')
-
-    if os.path.exists(filename_pdf):
-        print(filename_pdf)
-        os.remove(filename_pdf)
-        print('Success deleting the pdf file!')
-    else:
-        print('File pdf not found')
-
-    print('Done!')
-
-
-def background_generate_promotor_file(docx_path, pdf_path, laravel_url, surat_id):
-    """Background task to upload generated files to Laravel"""
-    asyncio.run(upload_promotor_files(docx_path, pdf_path, laravel_url, surat_id))
-
-async def upload_promotor_files(docx_path, pdf_path, laravel_url, surat_id):
-    """Async function to handle file uploads"""
-    try:
-        await asyncio.sleep(2)  # Small delay
-        
-        with open(docx_path, 'rb') as docx_file, open(pdf_path, 'rb') as pdf_file:
-            files = {
-                'file_docx': (os.path.basename(docx_path), docx_file, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'),
-                'file_pdf': (os.path.basename(pdf_path), pdf_file, 'application/pdf')
-            }
-            
-            data = {
-                'id_surat_tugas_promotor': surat_id
-            }
-            
-            response = requests.post(laravel_url, files=files, data=data)
-            response.raise_for_status()
-            response_data = response.json()
-
-            if response.status_code == 200:
-                mycursor = mydb.cursor()
-                update_sql = f"""
-                    UPDATE surat_tugas_promotor 
-                    SET file_path_docx = '{response_data['files']['docx']}', 
-                        file_path_pdf = '{response_data['files']['pdf']}' 
-                    WHERE id_surat_tugas_promotor = '{surat_id}'
-                """
-                mycursor.execute(update_sql)
-                mydb.commit()
-
-    except Exception as e:
-        print(f"Error in background process: {str(e)}")
-    finally:
-        # Clean up files
-        for path in [docx_path, pdf_path]:
-            try:
-                if os.path.exists(path):
-                    os.remove(path)
-                    print(f"Successfully deleted {path}")
-            except Exception as e:
-                print(f"Error deleting file {path}: {str(e)}")
-
+        return jsonify({'status': 'error'})
+    
+# Surat Tugas Promotor Indosat
 @app.route('/generate/surat/promotor', methods=['POST'])
 def generate_surat_promotor():
     laravel_url = 'http://localhost:8000/api/send/surat/promotor'
     file_template_path = 'Contoh Template/275-Surat Tugas Promotor Indosat-ahmad.docx'
     
-    pythoncom.CoInitialize()
-    word = comtypes.client.CreateObject('Word.Application')
-    
+    word = None
+    doc = None
+   
     try:
+        # Initialize Word application
+        pythoncom.CoInitialize()
+        word = comtypes.client.CreateObject('Word.Application')
+        word.Visible = False
+       
         # Get data from database
         mycursor = mydb.cursor(dictionary=True)
-        sqlStr = f"SELECT * FROM surat_tugas_promotor WHERE id_surat_tugas_promotor = '{request.json['id_surat_tugas_promotor']}'"
+       
+        # Debug: Print the incoming request data
+        print(f"Request JSON: {request.json}")
+       
+        # Pastikan id_surat_tugas_promotor ada dalam request
+        if 'id_surat_tugas_promotor' not in request.json:
+            return jsonify({
+                'status': 'error',
+                'message': 'id_surat_tugas_promotor is required in request'
+            })
+       
+        id_surat = request.json['id_surat_tugas_promotor']
+        sqlStr = f"SELECT * FROM surat_tugas_promotor WHERE id_surat_tugas_promotor = '{id_surat}'"
+       
+        print(f"Executing SQL: {sqlStr}")
         mycursor.execute(sqlStr)
         result = mycursor.fetchone()
 
         if not result:
+            # Debug: Check if table exists and has data
+            mycursor.execute("SHOW TABLES LIKE 'surat_tugas_promotor'")
+            table_exists = mycursor.fetchone()
+           
+            if not table_exists:
+                return jsonify({
+                    'status': 'error',
+                    'message': 'Table surat_tugas_promotor does not exist'
+                })
+           
+            mycursor.execute("SELECT COUNT(*) as count FROM surat_tugas_promotor")
+            count_result = mycursor.fetchone()
+           
             return jsonify({
                 'status': 'error',
-                'message': 'Data not found'
+                'message': f'Data not found for id: {id_surat}',
+                'details': {
+                    'table_exists': bool(table_exists),
+                    'total_records': count_result['count'] if count_result else 0
+                }
             })
 
         # Load template document
+        if not os.path.exists(file_template_path):
+            return jsonify({
+                'status': 'error',
+                'message': f'Template file not found: {file_template_path}'
+            })
+
         document = Document(file_template_path)
 
         # Format date function
@@ -297,98 +371,112 @@ def generate_surat_promotor():
             if not date_str:
                 return ""
             try:
-                date_obj = datetime.strptime(str(date_str), '%Y-%m-%d')
+                if isinstance(date_str, str):
+                    date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+                else:
+                    date_obj = date_str
                 return f"{date_obj.day} {bulan[date_obj.month-1]} {date_obj.year}"
             except:
                 return ""
 
-        # Process penempatan data - FIXED VERSION
+        # Process penempatan data
         penempatan = result.get('penempatan', '[]')
         try:
-            # Handle case where penempatan is a comma-separated string
             if isinstance(penempatan, str):
                 if penempatan.startswith('[') and penempatan.endswith(']'):
-                    # If it's a JSON array string
                     penempatan = json.loads(penempatan)
                 else:
-                    # If it's a comma-separated string
                     penempatan = [item.strip() for item in penempatan.split(',') if item.strip()]
-            
-            # Ensure we have a list
+           
             if not isinstance(penempatan, list):
                 penempatan = [str(penempatan)]
         except Exception as e:
             print(f"Error processing penempatan: {str(e)}")
-            penempatan = ["-"]  # Default value if error occurs
+            penempatan = ["-"]
 
-        # Format penempatan for document - IMPROVED FORMATTING
+        # Format penempatan
         penempatan_text = ""
         if len(penempatan) == 1:
             penempatan_text = penempatan[0]
         else:
-            # Create bullet points with proper Word formatting
             penempatan_text = "\n• ".join(penempatan)
-            penempatan_text = "• " + penempatan_text  # Add first bullet
+            penempatan_text = "• " + penempatan_text
 
         # Replace placeholders in paragraphs
         for paragraph in document.paragraphs:
-            if '__PENEMPATAN__' in paragraph.text:
-                # Special handling for penempatan to preserve formatting
-                for run in paragraph.runs:
-                    if '__PENEMPATAN__' in run.text:
-                        run.text = run.text.replace('__PENEMPATAN__', penempatan_text)
-            
+            paragraph.text = paragraph.text.replace('__PENEMPATAN__', penempatan_text)
             paragraph.text = paragraph.text.replace('__DATATGLSURATPEMBUATAN__', format_date(result.get('tgl_surat_pembuatan')))
             paragraph.text = paragraph.text.replace('__NAMAKANDIDAT__', result.get('nama_kandidat', '-'))
             paragraph.text = paragraph.text.replace('__DATATGLPENUGASAN__', format_date(result.get('tgl_penugasan')))
 
-        # Handle tables if needed
+        # Replace placeholders in tables
         for table in document.tables:
             for row in table.rows:
                 for cell in row.cells:
-                    if '__PENEMPATAN__' in cell.text:
-                        # Clear cell and add formatted content
-                        cell.text = ''
-                        paragraph = cell.paragraphs[0]
-                        runner = paragraph.add_run(penempatan_text)
-                        runner.font.name = 'Arial'  # Match template font
-                        runner.font.size = Pt(11)   # Match template font size
-                    else:
-                        cell.text = cell.text.replace('__DATATGLSURATPEMBUATAN__', format_date(result.get('tgl_surat_pembuatan')))
-                        cell.text = cell.text.replace('__NAMAKANDIDAT__', result.get('nama_kandidat', '-'))
-                        cell.text = cell.text.replace('__DATATGLPENUGASAN__', format_date(result.get('tgl_penugasan')))
+                    cell.text = cell.text.replace('__PENEMPATAN__', penempatan_text)
+                    cell.text = cell.text.replace('__DATATGLSURATPEMBUATAN__', format_date(result.get('tgl_surat_pembuatan')))
+                    cell.text = cell.text.replace('__NAMAKANDIDAT__', result.get('nama_kandidat', '-'))
+                    cell.text = cell.text.replace('__DATATGLPENUGASAN__', format_date(result.get('tgl_penugasan')))
 
         # Save documents
-        nama_kandidat = result.get('nama_kandidat', 'Surat_Tugas').replace(' ', '_')
-        docx_filename = f"Surat_Tugas_Promotor_{nama_kandidat}.docx"
-        pdf_filename = f"Surat_Tugas_Promotor_{nama_kandidat}.pdf"
-        
-        document.save(docx_filename)
-        abs_docx_path = os.path.abspath(docx_filename)
-        abs_pdf_path = os.path.abspath(pdf_filename)
-
-        # Convert to PDF
+        print('Saving Docx...')
+        output_filename = f'Surat Penempatan Promotor_{result["nama_kandidat"]}.docx'
+        document.save(output_filename)
+       
+        dirname = os.path.dirname(__file__)
+        filename_docx = os.path.join(dirname, output_filename)
+        filename_pdf = os.path.join(dirname, f'Surat Penempatan Promotor_{result["nama_kandidat"]}.pdf')
+       
         word.Visible = False
-        doc = word.Documents.Open(abs_docx_path)
-        doc.SaveAs(abs_pdf_path, FileFormat=wdFormatPDF)
+        doc = word.Documents.Open(filename_docx, ReadOnly=True)
+        print('Saving PDF...')
+        doc.SaveAs(filename_pdf, FileFormat=wdFormatPDF)
         doc.Close()
+        doc = None
         word.Quit()
+        word = None
+        print('Done!')
 
-        # Start background upload
+        print('Start threading in background...')
         t = threading.Thread(
-            target=background_generate_promotor_file,
-            args=(abs_docx_path, abs_pdf_path, laravel_url, request.json['id_surat_tugas_promotor'])
+            target=background_generate_file,
+            args=(
+                filename_docx,
+                filename_pdf,
+                laravel_url,
+                request.json.get('id_surat_tugas_promotor', id_surat),
+                request.json.get('table', 'surat_tugas_promotor'),
+                "id_surat_tugas_promotor"
+            )
         )
+        t.daemon = True  # Make thread daemon so it doesn't prevent app shutdown
         t.start()
+        print('After threading...')
+        print('Sending response!')
 
-        return jsonify({
-            'status': 'success',
-            'message': 'Document generation started',
-            'penempatan_format': penempatan_text  # For debugging
-        })
-
+        return jsonify({'status': 'success'})
+       
     except Exception as e:
+        print(f"Error in generate_surat_promotor: {str(e)}")
+        
+        # Clean up Word application if it exists
+        try:
+            if doc:
+                doc.Close()
+            if word:
+                word.Quit()
+        except:
+            pass
+            
         return jsonify({
             'status': 'error',
             'message': str(e)
-        }), 500
+        })
+    finally:
+        try:
+            pythoncom.CoUninitialize()
+        except:
+            pass
+
+if __name__ == '__main__':
+    app.run(debug=True)

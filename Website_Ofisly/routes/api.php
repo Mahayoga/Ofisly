@@ -46,19 +46,17 @@ Route::post('/send/surat/pengganti/driver', function(Request $request) {
 
 Route::post('/send/surat/promotor', function(Request $request) {
     $request->validate([
-        'id_surat_tugas_promotor' => 'required|uuid',
         'file_docx' => 'required|file|mimes:docx',
         'file_pdf' => 'required|file|mimes:pdf'
     ]);
 
     $savedFiles = [];
-    $id_surat = $request->input('id_surat_tugas_promotor');
 
     try {
         // Handle DOCX file
         if ($request->hasFile('file_docx')) {
             $docxFile = $request->file('file_docx');
-            $docxName = 'promotor_'.$id_surat.'_'.time().'.'.$docxFile->extension();
+            $docxName = 'promotor_'.time().'_'.uniqid().'.'.$docxFile->extension();
 
             $docxPath = $docxFile->storeAs(
                 'uploads/surat_promotor',
@@ -71,7 +69,7 @@ Route::post('/send/surat/promotor', function(Request $request) {
         // Handle PDF file
         if ($request->hasFile('file_pdf')) {
             $pdfFile = $request->file('file_pdf');
-            $pdfName = 'promotor_'.$id_surat.'_'.time().'.'.$pdfFile->extension();
+            $pdfName = 'promotor_'.time().'_'.uniqid().'.'.$pdfFile->extension();
 
             $pdfPath = $pdfFile->storeAs(
                 'uploads/surat_promotor',
@@ -104,8 +102,5 @@ Route::post('/send/surat/promotor', function(Request $request) {
 
 
 Route::get('/nyoba/ajax', function() {
-    return response()->json([
-        'status' => 'success',
-        // 'data' => $request->all()
-    ]);
+    abort(500);
 })->name('nyoba.ajax');

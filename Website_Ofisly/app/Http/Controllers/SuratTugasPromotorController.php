@@ -219,7 +219,15 @@ class SuratTugasPromotorController extends Controller
      */
     public function generatePDF($id)
     {
-        return $this->downloadFile($id, 'file_path_pdf');
+        try {
+            $surat = SuratTugasPromotor::findOrFail($id);
+            $relativePath = str_replace('/storage/', '', $surat->file_path_pdf);
+            $filePath = storage_path('app/public/' . $relativePath);
+            return response()->download($filePath)->deleteFileAfterSend(false);
+
+        } catch (\Exception $e) {
+            abort(500, 'Hehe');
+        }
     }
 
     /**
@@ -227,77 +235,79 @@ class SuratTugasPromotorController extends Controller
      */
     public function generateWord($id)
     {
-        return $this->downloadFile($id, 'file_path_docx');
+        try {
+            $surat = SuratTugasPromotor::findOrFail($id);
+            $relativePath = str_replace('/storage/', '', $surat->file_path_docx);
+            $filePath = storage_path('app/public/' . $relativePath);
+            return response()->download($filePath)->deleteFileAfterSend(false);
+
+        } catch (\Exception $e) {
+            abort(500, 'Hehe');
+        }
     }
 
     /**
      * Download file
      */
-    protected function downloadFile($id, $fileType)
-    {
-        try {
-            $surat = SuratTugasPromotor::findOrFail($id);
+    // protected function downloadFile($id, $fileType)
+    // {
+    //     try {
+    //         $surat = SuratTugasPromotor::findOrFail($id);
 
-            if (!$surat->$fileType) {
-                throw new \Exception("File tidak ditemukan");
-            }
+    //         if (!$surat->$fileType) {
+    //             throw new \Exception("File tidak ditemukan");
+    //         }
 
-            $relativePath = str_replace('/storage/', '', $surat->$fileType);
-            $filePath = storage_path('app/public/' . $relativePath);
+    //         $relativePath = str_replace('/storage/', '', $surat->$fileType);
+    //         $filePath = storage_path('app/public/' . $relativePath);
 
-            if (!file_exists($filePath)) {
-                throw new \Exception("File tidak ditemukan di server");
-            }
+    //         if (!file_exists($filePath)) {
+    //             throw new \Exception("File tidak ditemukan di server");
+    //         }
 
-            $mimeType = mime_content_type($filePath);
-            $allowedMimes = [
-                'file_path_pdf' => 'application/pdf',
-                'file_path_docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-            ];
+    //         $mimeType = mime_content_type($filePath);
+    //         $allowedMimes = [
+    //             'file_path_pdf' => 'application/pdf',
+    //             'file_path_docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    //         ];
 
-            if ($mimeType !== $allowedMimes[$fileType]) {
-                throw new \Exception("Tipe file tidak valid");
-            }
+    //         if ($mimeType !== $allowedMimes[$fileType]) {
+    //             throw new \Exception("Tipe file tidak valid");
+    //         }
 
-            return response()
-                ->download($filePath, basename($filePath))
-                ->deleteFileAfterSend(false);
+    //         return response()
+    //             ->download($filePath, basename($filePath))
+    //             ->deleteFileAfterSend(false);
 
-        } catch (\Exception $e) {
-            Log::error('Error downloading file: ' . $e->getMessage());
-            return back()
-                ->with('error', $e->getMessage());
-        }
-    }
+    //     } catch (\Exception $e) {
+    //         Log::error('Error downloading file: ' . $e->getMessage());
+    //         return back()
+    //             ->with('error', $e->getMessage());
+    //     }
+    // }
 
     /**
      * Generate File
      */
     public function generateFile(Request $request)
     {
-        try {
-            $response = Http::timeout(30)
-                ->retry(3, 1000)
-                ->post(env('FLASK_API_URL') . '/generate/surat/promotor', [
-                    'id_surat_tugas_promotor' => $request->id,
-                    'request_by' => auth()->id(),
-                ]);
+        $apiURL = env('FLASK_API_URL') . '/generate/surat/promotor';
+        $model= new SuratTugasPromotor();
+        $responses = Http::post($apiURL, [
+            'id_surat_tugas_promotor' => $request->id,
+            'table' => $model->getTable()
+        ]);
 
-            if (!$response->successful()) {
-                throw new \Exception("Flask API returned status: " . $response->status());
-            }
+        $responsesData = $responses->json();
 
-            $responseData = $response->json();
-
-            return response()->json($responseData);
-
-        } catch (\Exception $e) {
-            Log::error('Flask API communication error: ' . $e->getMessage());
+        if ($responses->successful() && $responsesData['status'] == 'success') {
             return response()->json([
-                'status' => 'error',
-                'message' => 'Gagal berkomunikasi dengan server dokumen: ' . $e->getMessage()
-            ], 500);
+                'status' => 'success',
+            ]);
         }
+        return response()->json([
+            'status' => 'error',
+        ]);
     }
 
     /**
@@ -325,4 +335,51 @@ class SuratTugasPromotorController extends Controller
             Log::error('Error deleting associated files: ' . $e->getMessage());
         }
     }
+
+    // /**
+    //  * Receive files from Flask API
+    //  */
+    // public function receiveFiles(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'file_docx' => 'required|file|mimes:docx',
+    //         'file_pdf' => 'required|file|mimes:pdf',
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Invalid file upload',
+    //             'errors' => $validator->errors()
+    //         ], 422);
+    //     }
+
+    //     try {
+    //         // Simpan file DOCX
+    //         $docxFile = $request->file('file_docx');
+    //         $docxPath = $docxFile->store('surat_tugas_promotor', 'public');
+
+    //         // Simpan file PDF
+    //         $pdfFile = $request->file('file_pdf');
+    //         $pdfPath = $pdfFile->store('surat_tugas_promotor', 'public');
+
+    //         // Return JSON response dengan path file
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Files uploaded successfully',
+    //             'files' => [
+    //                 'docx' => '/storage/' . $docxPath,
+    //                 'pdf' => '/storage/' . $pdfPath
+    //             ]
+    //         ]);
+
+    //     } catch (\Exception $e) {
+    //         Log::error('Error receiving files from Flask: ' . $e->getMessage());
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Failed to process files'
+    //         ], 500);
+    //     }
+    // }
 }
+

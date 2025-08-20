@@ -126,6 +126,15 @@ class SuratTugasPenggantiDriverController extends Controller
                 'tgl_selesai_penugasan' => $request->edit_tgl_selesai_penugasan,
                 'tgl_surat_pembuatan' => Carbon::now()->format('Y-m-d'),
             ]);
+            
+            $pathDocx = $surat->file_path_docx;
+            $pathPDF = $surat->file_path_pdf;
+            if(is_file(public_path() . $pathDocx)) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $pathDocx));
+            }
+            if(is_file(public_path() . $pathPDF)) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $pathPDF));
+            }
 
             return redirect()->route('surat-tugas.index')
                 ->with([
@@ -153,7 +162,16 @@ class SuratTugasPenggantiDriverController extends Controller
     {
         try {
             $surat = SuratTugasPenggantiDriverModel::findOrFail($id);
-            $surat->delete();
+            if($surat->delete()) {
+                $pathDocx = $surat->file_path_docx;
+                $pathPDF = $surat->file_path_pdf;
+                if(is_file(public_path() . $pathDocx)) {
+                    Storage::disk('public')->delete(str_replace('/storage/', '', $pathDocx));
+                }
+                if(is_file(public_path() . $pathPDF)) {
+                    Storage::disk('public')->delete(str_replace('/storage/', '', $pathPDF));
+                }
+            }
 
             // return response()->json([
             //     'success' => true,
@@ -176,13 +194,10 @@ class SuratTugasPenggantiDriverController extends Controller
             $surat = SuratTugasPenggantiDriverModel::findOrFail($id);
             $relativePath = str_replace('/storage/', '', $surat->file_path_pdf);
             $filePath = storage_path('app/public/' . $relativePath);
-            return response()->download($filePath)->deleteFileAfterSend(true);
+            return response()->download($filePath)->deleteFileAfterSend(false);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
+            abort(500, 'Hehe');
         }
     }
 
@@ -192,20 +207,20 @@ class SuratTugasPenggantiDriverController extends Controller
             $surat = SuratTugasPenggantiDriverModel::findOrFail($id);
             $relativePath = str_replace('/storage/', '', $surat->file_path_docx);
             $filePath = storage_path('app/public/' . $relativePath);
-            return response()->download($filePath)->deleteFileAfterSend(true);
+            return response()->download($filePath)->deleteFileAfterSend(false);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
+            abort(500, 'Hehe');
         }
     }
 
     public function generateFile(Request $request) {
         $apiURL = env('FLASK_API_URL') . '/generate/surat/penggati/driver';
+        $model = new SuratTugasPenggantiDriverModel();
         $responses = Http::post($apiURL, [
             'id_surat_tugas' => $request->id,
+            'table' => $model->getTable(),
+
         ]);
 
         $responsesData = $responses->json();
