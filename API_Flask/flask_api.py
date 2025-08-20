@@ -4,6 +4,7 @@ import os
 import sys
 import asyncio
 import threading
+import time
 from docx import Document
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -18,6 +19,7 @@ CORS(app)
 load_dotenv()
 wdFormatPDF = 17
 bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
+processesId = []
 
 mydb = mysql.connector.connect(
   host=os.getenv('DB_HOST'),
@@ -31,9 +33,6 @@ def background_generate_file(filename_docx, filename_pdf, laravel_url, surat_id,
 
 async def generateFile(filename_docx, filename_pdf, laravel_url, id_surat, table_name, id_column_name):
     print('Start Async Function....')
-    print('Start Await Sleep....')
-    await asyncio.sleep(2)
-    print('Done Await Sleep....')
     f = open(filename_docx, 'rb')
     pdf = open(filename_pdf, 'rb')
     
@@ -56,6 +55,14 @@ async def generateFile(filename_docx, filename_pdf, laravel_url, id_surat, table
     print('Done!')
     f.close()
     pdf.close()
+
+    try:
+        print(f'Deleting id from processedId... {id_surat}')
+        processesId.remove(id_surat)
+    except:
+        pass
+    print('Done Deleting id from processedId!')
+
     print('Deleting the temporary file...')
     if os.path.exists(filename_docx):
         print(filename_docx)
@@ -73,6 +80,25 @@ async def generateFile(filename_docx, filename_pdf, laravel_url, id_surat, table
 
     print('Done!')
 
+
+@app.route('/nyoba/ajax', methods=['GET'])
+def nyoba_ajax():
+    time.sleep(10)
+    return {
+        'status': True
+    }
+
+@app.route('/check/generate/run', methods=['POST'])
+def checkGenerateFiles():
+    for id in processesId:
+        if id == str(request.json['id']):
+            return {
+                'status': True
+            }
+        
+    return {
+        'status': False
+    }
 
 @app.route('/nyoba/pdf', methods=['GET'])
 def nyoba_pdf():
@@ -138,6 +164,10 @@ def nyoba_file():
     word = comtypes.client.CreateObject('Word.Application')
     now = datetime.now()
     document = Document(file_template_path)
+
+    print(f'Appending to processedId... {request.json["id_surat_tugas"]}')
+    processesId.append(request.json['id_surat_tugas'])
+    print('Done Appending to processedId!')
 
     mycursor = mydb.cursor()
     sqlStr = f"SELECT * FROM surat_tugas_pengganti_driver WHERE id_surat_tugas = '{request.json['id_surat_tugas']}'"
