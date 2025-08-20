@@ -43,6 +43,7 @@ Route::middleware(['role.auth', 'auth'])->group(function () {
             Route::get('/generate-pdf/{id}', [SuratTugasPenggantiDriverController::class, 'generatePDF'])->name('surat-tugas.generate-pdf');
             Route::get('/generate-word/{id}', [SuratTugasPenggantiDriverController::class, 'generateWord'])->name('surat-tugas.generate-word');
             Route::post('/generate/file', [SuratTugasPenggantiDriverController::class, 'generateFile'])->name('surat-tugas.generate-file');
+            Route::get('/file/check/{id}/{type}', [SuratTugasPenggantiDriverController::class, 'fileCheck'])->name('surat-tugas.file-check');
         });
 
     //route penempatan driver mandiri
