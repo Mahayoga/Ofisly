@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\LowonganPekerjaanModel;
 use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
 
 class LowonganPekerjaanController extends Controller
 {
@@ -20,7 +19,6 @@ class LowonganPekerjaanController extends Controller
         $request->validate([
             'judul' => 'required|string|max:255',
             'deskripsi' => 'required|string',
-            'tanggal_post' => 'required|date',
             'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ], [
             'gambar.max' => 'Ukuran file tidak boleh lebih dari 2MB',
@@ -29,9 +27,9 @@ class LowonganPekerjaanController extends Controller
 
         try {
             $data = [
-                'judul' => $request->judul,
-                'deskripsi' => $request->deskripsi,
-                'tanggal_post' => $request->tanggal_post,
+                'judul'        => $request->judul,
+                'deskripsi'    => $request->deskripsi,
+                'tanggal_post' => now(), 
             ];
 
             if ($request->hasFile('gambar')) {
@@ -39,13 +37,12 @@ class LowonganPekerjaanController extends Controller
                 $data['gambar'] = $path;
             }
 
-            $result = LowonganPekerjaanModel::create($data);
+            LowonganPekerjaanModel::create($data);
 
             return redirect()->route('lowongan-pekerjaan.index')
                 ->with([
                     'success' => 'Lowongan pekerjaan berhasil ditambahkan',
-                    'action' => true,
-                    'id_generate' => $result->id
+                    'action'  => true,
                 ]);
 
         } catch (\Exception $e) {
@@ -63,11 +60,11 @@ class LowonganPekerjaanController extends Controller
         return response()->json([
             'success' => true,
             'data' => [
-                'id' => $lowonganPekerjaan->id,
-                'judul' => $lowonganPekerjaan->judul,
-                'deskripsi' => $lowonganPekerjaan->deskripsi,
+                'id'           => $lowonganPekerjaan->id_lowongan_pekerjaan,
+                'judul'        => $lowonganPekerjaan->judul,
+                'deskripsi'    => $lowonganPekerjaan->deskripsi,
                 'tanggal_post' => $lowonganPekerjaan->tanggal_post,
-                'gambar' => $lowonganPekerjaan->gambar,
+                'gambar'       => $lowonganPekerjaan->gambar,
             ]
         ]);
     }
@@ -75,12 +72,11 @@ class LowonganPekerjaanController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'edit_judul' => 'required|string|max:255',
+            'edit_judul'     => 'required|string|max:255',
             'edit_deskripsi' => 'required|string',
-            'edit_tanggal_post' => 'required|date',
-            'edit_gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'edit_gambar'    => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ], [
-            'edit_gambar.max' => 'Ukuran file tidak boleh lebih dari 2MB',
+            'edit_gambar.max'   => 'Ukuran file tidak boleh lebih dari 2MB',
             'edit_gambar.mimes' => 'Format file harus jpg, jpeg, atau png',
         ]);
 
@@ -88,9 +84,8 @@ class LowonganPekerjaanController extends Controller
             $lowonganPekerjaan = LowonganPekerjaanModel::findOrFail($id);
 
             $data = [
-                'judul' => $request->edit_judul,
+                'judul'     => $request->edit_judul,
                 'deskripsi' => $request->edit_deskripsi,
-                'tanggal_post' => $request->edit_tanggal_post,
             ];
 
             if ($request->hasFile('edit_gambar')) {
@@ -106,8 +101,7 @@ class LowonganPekerjaanController extends Controller
             return redirect()->route('lowongan-pekerjaan.index')
                 ->with([
                     'success' => 'Lowongan pekerjaan berhasil diperbarui',
-                    'action' => true,
-                    'id_generate' => $lowonganPekerjaan->id
+                    'action'  => true,
                 ]);
 
         } catch (\Exception $e) {

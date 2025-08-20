@@ -43,7 +43,7 @@
         @endif
 
         <div class="table-responsive">
-          <table class="table table-bordered table-hover" id="lowonganTable" width="100%" cellspacing="0">
+          <table class="table table-bordered table-hover" id="lowonganPekerjaanTable" width="100%" cellspacing="0">
             <thead class="bg-light">
               <tr>
                 <th>No</th>
@@ -61,14 +61,12 @@
                   <td>{{ $i }}</td>
                   <td>{{ $lowongan->judul }}</td>
                   <td class="deskripsi">{{ $lowongan->deskripsi }}</td>
-                  <td>
-                    @if ($lowongan->gambar)
-                      <img src="{{ asset('storage/' . $lowongan->gambar) }}" alt="gambar" width="100">
-                    @else
-                      -
-                    @endif
-                  </td>
-                  <td>{{ \Carbon\Carbon::parse($lowongan->tgl_post)->format('d/m/Y') }}</td>
+                  <td>@if ($lowongan->gambar)
+                          <img src="{{ asset('storage/' . $lowongan->gambar) }}" alt="Gambar Lowongan" width="100">
+                      @else
+                          -
+                        @endif</td>  
+                  <td>{{ $lowongan->tanggal_post }}</td>
                   <td class="text-center">
                     <div class="btn-group">
                       <button class="btn btn-sm btn-info edit-btn" data-toggle="modal" data-target="#editModal" onclick="getDataEdit(this)" data-id="{{ $lowongan->id_lowongan_pekerjaan }}">
@@ -146,15 +144,15 @@
             <div class="row mb-3">
               <div class="col-md-6">
                 <label for="edit_judul" class="form-label">Judul</label>
-                <input type="text" class="form-control" id="edit_judul" name="judul" required>
+                <input type="text" class="form-control" id="edit_judul" name="edit_judul" required>
               </div>
               <div class="col-md-6">
                 <label for="edit_deskripsi" class="form-label">Deskripsi</label>
-                <input type="text" class="form-control" id="edit_deskripsi" name="deskripsi" required>
+                <input type="text" class="form-control" id="edit_deskripsi" name="edit_deskripsi" required>
               </div>
               <div class="col-md-6">
                 <label for="edit_gambar" class="form-label">Gambar</label>
-                <input type="file" class="form-control" id="edit_gambar" name="gambar" accept="image/*">
+                <input type="file" class="form-control" id="edit_gambar" name="edit_gambar" accept="image/*">
                 <img id="preview_gambar" src="" alt="Preview" class="mt-2 d-none" width="150">
               </div>
             </div>
@@ -201,49 +199,44 @@
 @endsection
 
 @section('script')
-<script>
-  $(document).ready(function(){
-    // Aktifkan DataTable
-    new DataTable('#lowonganTable');
-
-    $('#deleteCancelBtn').on('click', function() {
-      $('#deleteSubmitBtn').attr('disabled', '');
+  <script>
+    $(document).ready(function(){
+      new DataTable('#lowonganPekerjaanTable');
+      $('#deleteCancelBtn').on('click', function() {
+        $('#deleteSubmitBtn').attr('disabled', '');
+      });
     });
-  });
 
-  function getDataEdit(element) {
-    let idEdit = element.getAttribute('data-id');
-    let urlEdit = '{{ route('lowongan-pekerjaan.edit', ['lowongan_pekerjaan' => '__ID__']) }}';
-    let urlUpdate = '{{ route('lowongan-pekerjaan.update', ['lowongan_pekerjaan' => '__ID__']) }}';
+    function getDataEdit(element) {
+      let idEdit = element.getAttribute('data-id');
+      let urlEdit   = '{{ route('lowongan-pekerjaan.edit', ['lowongan_pekerjaan' => '__ID__']) }}';
+      let urlUpdate = '{{ route('lowongan-pekerjaan.update', ['lowongan_pekerjaan' => '__ID__']) }}';
+      $.get(urlEdit.replace('__ID__', idEdit), function(data) {
+        $('#editForm').attr('action', urlUpdate.replace('__ID__', idEdit));
 
-    $.get(urlEdit.replace('__ID__', idEdit), function(data, status) {
-      $('#editForm').attr('action', urlUpdate.replace('__ID__', idEdit));
-
-      if(data.success) {
-        $('#edit_judul').val(data.data.judul);
-        $('#edit_deskripsi').val(data.data.deskripsi);
-        if (data.data.gambar) {
-          $('#preview_gambar').attr('src', '/storage/' + data.data.gambar).removeClass('d-none');
-        } else {
-          $('#preview_gambar').addClass('d-none');
+        if(data.success) {
+          $('#edit_judul').val(data.data.judul);
+          $('#edit_deskripsi').val(data.data.deskripsi);
+          if (data.data.gambar) {
+            $('#preview_gambar').attr('src', '/storage/' + data.data.gambar).removeClass('d-none');
+          } else {
+            $('#preview_gambar').addClass('d-none');
+          }
         }
-      }
-    });
-  }
+      });
+    }
 
-  function getDataHapus(element) {
-    let idEdit = element.getAttribute('data-id');
-    let urlEdit = '{{ route('lowongan-pekerjaan.edit', ['lowongan_pekerjaan' => '__ID__']) }}';
-    let urlDelete = '{{ route('lowongan-pekerjaan.destroy', ['lowongan_pekerjaan' => '__ID__']) }}';
-
-    $.get(urlEdit.replace('__ID__', idEdit), function(data, status) {
-      $('#deleteForm').attr('action', urlDelete.replace('__ID__', idEdit));
-
-      if(data.success) {
-        $('#hapus_judul').text(data.data.judul);
-        $('#deleteSubmitBtn').removeAttr('disabled');
-      }
-    });
-  }
-</script>
+    function getDataHapus(element) {
+      let idEdit    = element.getAttribute('data-id');
+      let urlEdit   = '{{ route('lowongan-pekerjaan.edit', ['lowongan_pekerjaan' => '__ID__']) }}';
+      let urlDelete = '{{ route('lowongan-pekerjaan.destroy', ['lowongan_pekerjaan' => '__ID__']) }}';
+      $.get(urlEdit.replace('__ID__', idEdit), function(data) {
+        $('#deleteForm').attr('action', urlDelete.replace('__ID__', idEdit));
+        if(data.success) {
+          $('#hapus_judul').text(data.data.judul);
+          $('#deleteSubmitBtn').removeAttr('disabled');
+        }
+      });
+    }
+  </script>
 @endsection

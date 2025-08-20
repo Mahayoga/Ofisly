@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('judul');     
             $table->text('deskripsi');
             $table->string('gambar')->nullable();   
-            $table->date('tanggal_post');  
+            $table->timestamp('tanggal_post')->useCurrent()->useCurrentOnUpdate();
             $table->timestamps();
         });
     }
