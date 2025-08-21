@@ -75,7 +75,7 @@
                   <button class="btn btn-sm btn-danger" id="btn_pdf_{{ $surat->id_surat_tugas }}" onclick="getInfoFile(this, '{{ $surat->id_surat_tugas }}', 'pdf')">
                     <i class="fas fa-file-pdf"></i>
                   </button>
-                  <button class="btn btn-sm btn-primary" id="btn_word_{{ $surat->id_surat_tugas }}" onclick="getInfoFile(this, '{{ $surat->id_surat_tugas }}', 'word')">
+                  <button class="btn btn-sm btn-primary" id="btn_word_{{ $surat->id_surat_tugas }}" onclick="getInfoFile(this, '{{ $surat->id_surat_tugas }}', 'docx')">
                     <i class="fas fa-file-word"></i>
                   </button>
                   <button class="btn btn-sm btn-info edit-btn" data-toggle="modal" data-target="#editModal" onclick="getDataEdit(this)" data-id="{{ $surat->id_surat_tugas }}">
