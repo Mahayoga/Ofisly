@@ -41,6 +41,7 @@ Route::middleware(['role.auth', 'auth'])->group(function () {
     Route::resource('cuti-karyawan', CutiKaryawanController::class);
     //lowongan pekerjaan
     Route::resource('lowongan-pekerjaan', LowonganPekerjaanController::class);
+    Route::resource('daftar-lowongan-pekerjaan', controller: LowonganPekerjaanController::class);
     // Route::get('/', [LowonganPekerjaanController::class, 'landing'])->name('landing');
     // Route::get('/lowongan/detail/{id}', [LowonganPekerjaanController::class, 'showLanding'])->name('lowongan-pekerjaan.detail');
     // Blank Page
