@@ -397,6 +397,8 @@
             'id': id
           }, function(data, status) {
             if(data.status == 'success') {
+              btnPDF.removeAttribute('disabled');
+              btnDocx.removeAttribute('disabled');
               alertField.innerHTML = `
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                   Oke sudah tergenerate!
@@ -414,11 +416,11 @@
                   </button>
                 </div>
               `;
+              btnPDF.removeAttribute('disabled');
+              btnDocx.removeAttribute('disabled');
             }
           });
           element.innerHTML = `<i class="fas fa-file-${type.replace('docx', 'word')}"></i>`;
-          btnPDF.removeAttribute('disabled');
-          btnDocx.removeAttribute('disabled');
         }
       });
     }
