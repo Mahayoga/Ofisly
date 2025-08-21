@@ -45,5 +45,15 @@ Route::post('/send/surat/pengganti/driver', function(Request $request) {
 });
 
 Route::get('/nyoba/ajax', function() {
-    abort(500);
+    $apiURL = env('FLASK_API_URL') . '/nyoba/ajax';
+
+    $responses = Http::get($apiURL);
+
+    $responsesData = $responses->json();
+
+    if($responses->successful() && $responsesData['status'] == true) {
+        return response()->json([
+            'status' => 'success',
+        ]);
+    }
 })->name('nyoba.ajax');
