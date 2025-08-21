@@ -234,4 +234,65 @@ class SuratTugasPenggantiDriverController extends Controller
             'status' => 'error',
         ]);
     }
+
+    public function fileCheck($id, $type) {
+        $apiURL = env('FLASK_API_URL') . '/check/generate/run';
+        $dataSurat = SuratTugasPenggantiDriverModel::findOrFail($id);
+        $pathDocx = $dataSurat->file_path_docx;
+        $pathPDF = $dataSurat->file_path_pdf;
+        if($type == 'pdf') {
+            if(is_file(public_path() . $pathPDF)) {
+                return response()->json([
+                    'status' => true,
+                ]);
+            } else {
+                $responses = Http::post($apiURL, [
+                    'id' => $id
+                ]);
+                $responsesData = $responses->json();
+                if($responses->successful()) {
+                    if($responsesData['status']) {
+                        return response()->json([
+                            'status' => true,
+                            'msg' => 'File ini masih proses generate yaa, mohon bersabar!'
+                        ]);
+                    } else {
+                        return response()->json([
+                            'status' => false,
+                            'msg' => 'File ini sepertinya terhapus, masukan datanya lagi yaa!'
+                        ]);
+                    }
+                }
+            }
+        } else if($type == 'docx') {
+            if(is_file(public_path() . $pathDocx)) {
+                return response()->json([
+                    'status' => true,
+                ]);
+            } else {
+                $responses = Http::post($apiURL, [
+                    'id' => $id
+                ]);
+                $responsesData = $responses->json();
+                if($responses->successful()) {
+                    if($responsesData['status']) {
+                        return response()->json([
+                            'status' => true,
+                        ]);
+                    } else {
+                        return response()->json([
+                            'status' => false,
+                            'msg' => 'File ini masih proses generate yaa, mohon bersabar!'
+                        ]);
+                    }
+                }
+            }
+        }
+
+        return response()->json([
+            'status' => false,
+            'data' => $dataSurat,
+            'type' => $type
+        ]);
+    }
 }
