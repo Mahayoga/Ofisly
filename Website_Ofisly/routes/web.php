@@ -7,6 +7,7 @@ use App\Http\Controllers\SuratTugasPenggantiDriverController;
 use App\Http\Controllers\SuratTugasMandiriController;
 use App\Http\Controllers\SuratTugasController;
 use App\Http\Controllers\LowonganPekerjaanController;
+use App\Http\Controllers\DaftarLowonganController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
@@ -37,13 +38,13 @@ Route::middleware(['role.auth', 'auth'])->group(function () {
     Route::get('/generate-word/{id}', [SuratTugasMandiriController::class, 'generateWord'])->name('surat-tugas-mandiri.generate-word');
     Route::post('/generate/file', [SuratTugasMandiriController::class, 'generateFile'])->name('surat-tugas-mandiri.generate-file');
     
-
+    //cuti karyawan
     Route::resource('cuti-karyawan', CutiKaryawanController::class);
+
     //lowongan pekerjaan
     Route::resource('lowongan-pekerjaan', LowonganPekerjaanController::class);
-    Route::resource('daftar-lowongan-pekerjaan', controller: LowonganPekerjaanController::class);
-    // Route::get('/', [LowonganPekerjaanController::class, 'landing'])->name('landing');
-    // Route::get('/lowongan/detail/{id}', [LowonganPekerjaanController::class, 'showLanding'])->name('lowongan-pekerjaan.detail');
+    // Route::resource('daftar-lowongan-pekerjaan', controller: LowonganPekerjaanController::class)
+
     // Blank Page
     Route::get('/blank', function() {
         return view('admin.layout.blank');
@@ -55,6 +56,9 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+Route::get('/daftar-lowongan', [App\Http\Controllers\DaftarLowonganController::class, 'index'])->name('daftar-lowongan.index');
+Route::get('/daftar-lowongan/{id_lowongan_pekerjaan}', [DaftarLowonganController::class, 'show'])->name('daftar-lowongan.show');
 
 // // Nyoba Request File
 // Route::post('/nyoba/file', function(Request $request) {
