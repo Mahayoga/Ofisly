@@ -9,12 +9,12 @@ class DaftarLowonganController extends Controller
     public function index()
     {
         $lowongan = LowonganPekerjaanModel::latest()->paginate(6); 
-        return view('daftar-lowongan.index', compact('lowongan'));
+        return view('user.daftar-lowongan.index', compact('lowongan'));
     }
 
     public function show($id_lowongan_pekerjaan)
     {
         $lowongan = LowonganPekerjaanModel::findOrFail($id_lowongan_pekerjaan);
-        return view('daftar-lowongan.show', compact('lowongan'));
+        return view('user.daftar-lowongan.show', compact('lowongan'));
     }
 }

@@ -1,5 +1,7 @@
-@extends('user.layout.app')
+@extends('user.layouts.app')
+
 @section('title', $lowongan->judul)
+
 @section('content')
 <div class="container mt-5">
     <div class="card shadow-sm">

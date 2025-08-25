@@ -1,4 +1,4 @@
-@extends('user.layout.app')
+@extends('user.layouts.app')
 
 @section('title', 'Daftar Lowongan')
 
@@ -17,7 +17,7 @@
                 <div class="card-body">
                     <h5 class="card-title">{{ $item->judul }}</h5>
                     <p class="card-text text-truncate">{{ $item->deskripsi }}</p>
-                    <a href="{{ route('daftar-lowongan.show', $item->id_lowongan_pekerjaan) }}" class="btn btn-primary">Selengkapnya</a>
+                    <a href="{{ route('daftar-lowongan.show', ['daftar_lowongan' => $item->id_lowongan_pekerjaan]) }}" class="btn btn-primary">Selengkapnya</a>
                 </div>
             </div>
         </div>
