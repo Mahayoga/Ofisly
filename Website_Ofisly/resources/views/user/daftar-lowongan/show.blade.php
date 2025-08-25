@@ -4,8 +4,17 @@
 
 @section('content')
 <div class="container mt-5">
+    
+    <!-- Tombol Kembali di atas card -->
+    <div class="mb-3">
+        <a href="{{ route('daftar-lowongan.index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Kembali
+        </a>
+    </div>
+
     <div class="card shadow-sm p-3">
         <div class="row g-0 align-items-start">
+            
             <!-- Bagian Gambar -->
             <div class="col-md-5">
                 @if($lowongan->gambar)
@@ -22,17 +31,13 @@
             </div>
 
             <!-- Bagian Deskripsi -->
-            <div class="col-md-7 ps-3">
-                <div class="card-body">
+            <div class="col-md-7">
+                <div class="card-body p-2"> <!-- padding kecil banget -->
                     <h3 class="card-title">{{ $lowongan->judul }}</h3>
                     <p class="card-text">{!! nl2br(e($lowongan->deskripsi)) !!}</p>
                 </div>
             </div>
-        </div>
 
-        <!-- Footer -->
-        <div class="card-footer text-end">
-            <a href="{{ route('daftar-lowongan.index') }}" class="btn btn-secondary">Kembali</a>
         </div>
     </div>
 </div>
