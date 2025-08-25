@@ -1,4 +1,4 @@
-@extends('layout.app')
+@extends('user.layout.app')
 @section('title', $lowongan->judul)
 @section('content')
 <div class="container mt-5">

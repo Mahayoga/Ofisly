@@ -431,7 +431,7 @@
                             Jangan lewatkan kesempatan ini, daftar sekarang untuk melihat lowongan pekerjaan yang
                             tersedia.
                         </p>
-                        <a href="{{ route('daftar-lowongan-pekerjaan.index') }}" class="btn btn-primary mt-3">
+                        <a href="{{ route('daftar-lowongan.index') }}" class="btn btn-primary mt-3">
                             Selengkapnya
                         </a>
                     </div>
