@@ -10,14 +10,14 @@
         <div class="col-md-4 mb-4">
             <div class="card h-100 shadow-sm">
                 @if($item->gambar)
-                    <img src="{{ asset('storage/' . $item->gambar) }}" class="card-img-top" alt="{{ $item->judul }}">
+                    <img src="{{ asset('storage/' . $item->gambar) }}"class="card-img-top"alt="{{ $item->judul }}"style="max-height: 200px; object-fit: cover;">
                 @else
-                    <img src="https://via.placeholder.com/400x200" class="card-img-top" alt="default">
+                    <img src="https://via.placeholder.com/400x200"class="card-img-top"alt="default"style="max-height:200px; object-fit:cover;">
                 @endif
                 <div class="card-body">
                     <h5 class="card-title">{{ $item->judul }}</h5>
                     <p class="card-text text-truncate">{{ $item->deskripsi }}</p>
-                    <a href="{{ route('daftar-lowongan.show', ['daftar_lowongan' => $item->id_lowongan_pekerjaan]) }}" class="btn btn-primary">Selengkapnya</a>
+                    <a href="{{ route('daftar-lowongan.show', ['daftar_lowongan' => $item->id_lowongan_pekerjaan]) }}" class="btn btn-primary">Lihat detail</a>
                 </div>
             </div>
         </div>
