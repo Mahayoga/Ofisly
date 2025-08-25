@@ -14,7 +14,7 @@ class DaftarLowonganController extends Controller
 
     public function show($id_lowongan_pekerjaan)
     {
-    $lowongan = LowonganPekerjaanModel::findOrFail($id_lowongan_pekerjaan);
-    return view('daftar-lowongan.show', compact('lowongan'));
+        $lowongan = LowonganPekerjaanModel::findOrFail($id_lowongan_pekerjaan);
+        return view('daftar-lowongan.show', compact('lowongan'));
     }
 }
