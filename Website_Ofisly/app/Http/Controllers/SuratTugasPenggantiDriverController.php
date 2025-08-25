@@ -138,7 +138,7 @@ class SuratTugasPenggantiDriverController extends Controller
 
             return redirect()->route('surat-tugas.index')
                 ->with([
-                    'success' => 'Surat Tugas berhasil di edit',
+                    'success' => 'Surat Tugas berhasil di edit, sabar ya masih di generate ulang!',
                     'action' => true,
                     'id_generate' => $surat->id_surat_tugas
                 ]);
