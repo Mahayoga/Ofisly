@@ -399,78 +399,47 @@
 
         </section><!-- /Call To Action Section -->
 
-        <!-- Team Section -->
-        <section id="team" class="team section">
-
-            <!-- Section Title -->
+         <!-- Lowongan Section -->
+        <section id="lowongan" class="lowongan section">
             <div class="container section-title" data-aos="fade-up">
-                <span>Team</span>
-                <h2>Team</h2>
-                <p>Tim Ofisly terdiri dari para profesional kreatif dan berdedikasi yang memiliki visi untuk mempermudah
-                    pekerjaan Anda. Dengan keahlian di bidang teknologi, desain, dan manajemen, kami bekerja sama untuk
-                    menghadirkan solusi digital yang praktis, inovatif, dan mudah digunakan.</p>
-            </div><!-- End Section Title -->
-
-            <div class="container">
-
-                <div class="row gy-5">
-
-                    <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
-                        <div class="member">
-                            <div class="pic"><img src="assets/img/team/team-1.jpg" class="img-fluid"
-                                    alt=""></div>
-                            <div class="member-info">
-                                <h4>Walter White</h4>
-                                <span>Chief Executive Officer</span>
-                                <div class="social">
-                                    <a href=""><i class="bi bi-twitter-x"></i></a>
-                                    <a href=""><i class="bi bi-facebook"></i></a>
-                                    <a href=""><i class="bi bi-instagram"></i></a>
-                                    <a href=""><i class="bi bi-linkedin"></i></a>
-                                </div>
-                            </div>
-                        </div>
-                    </div><!-- End Team Member -->
-
-                    <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
-                        <div class="member">
-                            <div class="pic"><img src="assets/img/team/team-2.jpg" class="img-fluid"
-                                    alt=""></div>
-                            <div class="member-info">
-                                <h4>Sarah Jhonson</h4>
-                                <span>Product Manager</span>
-                                <div class="social">
-                                    <a href=""><i class="bi bi-twitter-x"></i></a>
-                                    <a href=""><i class="bi bi-facebook"></i></a>
-                                    <a href=""><i class="bi bi-instagram"></i></a>
-                                    <a href=""><i class="bi bi-linkedin"></i></a>
-                                </div>
-                            </div>
-                        </div>
-                    </div><!-- End Team Member -->
-
-                    <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
-                        <div class="member">
-                            <div class="pic"><img src="assets/img/team/team-3.jpg" class="img-fluid"
-                                    alt=""></div>
-                            <div class="member-info">
-                                <h4>William Anderson</h4>
-                                <span>CTO</span>
-                                <div class="social">
-                                    <a href=""><i class="bi bi-twitter-x"></i></a>
-                                    <a href=""><i class="bi bi-facebook"></i></a>
-                                    <a href=""><i class="bi bi-instagram"></i></a>
-                                    <a href=""><i class="bi bi-linkedin"></i></a>
-                                </div>
-                            </div>
-                        </div>
-                    </div><!-- End Team Member -->
-
-                </div>
-
+                <span>Lowongan Pekerjaan<br></span>
+                <h2>Info Lowongan</h2>
+                <p>
+                    Temukan berbagai lowongan pekerjaan yang tersedia untuk mendukung karir Anda.
+                    Dapatkan kesempatan terbaik sesuai minat dan kemampuan Anda bersama kami.
+                </p>
             </div>
 
-        </section><!-- /Team Section -->
+            <div class="container">
+                <div class="row gy-4">
+                    <div class="col-lg-6 position-relative align-self-start" data-aos="fade-up" data-aos-delay="100">
+                        <img src="assets/img/loker.jpg" class="img-fluid" alt="">
+                    </div>
+                    <div class="col-lg-6 content" data-aos="fade-up" data-aos-delay="200">
+                        <h3>Kesempatan Berkarir</h3>
+                        <p class="fst-italic">
+                            Kami membuka peluang kerja untuk Anda yang ingin berkembang bersama kami.
+                        </p>
+                        <ul>
+                            <li><i class="bi bi-check2-all"></i> <span>Berbagai posisi sesuai bidang keahlian.</span>
+                            </li>
+                            <li><i class="bi bi-check2-all"></i> <span>Lingkungan kerja profesional dan
+                                    inovatif.</span></li>
+                            <li><i class="bi bi-check2-all"></i> <span>Kesempatan untuk mengembangkan skill dan
+                                    pengalaman.</span></li>
+                        </ul>
+                        <p>
+                            Jangan lewatkan kesempatan ini, daftar sekarang untuk melihat lowongan pekerjaan yang
+                            tersedia.
+                        </p>
+                        <a href="{{ route('daftar-lowongan.index') }}" class="btn btn-primary mt-3">
+                            Selengkapnya
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Lowongan Section -->
 
         <!-- Contact Section -->
         <section id="contact" class="contact section">
