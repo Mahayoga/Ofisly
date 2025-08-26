@@ -50,8 +50,8 @@
               </tr>
             </thead>
             <tbody>
-              @php 
-              $i = 1; 
+              @php
+              $i = 1;
               @endphp
               @foreach ($suratPenempatan as $surat)
                 <tr data-id="{{ $surat->id_surat_penempatan }}">
