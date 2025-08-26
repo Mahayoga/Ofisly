@@ -7,12 +7,14 @@ use App\Http\Controllers\SuratTugasPenggantiDriverController;
 use App\Http\Controllers\SuratTugasMandiriController;
 use App\Http\Controllers\SuratTugasController;
 use App\Http\Controllers\LowonganPekerjaanController;
+use App\Http\Controllers\DaftarLowonganController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
 Route::get('/', function () {
     return view('landing-page');
 })->name('welcome');
+Route::resource('daftar-lowongan', DaftarLowonganController::class);
 
 Route::middleware(['role.auth', 'auth'])->group(function () {
     Route::resource('dashboard', DashboardController::class);
@@ -37,12 +39,13 @@ Route::middleware(['role.auth', 'auth'])->group(function () {
     Route::get('/generate-word/{id}', [SuratTugasMandiriController::class, 'generateWord'])->name('surat-tugas-mandiri.generate-word');
     Route::post('/generate/file', [SuratTugasMandiriController::class, 'generateFile'])->name('surat-tugas-mandiri.generate-file');
     
-
+    //cuti karyawan
     Route::resource('cuti-karyawan', CutiKaryawanController::class);
+
     //lowongan pekerjaan
     Route::resource('lowongan-pekerjaan', LowonganPekerjaanController::class);
-    // Route::get('/', [LowonganPekerjaanController::class, 'landing'])->name('landing');
-    // Route::get('/lowongan/detail/{id}', [LowonganPekerjaanController::class, 'showLanding'])->name('lowongan-pekerjaan.detail');
+    // Route::resource('daftar-lowongan-pekerjaan', controller: LowonganPekerjaanController::class)
+
     // Blank Page
     Route::get('/blank', function() {
         return view('admin.layout.blank');
@@ -55,22 +58,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// // Nyoba Request File
-// Route::post('/nyoba/file', function(Request $request) {
-//     if ($request->hasFile('file')) {
-//         $file = $request->file('file');
-//         // $path = $file->storeAs('uploads', $file->getClientOriginalName(), 'public');
-
-//         return response()->json([
-//             'success' => true,
-//             // 'path' => $path
-//         ]);
-//     }
-//     return response()->json([
-//         'success' => false,
-//         'message' => 'No file received',
-//         'data' => $request->all()
-//     ]);
-// });
+// Route::get('/daftar-lowongan', [App\Http\Controllers\DaftarLowonganController::class, 'index'])->name('daftar-lowongan.index');
+// Route::get('/daftar-lowongan/{id_lowongan_pekerjaan}', [DaftarLowonganController::class, 'show'])->name('daftar-lowongan.show');
 
 require __DIR__ . '/auth.php';
