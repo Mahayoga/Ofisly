@@ -30,6 +30,7 @@ Route::middleware(['role.auth', 'auth'])->group(function () {
             Route::get('/generate-pdf/{id}', [SuratTugasPromotorController::class, 'generatePDF'])->name('surat-tugas-promotor.generate-pdf');
             Route::get('/generate-word/{id}', [SuratTugasPromotorController::class, 'generateWord'])->name('surat-tugas-promotor.generate-word');
             Route::post('/generate/file', [SuratTugasPromotorController::class, 'generateFile'])->name('surat-tugas-promotor.generate-file');
+            Route::get('/file/check/{id}/{type}', [SuratTugasPromotorController::class, 'fileCheck'])->name('surat-tugas-promotor.file-check');
         });
 
     Route::resource('surat-tugas', SuratTugasPenggantiDriverController::class);

@@ -59,7 +59,7 @@ Route::post('/send/surat/promotor', function(Request $request) {
             $docxName = 'promotor_'.time().'_'.uniqid().'.'.$docxFile->extension();
 
             $docxPath = $docxFile->storeAs(
-                'uploads/surat_promotor',
+                'uploads/surat_tugas_promotor',
                 $docxName,
                 'public'
             );
@@ -72,7 +72,7 @@ Route::post('/send/surat/promotor', function(Request $request) {
             $pdfName = 'promotor_'.time().'_'.uniqid().'.'.$pdfFile->extension();
 
             $pdfPath = $pdfFile->storeAs(
-                'uploads/surat_promotor',
+                'uploads/surat_tugas_promotor',
                 $pdfName,
                 'public'
             );

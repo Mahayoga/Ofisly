@@ -267,7 +267,7 @@
 
 @endsection --}}
 
-@extends('admin.layout.app')
+{{-- @extends('admin.layout.app')
 @section('title', 'Surat Tugas Promotor')
 
 @section('content')
@@ -547,4 +547,645 @@
       $('#deleteSubmitBtn').prop('disabled', false);
     }
   </script>
+@endsection --}}
+
+@extends('admin.layout.app')
+@section('title', 'Surat Tugas Promotor Indosat')
+
+@section('content')
+    <div class="container-fluid">
+        <!-- Page Heading -->
+        <h1 class="h3 text-gray-800">Data Surat Tugas Promotor Indosat</h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item">Kumpulan data surat tugas untuk promotor indosat</li>
+        </ol>
+        <div class="card border-0 mb-4">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#createModal">
+                    <i class="fas fa-plus"></i> Tambah Surat
+                </button>
+            </div>
+            <div class="card-body border">
+                @if (session('success'))
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        {{ session('success') }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                @endif
+
+                @if (session('error'))
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        {{ session('error') }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                @endif
+
+                @if (session('delete_success'))
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        {{ session('delete_success') }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                @endif
+
+                <div id="alert-field"></div>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="suratTugasPromotorTable" width="100%"
+                        cellspacing="0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>No.</th>
+                                <th>Nama Kandidat</th>
+                                <th>Penempatan</th>
+                                <th>Tanggal Penugasan</th>
+                                <th>Tanggal Pembuatan</th>
+                                <th>Status File</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php
+                                $i = 1;
+                            @endphp
+                            @foreach ($suratTugasPromotor as $surat)
+                                <tr data-id="{{ $surat->id_surat_tugas_promotor }}">
+                                    <td>{{ $i }}</td>
+                                    <td class="nama-kandidat">{{ $surat->nama_kandidat }}</td>
+                                    <td>
+                                        @if (is_array($surat->penempatan))
+                                            @foreach ($surat->penempatan as $lokasi)
+                                                <span class="badge badge-primary mr-1">{{ $lokasi }}</span>
+                                            @endforeach
+                                        @else
+                                            <span class="badge badge-primary">{{ $surat->penempatan }}</span>
+                                        @endif
+                                    </td>
+                                    <td class="tgl-penugasan">
+                                        {{ \Carbon\Carbon::parse($surat->tgl_penugasan)->format('d/m/Y') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($surat->tgl_surat_pembuatan)->format('d/m/Y') }}</td>
+                                    <td class="text-center">
+                                        @if ($surat->file_path_pdf && $surat->file_path_docx)
+                                            <span class="badge badge-success">Tersedia</span>
+                                        @else
+                                            <span class="badge badge-warning" id="status-{{ $surat->id_surat_tugas_promotor }}">Proses Generate</span>
+                                        @endif
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group">
+                                            <button class="btn btn-sm btn-danger" id="btn_pdf_{{ $surat->id_surat_tugas_promotor }}"
+                                                onclick="getInfoFile(this, '{{ $surat->id_surat_tugas_promotor }}', 'pdf')">
+                                                <i class="fas fa-file-pdf"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-primary" id="btn_word_{{ $surat->id_surat_tugas_promotor }}"
+                                                onclick="getInfoFile(this, '{{ $surat->id_surat_tugas_promotor }}', 'docx')">
+                                                <i class="fas fa-file-word"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-info edit-btn" data-toggle="modal"
+                                                data-target="#editModal" onclick="getDataEdit(this)"
+                                                data-id="{{ $surat->id_surat_tugas_promotor }}">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-danger delete-btn" data-toggle="modal"
+                                                data-target="#deleteModal" onclick="getDataHapus(this)"
+                                                data-id="{{ $surat->id_surat_tugas_promotor }}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @php
+                                    $i++;
+                                @endphp
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Modal -->
+        <div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="createModalLabel">Buat Surat Tugas Promotor Baru</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form id="createForm" action="{{ route('surat-tugas-promotor.store') }}" method="POST">
+                        @csrf
+                        <div class="modal-body">
+                            <div class="row mb-3">
+                                <div class="col-md-6 mb-3">
+                                    <label for="nama_kandidat" class="form-label">Nama Kandidat</label>
+                                    <input type="text" class="form-control" id="nama_kandidat" name="nama_kandidat"
+                                        required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="tgl_penugasan" class="form-label">Tanggal Penugasan</label>
+                                    <input type="date" placeholder="Pilih Tanggal" class="form-control"
+                                        id="tgl_penugasan" name="tgl_penugasan" required>
+                                </div>
+                                <div class="col-md-12">
+                                    <label for="penempatan" class="form-label">Penempatan</label>
+                                    <div class="penempatan-container mb-2">
+                                        <div class="input-group mb-2">
+                                            <input type="text" class="form-control penempatan-input"
+                                                placeholder="Masukkan lokasi penempatan">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-outline-primary" type="button"
+                                                    id="tambahPenempatan">Tambah</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="daftarPenempatan" class="d-flex flex-wrap gap-2 mb-2"></div>
+                                    <input type="hidden" id="penempatan" name="penempatan" required>
+                                    <small class="form-text text-muted">Klik tombol "Tambah" untuk menambahkan lokasi
+                                        penempatan.</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary" id="createSubmitBtn">
+                                <span id="createSubmitText">Simpan</span>
+                                <span id="createSubmitSpinner" class="spinner-border spinner-border-sm d-none"
+                                    role="status" aria-hidden="true"></span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- Edit Modal -->
+        <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="editModalLabel">Edit Surat Tugas Promotor</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form id="editForm" method="POST">
+                        @csrf
+                        @method('PUT')
+                        <div class="modal-body">
+                            <div class="row mb-3">
+                                <div class="col-md-6 mb-3">
+                                    <label for="edit_nama_kandidat" class="form-label">Nama Kandidat</label>
+                                    <input type="text" class="form-control" id="edit_nama_kandidat"
+                                        name="edit_nama_kandidat" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="edit_tgl_penugasan" class="form-label">Tanggal Penugasan</label>
+                                    <input type="date" placeholder="Pilih Tanggal" class="form-control"
+                                        id="edit_tgl_penugasan" name="edit_tgl_penugasan" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="edit_tgl_surat_pembuatan" class="form-label">Tanggal Pembuatan
+                                        Surat</label>
+                                    <input type="date" class="form-control" id="edit_tgl_surat_pembuatan"
+                                        name="edit_tgl_surat_pembuatan" required>
+                                </div>
+                                <div class="col-md-12">
+                                    <label for="edit_penempatan" class="form-label">Penempatan</label>
+                                    <div class="penempatan-container mb-2">
+                                        <div class="input-group mb-2">
+                                            <input type="text" class="form-control edit-penempatan-input"
+                                                placeholder="Masukkan lokasi penempatan">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-outline-primary" type="button"
+                                                    id="editTambahPenempatan">Tambah</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="editDaftarPenempatan" class="d-flex flex-wrap gap-2 mb-2"></div>
+                                    <input type="hidden" id="edit_penempatan" name="edit_penempatan" required>
+                                    <small class="form-text text-muted">Klik tombol "Tambah" untuk menambahkan lokasi
+                                        penempatan.</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary" id="editSubmitBtn">
+                                <span id="editSubmitText">Simpan Perubahan</span>
+                                <span id="editSubmitSpinner" class="spinner-border spinner-border-sm d-none"
+                                    role="status" aria-hidden="true"></span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- Delete Modal -->
+        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="deleteModalLabel">Hapus Surat Tugas</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form id="deleteForm" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <div class="modal-body">
+                            Apakah Anda yakin ingin menghapus data Surat Tugas untuk Promotor <strong
+                                id="hapus_nama_kandidat"></strong>?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal"
+                                id="deleteCancelBtn">Batal</button>
+                            <button type="submit" class="btn btn-danger" id="deleteSubmitBtn" disabled>
+                                <span id="deleteSubmitText">Hapus</span>
+                                <span id="deleteSubmitSpinner" class="spinner-border spinner-border-sm d-none"
+                                    role="status" aria-hidden="true"></span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@section('script')
+    @if (session('action') == 'generate_surat' && session('id_generate'))
+        <script>
+            $(document).ready(function() {
+                let idGenerate = '{{ session('id_generate') }}';
+                let urlGenerate = '{{ route('surat-tugas-promotor.generate-file') }}';
+                $.post(urlGenerate, {
+                    '_token': '{{ csrf_token() }}',
+                    'id': idGenerate
+                }, function(data, status) {
+                    console.log('Generate file response:', data);
+                    if (data.status === 'success') {
+                        // Update status badge
+                        $('#status-' + idGenerate).removeClass('badge-warning').addClass('badge-success').text('Tersedia');
+                    }
+                }).fail(function() {
+                    console.error('Failed to trigger file generation.');
+                });
+            });
+        </script>
+    @endif
+    <script>
+        $(document).ready(function() {
+            let table = new DataTable('#suratTugasPromotorTable');
+
+            // Inisialisasi flatpickr untuk modal create
+            flatpickr("#tgl_penugasan", {
+                minDate: 'today',
+                dateFormat: "Y-m-d",
+            });
+
+            // Reset tombol hapus saat modal ditutup
+            $('#deleteModal').on('hidden.bs.modal', function() {
+                $('#deleteSubmitBtn').prop('disabled', true);
+                $('#hapus_nama_kandidat').text('');
+            });
+
+            // Fungsi untuk menambahkan lokasi penempatan (create modal)
+            $('#tambahPenempatan').click(function() {
+                const input = $('.penempatan-input');
+                const value = input.val().trim();
+
+                if (value) {
+                    // Tambahkan badge untuk lokasi baru
+                    const badge = `<span class="badge badge-primary p-2 d-flex align-items-center mb-2">
+                        ${value}
+                        <button type="button" class="btn btn-sm btn-link text-danger p-0 ml-2 hapus-lokasi">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </span>`;
+
+                    $('#daftarPenempatan').append(badge);
+                    input.val('');
+
+                    // Perbarui input hidden
+                    updatePenempatanInput();
+                }
+            });
+
+            // Fungsi untuk menambahkan lokasi penempatan (edit modal)
+            $('#editTambahPenempatan').click(function() {
+                const input = $('.edit-penempatan-input');
+                const value = input.val().trim();
+
+                if (value) {
+                    // Tambahkan badge untuk lokasi baru
+                    const badge = `<span class="badge badge-primary p-2 d-flex align-items-center mb-2">
+                        ${value}
+                        <button type="button" class="btn btn-sm btn-link text-danger p-0 ml-2 hapus-lokasi">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </span>`;
+
+                    $('#editDaftarPenempatan').append(badge);
+                    input.val('');
+
+                    // Perbarui input hidden
+                    updateEditPenempatanInput();
+                }
+            });
+
+            // Fungsi untuk menghapus lokasi penempatan (delegasi event)
+            $(document).on('click', '.hapus-lokasi', function() {
+                $(this).closest('.badge').remove();
+
+                // Perbarui input hidden berdasarkan modal yang aktif
+                if ($('#createModal').hasClass('show')) {
+                    updatePenempatanInput();
+                } else if ($('#editModal').hasClass('show')) {
+                    updateEditPenempatanInput();
+                }
+            });
+
+            // Fungsi untuk memperbarui input hidden penempatan (create modal)
+            function updatePenempatanInput() {
+                const locations = [];
+                $('#daftarPenempatan .badge').each(function() {
+                    // Ambil teks lokasi (exclude tombol hapus)
+                    const locationText = $(this).contents().filter(function() {
+                        return this.nodeType === 3; // NodeType 3 adalah text node
+                    }).text().trim();
+
+                    if (locationText) {
+                        locations.push(locationText);
+                    }
+                });
+
+                $('#penempatan').val(locations.join(', '));
+            }
+
+            // Fungsi untuk memperbarui input hidden penempatan (edit modal)
+            function updateEditPenempatanInput() {
+                const locations = [];
+                $('#editDaftarPenempatan .badge').each(function() {
+                    // Ambil teks lokasi (exclude tombol hapus)
+                    const locationText = $(this).contents().filter(function() {
+                        return this.nodeType === 3; // NodeType 3 adalah text node
+                    }).text().trim();
+
+                    if (locationText) {
+                        locations.push(locationText);
+                    }
+                });
+
+                $('#edit_penempatan').val(JSON.stringify(locations));
+            }
+
+            // Reset modal create ketika ditutup
+            $('#createModal').on('hidden.bs.modal', function() {
+                $('#daftarPenempatan').empty();
+                $('#penempatan').val('');
+                $('.penempatan-input').val('');
+            });
+
+            // Reset modal edit ketika ditutup
+            $('#editModal').on('hidden.bs.modal', function() {
+                $('#editDaftarPenempatan').empty();
+                $('#edit_penempatan').val('');
+                $('.edit-penempatan-input').val('');
+            });
+
+            // Handle submit form edit
+            $('#editForm').on('submit', function(e) {
+                e.preventDefault();
+
+                const submitBtn = $('#editSubmitBtn');
+                const submitText = $('#editSubmitText');
+                const submitSpinner = $('#editSubmitSpinner');
+
+                // Show loading state
+                submitBtn.prop('disabled', true);
+                submitText.addClass('d-none');
+                submitSpinner.removeClass('d-none');
+
+                $.ajax({
+                    url: $(this).attr('action'),
+                    method: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        if (response.success) {
+                            if (response.action === 'generate_surat') {
+                                // Trigger generate file baru
+                                generateFile(response.id_generate);
+                                // Update status badge
+                                $('#status-' + response.id_generate).removeClass('badge-warning').addClass('badge-info').text('Proses Generate');
+                                // Reload setelah beberapa detik
+                                setTimeout(() => location.reload(), 3000);
+                            } else {
+                                location.reload();
+                            }
+                        } else {
+                            alert('Gagal memperbarui data: ' + (response.message || 'Terjadi kesalahan'));
+                        }
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 422) {
+                            // Validation errors
+                            const errors = xhr.responseJSON.errors;
+                            let errorMessage = 'Validasi gagal:\n';
+                            for (const field in errors) {
+                                errorMessage += `- ${errors[field][0]}\n`;
+                            }
+                            alert(errorMessage);
+                        } else {
+                            alert('Terjadi kesalahan sistem. Silakan coba lagi.');
+                        }
+                    },
+                    complete: function() {
+                        // Reset loading state
+                        submitBtn.prop('disabled', false);
+                        submitText.removeClass('d-none');
+                        submitSpinner.addClass('d-none');
+                    }
+                });
+            });
+        });
+
+        // Fungsi untuk generate file
+        function generateFile(id) {
+            let urlGenerate = '{{ route('surat-tugas-promotor.generate-file') }}';
+            $.post(urlGenerate, {
+                '_token': '{{ csrf_token() }}',
+                'id': id
+            }, function(data, status) {
+                console.log('Generate file response:', data);
+                if (data.status === 'success') {
+                    // Update status badge
+                    $('#status-' + id).removeClass('badge-warning').addClass('badge-info').text('Proses Generate');
+                } else {
+                    alert('Gagal memulai proses generate file.');
+                }
+            }).fail(function() {
+                console.error('Failed to trigger file generation.');
+                alert('Terjadi kesalahan saat generate file.');
+            });
+        }
+
+        function getDataEdit(element) {
+            let idEdit = $(element).data('id');
+            let urlEdit = '{{ route('surat-tugas-promotor.edit', ['id' => '__ID__']) }}'.replace('__ID__', idEdit);
+            let urlUpdate = '{{ route('surat-tugas-promotor.update', ['id' => '__ID__']) }}'.replace('__ID__', idEdit);
+
+            // Reset modal edit sebelum memuat data baru
+            $('#editDaftarPenempatan').empty();
+            $('.edit-penempatan-input').val('');
+
+            $.get(urlEdit, function(response) {
+                if (response.success) {
+                    let data = response.data;
+                    $('#editForm').attr('action', urlUpdate);
+
+                    $('#edit_nama_kandidat').val(data.nama_kandidat);
+                    $('#edit_tgl_penugasan').val(data.tgl_penugasan.substring(0, 10));
+                    $('#edit_tgl_surat_pembuatan').val(data.tgl_surat_pembuatan.substring(0, 10));
+
+                    // Proses data penempatan
+                    let penempatanArray = [];
+
+                    if (Array.isArray(data.penempatan)) {
+                        penempatanArray = data.penempatan;
+                    } else if (typeof data.penempatan === 'string') {
+                        // Coba parse jika berupa JSON string
+                        try {
+                            const parsed = JSON.parse(data.penempatan);
+                            penempatanArray = Array.isArray(parsed) ? parsed : [data.penempatan];
+                        } catch (e) {
+                            // Jika bukan JSON, split by comma
+                            penempatanArray = data.penempatan.split(',').map(item => item.trim());
+                        }
+                    } else {
+                        penempatanArray = [data.penempatan];
+                    }
+
+                    // Filter empty values
+                    penempatanArray = penempatanArray.filter(item => item && item.trim() !== '');
+
+                    // Tambahkan setiap lokasi sebagai badge
+                    penempatanArray.forEach(function(lokasi) {
+                        if (lokasi && lokasi.trim()) {
+                            const badge = `<span class="badge badge-primary p-2 d-flex align-items-center mb-2">
+                                ${lokasi.trim()}
+                                <button type="button" class="btn btn-sm btn-link text-danger p-0 ml-2 hapus-lokasi">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </span>`;
+                            $('#editDaftarPenempatan').append(badge);
+                        }
+                    });
+
+                    // Perbarui input hidden
+                    $('#edit_penempatan').val(JSON.stringify(penempatanArray));
+
+                    // Inisialisasi flatpickr untuk modal edit
+                    flatpickr("#edit_tgl_penugasan", {
+                        dateFormat: "Y-m-d",
+                        defaultDate: data.tgl_penugasan
+                    });
+
+                    flatpickr("#edit_tgl_surat_pembuatan", {
+                        dateFormat: "Y-m-d",
+                        defaultDate: data.tgl_surat_pembuatan
+                    });
+
+                } else {
+                    alert('Gagal memuat data. Silakan coba lagi.');
+                }
+            }).fail(function(xhr, status, error) {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan saat mengambil data.');
+            });
+        }
+
+        function getDataHapus(element) {
+            let idDelete = $(element).data('id');
+            let namaKandidat = $(element).closest('tr').find('.nama-kandidat').text();
+            let urlDelete = '{{ route('surat-tugas-promotor.destroy', ['id' => '__ID__']) }}'.replace('__ID__', idDelete);
+
+            $('#deleteForm').attr('action', urlDelete);
+            $('#hapus_nama_kandidat').text(namaKandidat);
+            $('#deleteSubmitBtn').prop('disabled', false);
+        }
+
+        function getInfoFile(element, id, type) {
+            let alertField = document.getElementById('alert-field');
+            element.innerHTML = `<i class="fas fa-spin fa-sync-alt"></i>`;
+            let btnPDF = document.getElementById('btn_pdf_' + id);
+            let btnDocx = document.getElementById('btn_word_' + id);
+
+            btnPDF.setAttribute('disabled', '');
+            btnDocx.setAttribute('disabled', '');
+
+            let urlFileCheck = '{{ route('surat-tugas-promotor.file-check', ['id' => '__ID__', 'type' => '__TYPE__']) }}';
+            $.get(urlFileCheck.replace('__ID__', id).replace('__TYPE__', type), function(data, status) {
+                if(data.status) {
+                    if(type == 'pdf') {
+                        let urlGenerate = '{{ route('surat-tugas-promotor.generate-pdf', ['id' => '__ID__']) }}';
+                        window.open(urlGenerate.replace('__ID__', id), '_blank');
+                        element.innerHTML = `<i class="fas fa-file-pdf"></i>`;
+                    } else if(type == 'docx') {
+                        let urlGenerate = '{{ route('surat-tugas-promotor.generate-word', ['id' => '__ID__']) }}';
+                        window.open(urlGenerate.replace('__ID__', id), '_blank');
+                        element.innerHTML = `<i class="fas fa-file-word"></i>`;
+                    }
+                    btnPDF.removeAttribute('disabled');
+                    btnDocx.removeAttribute('disabled');
+                } else {
+                    alertField.innerHTML = `
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            ${data.msg || 'Sepertinya file untuk surat ini hilang, sabar yaa masih di generate ulang kok!'}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    `;
+                    generateFile(id);
+                    element.innerHTML = `<i class="fas fa-file-${type.replace('docx', 'word')}"></i>`;
+                    btnPDF.removeAttribute('disabled');
+                    btnDocx.removeAttribute('disabled');
+                }
+            }).fail(function() {
+                alertField.innerHTML = `
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        Terjadi kesalahan saat memeriksa file.
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                `;
+                element.innerHTML = `<i class="fas fa-file-${type.replace('docx', 'word')}"></i>`;
+                btnPDF.removeAttribute('disabled');
+                btnDocx.removeAttribute('disabled');
+            });
+        }
+    </script>
+
+    <style>
+        .badge {
+            font-size: 0.9rem;
+        }
+
+        .hapus-lokasi {
+            font-size: 0.8rem;
+        }
+
+        .gap-2>* {
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+    </style>
 @endsection

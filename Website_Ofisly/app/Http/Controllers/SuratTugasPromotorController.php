@@ -13,11 +13,6 @@ use Illuminate\Validation\Rule;
 
 class SuratTugasPromotorController extends Controller
 {
-    // public function __construct()
-    // {
-    //     $this->middleware('can:manage_surat_tugas_promotor');
-    // }
-
     /**
      * Display a listing of the resource.
      */
@@ -145,12 +140,28 @@ class SuratTugasPromotorController extends Controller
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [
-            'nama_kandidat' => 'required|string|max:255',
-            'penempatan' => 'required|array|min:1',
-            'penempatan.*' => 'string|max:255',
-            'tgl_penugasan' => 'required|date',
-            'tgl_surat_pembuatan' => 'required|date',
+            'edit_nama_kandidat' => 'required|string|max:255',
+            'edit_penempatan' => 'required',
+            'edit_tgl_penugasan' => 'required|date',
+            'edit_tgl_surat_pembuatan' => 'required|date',
         ]);
+
+        // Konversi penempatan ke array jika berupa string JSON
+        $penempatan = $request->edit_penempatan;
+        if (is_string($penempatan) && json_decode($penempatan) !== null) {
+            $penempatan = json_decode($penempatan, true);
+        } elseif (is_string($penempatan)) {
+            $penempatan = explode(',', $penempatan);
+            $penempatan = array_map('trim', $penempatan);
+            $penempatan = array_filter($penempatan);
+        }
+
+        if (empty($penempatan)) {
+            return response()->json([
+                'success' => false,
+                'errors' => ['edit_penempatan' => ['Minimal harus ada 1 penempatan']]
+            ], 422);
+        }
 
         if ($validator->fails()) {
             return response()->json([
@@ -159,11 +170,21 @@ class SuratTugasPromotorController extends Controller
             ], 422);
         }
 
-        try {
+            try {
             $surat = SuratTugasPromotor::findOrFail($id);
+
+            // HAPUS FILE LAMA SEBELUM UPDATE
+            $this->deleteAssociatedFiles($surat);
+
             $surat->update([
-                ...$validator->validated(),
+                'nama_kandidat' => $request->edit_nama_kandidat,
+                'penempatan' => $penempatan,
+                'tgl_penugasan' => $request->edit_tgl_penugasan,
+                'tgl_surat_pembuatan' => $request->edit_tgl_surat_pembuatan,
                 'updated_by' => auth()->id(),
+                // KOSONGKAN PATH FILE UNTUK DIGENERATE ULANG
+                'file_path_docx' => null,
+                'file_path_pdf' => null,
             ]);
 
             Log::info('Surat tugas promotor updated', [
@@ -171,9 +192,12 @@ class SuratTugasPromotorController extends Controller
                 'by' => auth()->id()
             ]);
 
+            // KEMBALIKAN RESPONSE DENGAN DATA UNTUK GENERATE FILE
             return response()->json([
                 'success' => true,
                 'message' => 'Surat Tugas Promotor berhasil diperbarui',
+                'action' => 'generate_surat', // ← TAMBAHKAN INI
+                'id_generate' => $id // ← TAMBAHKAN INI
             ]);
 
         } catch (\Exception $e) {
@@ -247,46 +271,6 @@ class SuratTugasPromotorController extends Controller
     }
 
     /**
-     * Download file
-     */
-    // protected function downloadFile($id, $fileType)
-    // {
-    //     try {
-    //         $surat = SuratTugasPromotor::findOrFail($id);
-
-    //         if (!$surat->$fileType) {
-    //             throw new \Exception("File tidak ditemukan");
-    //         }
-
-    //         $relativePath = str_replace('/storage/', '', $surat->$fileType);
-    //         $filePath = storage_path('app/public/' . $relativePath);
-
-    //         if (!file_exists($filePath)) {
-    //             throw new \Exception("File tidak ditemukan di server");
-    //         }
-
-    //         $mimeType = mime_content_type($filePath);
-    //         $allowedMimes = [
-    //             'file_path_pdf' => 'application/pdf',
-    //             'file_path_docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    //         ];
-
-    //         if ($mimeType !== $allowedMimes[$fileType]) {
-    //             throw new \Exception("Tipe file tidak valid");
-    //         }
-
-    //         return response()
-    //             ->download($filePath, basename($filePath))
-    //             ->deleteFileAfterSend(false);
-
-    //     } catch (\Exception $e) {
-    //         Log::error('Error downloading file: ' . $e->getMessage());
-    //         return back()
-    //             ->with('error', $e->getMessage());
-    //     }
-    // }
-
-    /**
      * Generate File
      */
     public function generateFile(Request $request)
@@ -336,50 +320,68 @@ class SuratTugasPromotorController extends Controller
         }
     }
 
-    // /**
-    //  * Receive files from Flask API
-    //  */
-    // public function receiveFiles(Request $request)
-    // {
-    //     $validator = Validator::make($request->all(), [
-    //         'file_docx' => 'required|file|mimes:docx',
-    //         'file_pdf' => 'required|file|mimes:pdf',
-    //     ]);
+    /**
+     * File Check
+     */
+    public function fileCheck($id, $type) {
+        $apiURL = env('FLASK_API_URL') . '/check/generate/run';
+        $dataSurat = SuratTugasPromotor::findOrFail($id);
+        $pathDocx = $dataSurat->file_path_docx;
+        $pathPDF = $dataSurat->file_path_pdf;
+        if($type == 'pdf') {
+            if(is_file(public_path() . $pathPDF)) {
+                return response()->json([
+                    'status' => true,
+                ]);
+            } else {
+                $responses = Http::post($apiURL, [
+                    'id' => $id
+                ]);
+                $responsesData = $responses->json();
+                if($responses->successful()) {
+                    if($responsesData['status']) {
+                        return response()->json([
+                            'status' => true,
+                            'msg' => 'File ini masih proses generate yaa, mohon bersabar!'
+                        ]);
+                    } else {
+                        return response()->json([
+                            'status' => false,
+                            'msg' => 'File ini sepertinya terhapus, masukan datanya lagi yaa!'
+                        ]);
+                    }
+                }
+            }
+        } else if($type == 'docx') {
+            if(is_file(public_path() . $pathDocx)) {
+                return response()->json([
+                    'status' => true,
+                ]);
+            } else {
+                $responses = Http::post($apiURL, [
+                    'id' => $id
+                ]);
+                $responsesData = $responses->json();
+                if($responses->successful()) {
+                    if($responsesData['status']) {
+                        return response()->json([
+                            'status' => true,
+                        ]);
+                    } else {
+                        return response()->json([
+                            'status' => false,
+                            'msg' => 'File ini masih proses generate yaa, mohon bersabar!'
+                        ]);
+                    }
+                }
+            }
+        }
 
-    //     if ($validator->fails()) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Invalid file upload',
-    //             'errors' => $validator->errors()
-    //         ], 422);
-    //     }
-
-    //     try {
-    //         // Simpan file DOCX
-    //         $docxFile = $request->file('file_docx');
-    //         $docxPath = $docxFile->store('surat_tugas_promotor', 'public');
-
-    //         // Simpan file PDF
-    //         $pdfFile = $request->file('file_pdf');
-    //         $pdfPath = $pdfFile->store('surat_tugas_promotor', 'public');
-
-    //         // Return JSON response dengan path file
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => 'Files uploaded successfully',
-    //             'files' => [
-    //                 'docx' => '/storage/' . $docxPath,
-    //                 'pdf' => '/storage/' . $pdfPath
-    //             ]
-    //         ]);
-
-    //     } catch (\Exception $e) {
-    //         Log::error('Error receiving files from Flask: ' . $e->getMessage());
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Failed to process files'
-    //         ], 500);
-    //     }
-    // }
+        return response()->json([
+            'status' => false,
+            'data' => $dataSurat,
+            'type' => $type
+        ]);
+    }
 }
 

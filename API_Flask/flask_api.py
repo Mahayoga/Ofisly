@@ -236,7 +236,7 @@ def driver_mandiri():
 # Surat Tugas Promotor Indosat
 @app.route('/generate/surat/promotor', methods=['POST'])
 def generate_surat_promotor():
-    laravel_url = 'http://localhost:8000/api/send/surat/promotor'
+    laravel_url = f'{os.getenv("LARAVEL_ENDPOINT")}/api/send/surat/promotor'
     file_template_path = 'Contoh Template/275-Surat Tugas Promotor Indosat-ahmad.docx'
     
     word = None
@@ -251,9 +251,6 @@ def generate_surat_promotor():
         # Get data from database
         mycursor = mydb.cursor(dictionary=True)
        
-        # Debug: Print the incoming request data
-        print(f"Request JSON: {request.json}")
-       
         # Pastikan id_surat_tugas_promotor ada dalam request
         if 'id_surat_tugas_promotor' not in request.json:
             return jsonify({
@@ -262,6 +259,10 @@ def generate_surat_promotor():
             })
        
         id_surat = request.json['id_surat_tugas_promotor']
+        
+        # Commit any pending transactions to ensure we get latest data
+        mydb.commit()
+        
         sqlStr = f"SELECT * FROM surat_tugas_promotor WHERE id_surat_tugas_promotor = '{id_surat}'"
        
         print(f"Executing SQL: {sqlStr}")
@@ -269,26 +270,9 @@ def generate_surat_promotor():
         result = mycursor.fetchone()
 
         if not result:
-            # Debug: Check if table exists and has data
-            mycursor.execute("SHOW TABLES LIKE 'surat_tugas_promotor'")
-            table_exists = mycursor.fetchone()
-           
-            if not table_exists:
-                return jsonify({
-                    'status': 'error',
-                    'message': 'Table surat_tugas_promotor does not exist'
-                })
-           
-            mycursor.execute("SELECT COUNT(*) as count FROM surat_tugas_promotor")
-            count_result = mycursor.fetchone()
-           
             return jsonify({
                 'status': 'error',
-                'message': f'Data not found for id: {id_surat}',
-                'details': {
-                    'table_exists': bool(table_exists),
-                    'total_records': count_result['count'] if count_result else 0
-                }
+                'message': f'Data not found for id: {id_surat}'
             })
 
         # Load template document
@@ -313,54 +297,106 @@ def generate_surat_promotor():
             except:
                 return ""
 
-        # Process penempatan data
+        # Process penempatan data - handle various formats
         penempatan = result.get('penempatan', '[]')
+        print(f"Raw penempatan data: {penempatan} (type: {type(penempatan)})")
+        
         try:
+            # Handle different formats of penempatan data
             if isinstance(penempatan, str):
+                # Try to parse as JSON first
                 if penempatan.startswith('[') and penempatan.endswith(']'):
                     penempatan = json.loads(penempatan)
+                elif penempatan.startswith('"') and penempatan.endswith('"'):
+                    # Remove quotes and split by comma
+                    penempatan = penempatan.strip('"').split(',')
                 else:
+                    # Split by comma as fallback
                     penempatan = [item.strip() for item in penempatan.split(',') if item.strip()]
            
+            # Ensure we have a list
             if not isinstance(penempatan, list):
                 penempatan = [str(penempatan)]
+                
+            # Clean each item
+            penempatan = [str(item).strip().strip('"\'[]') for item in penempatan if item and str(item).strip()]
+            
         except Exception as e:
             print(f"Error processing penempatan: {str(e)}")
             penempatan = ["-"]
 
+        print(f"Processed penempatan: {penempatan}")
+
         # Format penempatan
         penempatan_text = ""
-        if len(penempatan) == 1:
-            penempatan_text = penempatan[0]
+        if penempatan and any(item.strip() for item in penempatan):
+            if len(penempatan) == 1:
+                penempatan_text = penempatan[0]
+            else:
+                numbered_list = []
+                for i, item in enumerate(penempatan, 1):
+                    if item.strip():  # Only add non-empty items
+                        numbered_list.append(f"{i}. {item.strip()}")
+                
+                if numbered_list:
+                    penempatan_text = "\n".join(numbered_list)
+                else:
+                    penempatan_text = "-"
         else:
-            penempatan_text = "\n• ".join(penempatan)
-            penempatan_text = "• " + penempatan_text
+            penempatan_text = "-"
+
+        # Get other data
+        nama_kandidat = result.get('nama_kandidat', '-') or '-'
+        tgl_surat_pembuatan = result.get('tgl_surat_pembuatan', '') or ''
+        tgl_penugasan = result.get('tgl_penugasan', '') or ''
+
+        print(f"Data used for generation:")
+        print(f"  Nama: {nama_kandidat}")
+        print(f"  Penempatan: {penempatan_text}")
+        print(f"  Tgl Pembuatan: {tgl_surat_pembuatan}")
+        print(f"  Tgl Penugasan: {tgl_penugasan}")
 
         # Replace placeholders in paragraphs
         for paragraph in document.paragraphs:
-            paragraph.text = paragraph.text.replace('__PENEMPATAN__', penempatan_text)
-            paragraph.text = paragraph.text.replace('__DATATGLSURATPEMBUATAN__', format_date(result.get('tgl_surat_pembuatan')))
-            paragraph.text = paragraph.text.replace('__NAMAKANDIDAT__', result.get('nama_kandidat', '-'))
-            paragraph.text = paragraph.text.replace('__DATATGLPENUGASAN__', format_date(result.get('tgl_penugasan')))
+            original_text = paragraph.text
+            new_text = original_text
+            
+            new_text = new_text.replace('__PENEMPATAN__', penempatan_text)
+            new_text = new_text.replace('__DATATGLSURATPEMBUATAN__', format_date(tgl_surat_pembuatan))
+            new_text = new_text.replace('__NAMAKANDIDAT__', nama_kandidat)
+            new_text = new_text.replace('__DATATGLPENUGASAN__', format_date(tgl_penugasan))
+            
+            if new_text != original_text:
+                paragraph.text = new_text
+                print(f"Replaced in paragraph: {original_text} -> {new_text}")
 
         # Replace placeholders in tables
         for table in document.tables:
             for row in table.rows:
                 for cell in row.cells:
-                    cell.text = cell.text.replace('__PENEMPATAN__', penempatan_text)
-                    cell.text = cell.text.replace('__DATATGLSURATPEMBUATAN__', format_date(result.get('tgl_surat_pembuatan')))
-                    cell.text = cell.text.replace('__NAMAKANDIDAT__', result.get('nama_kandidat', '-'))
-                    cell.text = cell.text.replace('__DATATGLPENUGASAN__', format_date(result.get('tgl_penugasan')))
+                    original_text = cell.text
+                    new_text = original_text
+                    
+                    new_text = new_text.replace('__PENEMPATAN__', penempatan_text)
+                    new_text = new_text.replace('__DATATGLSURATPEMBUATAN__', format_date(tgl_surat_pembuatan))
+                    new_text = new_text.replace('__NAMAKANDIDAT__', nama_kandidat)
+                    new_text = new_text.replace('__DATATGLPENUGASAN__', format_date(tgl_penugasan))
+                    
+                    if new_text != original_text:
+                        cell.text = new_text
+                        print(f"Replaced in table cell: {original_text} -> {new_text}")
 
         # Save documents
         print('Saving Docx...')
-        output_filename = f'Surat Penempatan Promotor_{result["nama_kandidat"]}.docx'
-        document.save(output_filename)
+        output_filename = f'Surat_Penempatan_Promotor_{nama_kandidat}_{id_surat}.docx'
+        safe_filename = re.sub(r'[^\w\-_\. ]', '_', output_filename)
+        document.save(safe_filename)
        
         dirname = os.path.dirname(__file__)
-        filename_docx = os.path.join(dirname, output_filename)
-        filename_pdf = os.path.join(dirname, f'Surat Penempatan Promotor_{result["nama_kandidat"]}.pdf')
+        filename_docx = os.path.join(dirname, safe_filename)
+        filename_pdf = os.path.join(dirname, f'Surat_Penempatan_Promotor_{nama_kandidat}_{id_surat}.pdf')
        
+        # Convert to PDF
         word.Visible = False
         doc = word.Documents.Open(filename_docx, ReadOnly=True)
         print('Saving PDF...')
@@ -369,8 +405,9 @@ def generate_surat_promotor():
         doc = None
         word.Quit()
         word = None
-        print('Done!')
+        print('Conversion done!')
 
+        # Start background thread for file upload
         print('Start threading in background...')
         t = threading.Thread(
             target=background_generate_file,
@@ -378,22 +415,26 @@ def generate_surat_promotor():
                 filename_docx,
                 filename_pdf,
                 laravel_url,
-                request.json.get('id_surat_tugas_promotor', id_surat),
+                id_surat,
                 request.json.get('table', 'surat_tugas_promotor'),
                 "id_surat_tugas_promotor"
             )
         )
-        t.daemon = True  # Make thread daemon so it doesn't prevent app shutdown
+        t.daemon = True
         t.start()
-        print('After threading...')
-        print('Sending response!')
-
+        
+        # Add to processes list
+        processesId.append(id_surat)
+        
+        print('File generation process started successfully')
         return jsonify({'status': 'success'})
        
     except Exception as e:
         print(f"Error in generate_surat_promotor: {str(e)}")
+        import traceback
+        traceback.print_exc()
         
-        # Clean up Word application if it exists
+        # Clean up
         try:
             if doc:
                 doc.Close()
