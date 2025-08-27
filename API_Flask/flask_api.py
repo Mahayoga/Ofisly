@@ -13,6 +13,9 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH
 import requests
 import mysql.connector
 from dotenv import load_dotenv
+import re
+from docx.shared import Pt
+import json
 
 app = Flask(__name__)
 CORS(app)
@@ -229,3 +232,226 @@ def driver_mandiri():
         return jsonify({'status': 'success'})
     else:
         return jsonify({'status': 'error'})
+    
+# Surat Tugas Promotor Indosat
+@app.route('/generate/surat/promotor', methods=['POST'])
+def generate_surat_promotor():
+    laravel_url = f'{os.getenv("LARAVEL_ENDPOINT")}/api/send/surat/promotor'
+    file_template_path = 'Contoh Template/275-Surat Tugas Promotor Indosat-ahmad.docx'
+    
+    word = None
+    doc = None
+   
+    try:
+        # Initialize Word application
+        pythoncom.CoInitialize()
+        word = comtypes.client.CreateObject('Word.Application')
+        word.Visible = False
+       
+        # Get data from database
+        mycursor = mydb.cursor(dictionary=True)
+       
+        # Pastikan id_surat_tugas_promotor ada dalam request
+        if 'id_surat_tugas_promotor' not in request.json:
+            return jsonify({
+                'status': 'error',
+                'message': 'id_surat_tugas_promotor is required in request'
+            })
+       
+        id_surat = request.json['id_surat_tugas_promotor']
+        
+        # Commit any pending transactions to ensure we get latest data
+        mydb.commit()
+        
+        sqlStr = f"SELECT * FROM surat_tugas_promotor WHERE id_surat_tugas_promotor = '{id_surat}'"
+       
+        print(f"Executing SQL: {sqlStr}")
+        mycursor.execute(sqlStr)
+        result = mycursor.fetchone()
+
+        if not result:
+            return jsonify({
+                'status': 'error',
+                'message': f'Data not found for id: {id_surat}'
+            })
+
+        # Load template document
+        if not os.path.exists(file_template_path):
+            return jsonify({
+                'status': 'error',
+                'message': f'Template file not found: {file_template_path}'
+            })
+
+        document = Document(file_template_path)
+
+        # Format date function
+        def format_date(date_str):
+            if not date_str:
+                return ""
+            try:
+                if isinstance(date_str, str):
+                    date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+                else:
+                    date_obj = date_str
+                return f"{date_obj.day} {bulan[date_obj.month-1]} {date_obj.year}"
+            except:
+                return ""
+
+        # Process penempatan data - handle various formats
+        penempatan = result.get('penempatan', '[]')
+        print(f"Raw penempatan data: {penempatan} (type: {type(penempatan)})")
+        
+        try:
+            # Handle different formats of penempatan data
+            if isinstance(penempatan, str):
+                # Try to parse as JSON first
+                if penempatan.startswith('[') and penempatan.endswith(']'):
+                    penempatan = json.loads(penempatan)
+                elif penempatan.startswith('"') and penempatan.endswith('"'):
+                    # Remove quotes and split by comma
+                    penempatan = penempatan.strip('"').split(',')
+                else:
+                    # Split by comma as fallback
+                    penempatan = [item.strip() for item in penempatan.split(',') if item.strip()]
+           
+            # Ensure we have a list
+            if not isinstance(penempatan, list):
+                penempatan = [str(penempatan)]
+                
+            # Clean each item
+            penempatan = [str(item).strip().strip('"\'[]') for item in penempatan if item and str(item).strip()]
+            
+        except Exception as e:
+            print(f"Error processing penempatan: {str(e)}")
+            penempatan = ["-"]
+
+        print(f"Processed penempatan: {penempatan}")
+
+        # Format penempatan
+        penempatan_text = ""
+        if penempatan and any(item.strip() for item in penempatan):
+            if len(penempatan) == 1:
+                penempatan_text = penempatan[0]
+            else:
+                numbered_list = []
+                for i, item in enumerate(penempatan, 1):
+                    if item.strip():  # Only add non-empty items
+                        numbered_list.append(f"{i}. {item.strip()}")
+                
+                if numbered_list:
+                    penempatan_text = "\n".join(numbered_list)
+                else:
+                    penempatan_text = "-"
+        else:
+            penempatan_text = "-"
+
+        # Get other data
+        nama_kandidat = result.get('nama_kandidat', '-') or '-'
+        tgl_surat_pembuatan = result.get('tgl_surat_pembuatan', '') or ''
+        tgl_penugasan = result.get('tgl_penugasan', '') or ''
+
+        print(f"Data used for generation:")
+        print(f"  Nama: {nama_kandidat}")
+        print(f"  Penempatan: {penempatan_text}")
+        print(f"  Tgl Pembuatan: {tgl_surat_pembuatan}")
+        print(f"  Tgl Penugasan: {tgl_penugasan}")
+
+        # Replace placeholders in paragraphs
+        for paragraph in document.paragraphs:
+            original_text = paragraph.text
+            new_text = original_text
+            
+            new_text = new_text.replace('__PENEMPATAN__', penempatan_text)
+            new_text = new_text.replace('__DATATGLSURATPEMBUATAN__', format_date(tgl_surat_pembuatan))
+            new_text = new_text.replace('__NAMAKANDIDAT__', nama_kandidat)
+            new_text = new_text.replace('__DATATGLPENUGASAN__', format_date(tgl_penugasan))
+            
+            if new_text != original_text:
+                paragraph.text = new_text
+                print(f"Replaced in paragraph: {original_text} -> {new_text}")
+
+        # Replace placeholders in tables
+        for table in document.tables:
+            for row in table.rows:
+                for cell in row.cells:
+                    original_text = cell.text
+                    new_text = original_text
+                    
+                    new_text = new_text.replace('__PENEMPATAN__', penempatan_text)
+                    new_text = new_text.replace('__DATATGLSURATPEMBUATAN__', format_date(tgl_surat_pembuatan))
+                    new_text = new_text.replace('__NAMAKANDIDAT__', nama_kandidat)
+                    new_text = new_text.replace('__DATATGLPENUGASAN__', format_date(tgl_penugasan))
+                    
+                    if new_text != original_text:
+                        cell.text = new_text
+                        print(f"Replaced in table cell: {original_text} -> {new_text}")
+
+        # Save documents
+        print('Saving Docx...')
+        output_filename = f'Surat_Penempatan_Promotor_{nama_kandidat}_{id_surat}.docx'
+        safe_filename = re.sub(r'[^\w\-_\. ]', '_', output_filename)
+        document.save(safe_filename)
+       
+        dirname = os.path.dirname(__file__)
+        filename_docx = os.path.join(dirname, safe_filename)
+        filename_pdf = os.path.join(dirname, f'Surat_Penempatan_Promotor_{nama_kandidat}_{id_surat}.pdf')
+       
+        # Convert to PDF
+        word.Visible = False
+        doc = word.Documents.Open(filename_docx, ReadOnly=True)
+        print('Saving PDF...')
+        doc.SaveAs(filename_pdf, FileFormat=wdFormatPDF)
+        doc.Close()
+        doc = None
+        word.Quit()
+        word = None
+        print('Conversion done!')
+
+        # Start background thread for file upload
+        print('Start threading in background...')
+        t = threading.Thread(
+            target=background_generate_file,
+            args=(
+                filename_docx,
+                filename_pdf,
+                laravel_url,
+                id_surat,
+                request.json.get('table', 'surat_tugas_promotor'),
+                "id_surat_tugas_promotor"
+            )
+        )
+        t.daemon = True
+        t.start()
+        
+        # Add to processes list
+        processesId.append(id_surat)
+        
+        print('File generation process started successfully')
+        return jsonify({'status': 'success'})
+       
+    except Exception as e:
+        print(f"Error in generate_surat_promotor: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        
+        # Clean up
+        try:
+            if doc:
+                doc.Close()
+            if word:
+                word.Quit()
+        except:
+            pass
+            
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        })
+    finally:
+        try:
+            pythoncom.CoUninitialize()
+        except:
+            pass
+
+if __name__ == '__main__':
+    app.run(debug=True)

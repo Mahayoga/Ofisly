@@ -21,8 +21,6 @@ return new class extends Migration
             $table->date('tgl_mulai_penugasan');
             $table->date('tgl_selesai_penugasan');
             $table->date('tgl_surat_pembuatan');
-            $table->string('status')->nullable();
-            $table->string('created_by')->nullable();
             $table->string('file_path_docx')->nullable();
             $table->string('file_path_pdf')->nullable();
             /**
