@@ -100,10 +100,10 @@
             @csrf
             <div class="modal-body">
               <div class="row mb-3">
-                {{-- <div class="col-md-6">
+                <div class="col-md-6">
                   <label>Nomor Surat</label>
                   <input type="text" class="form-control" id="nomor_surat" name="nomor_surat" required>
-                </div> --}}
+                </div>
                 <div class="col-md-6">
                   <label>Nama Kandidat</label>
                   <input type="text" class="form-control" id="nama_kandidat" name="nama_kandidat" required>
@@ -148,10 +148,10 @@
             @method('PUT')
             <div class="modal-body">
               <div class="row mb-3">
-                {{-- <div class="col-md-6">
+                <div class="col-md-6">
                   <label>Nomor Surat</label>
-                  <input type="text" class="form-control" id="edit_nomor_surat" name="nomor_surat" required>
-                </div> --}}
+                  <input type="text" class="form-control" id="edit_nomor_surat" name="edit_nomor_surat" required>
+                </div>
                 <div class="col-md-6">
                   <label>Nama Kandidat</label>
                   <input type="text" class="form-control" id="edit_nama_kandidat" name="edit_nama_kandidat" required>
