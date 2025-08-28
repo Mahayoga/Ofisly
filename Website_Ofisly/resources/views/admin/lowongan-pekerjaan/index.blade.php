@@ -120,29 +120,35 @@
           @csrf
           <div class="modal-body">
             <div class="row mb-3">
-              <div class="col-md-6">
-                <label for="judul" class="form-label">Judul</label>
-                <input type="text" class="form-control" id="judul" name="judul" required>
-              </div>
-              <div class="col-md-6">
-                <label for="deskripsi" class="form-label">Deskripsi</label>
-                <input type="hidden" name="content_add", id="content_add">
-                <div id="quill-desc-add" name="deskripsi"></div>
-              </div>
               <div class="col-md-6 mt-2">
                 <div class="form-group">
-                  <label for="gambar">Upload Poster Lowongan</label>
+                  <label for="gambar" class="font-weight-bold">Upload Poster Lowongan</label>
                   <input type="file" class="form-control-file" id="gambar" name="gambar" accept="image/*" required>
                 </div>
               </div>
+              <div class="col-md-6">
+                <div class="row">
+                  <div class="col-md-12">
+                    <label for="judul" class="form-label font-weight-bold">Judul</label>
+                    <input type="text" class="form-control" id="judul" name="judul" required>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-12" style="padding-bottom: 20vh">
+                <label for="deskripsi" class="form-label font-weight-bold">Deskripsi</label>
+                <input type="hidden" name="content_add", id="content_add">
+                <div id="quill-desc-add" name="deskripsi"></div>
+              </div>
+              <div class="col-md-12">
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                  <button type="submit" class="btn btn-primary" id="createSubmitBtn">
+                    <span id="createSubmitText">Simpan</span>
+                    <span id="createSubmitSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-            <button type="submit" class="btn btn-primary" id="createSubmitBtn">
-              <span id="createSubmitText">Simpan</span>
-              <span id="createSubmitSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-            </button>
           </div>
         </form>
       </div>
@@ -165,27 +171,29 @@
           <div class="modal-body">
             <div class="row mb-3">
               <div class="col-md-6">
-                <label for="edit_judul" class="form-label">Judul</label>
-                <input type="text" class="form-control" id="edit_judul" name="edit_judul" required>
-              </div>
-              <div class="col-md-6">
-                <label for="deskripsi" class="form-label">Deskripsi</label>
-                <input type="hidden" name="content_edit", id="content_edit">
-                <div id="quill-desc-edit" name="deskripsi"></div>
-              </div>
-              <div class="col-md-6">
-                <label for="edit_gambar" class="form-label">Gambar</label>
+                <label for="edit_gambar" class="form-label font-weight-bold">Gambar</label>
                 <input type="file" class="form-control" id="edit_gambar" name="edit_gambar" accept="image/*">
                 <img id="preview_gambar" src="" alt="Preview" class="mt-2 d-none" width="150">
               </div>
+              <div class="col-md-6">
+                <label for="edit_judul" class="form-label font-weight-bold">Judul</label>
+                <input type="text" class="form-control" id="edit_judul" name="edit_judul" required>
+              </div>
+              <div class="col-md-12 mt-4" style="padding-bottom: 20vh">
+                <label for="deskripsi" class="form-label font-weight-bold">Deskripsi</label>
+                <input type="hidden" name="content_edit", id="content_edit">
+                <div id="quill-desc-edit" name="deskripsi"></div>
+              </div>
+              <div class="col-md-12">
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                  <button type="submit" class="btn btn-primary" id="editSubmitBtn">
+                    <span id="editSubmitText">Simpan</span>
+                    <span id="editSubmitSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-            <button type="submit" class="btn btn-primary" id="editSubmitBtn">
-              <span id="editSubmitText">Simpan</span>
-              <span id="editSubmitSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-            </button>
           </div>
         </form>
       </div>

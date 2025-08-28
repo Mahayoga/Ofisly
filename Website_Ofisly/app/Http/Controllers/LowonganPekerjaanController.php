@@ -86,7 +86,7 @@ class LowonganPekerjaanController extends Controller
 
             $data = [
                 'judul'     => $request->edit_judul,
-                'deskripsi' => $request->content_edit,
+                'deskripsi' => Purifier::clean($request->content_edit),
             ];
 
             if ($request->hasFile('edit_gambar')) {
