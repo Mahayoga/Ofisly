@@ -20,61 +20,40 @@ class SuratTugasMandiriController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'nama_kandidat' => 'required|string|max:255',
-            'jabatan_kandidat' => 'required|string|max:255',
-            'tgl_mulai_penempatan' => 'required|date',
+{
+    $request->validate([
+        'nomor_surat' => 'required|string|max:50',
+        'nama_kandidat' => 'required|string|max:255',
+        'jabatan_kandidat' => 'required|string|max:255',
+        'tgl_mulai_penempatan' => 'required|date',
+    ]);
+
+    try {
+        $now = Carbon::now();
+
+        $resultCreate = SuratTugasMandiriModel::create([
+            'nomor_surat' => $request->nomor_surat,
+            'nama_kandidat' => $request->nama_kandidat,
+            'jabatan_kandidat' => $request->jabatan_kandidat,
+            'tgl_mulai_penempatan' => $request->tgl_mulai_penempatan,
+            'tgl_surat_pembuatan' => $now->format('Y-m-d'),
         ]);
 
-        try {
-            $now = Carbon::now();
-            $bulanRomawi = $this->convertToRoman($now->month); 
-            $tahun = $now->year;
-            $lastSurat = SuratTugasMandiriModel::whereYear('tgl_surat_pembuatan', $tahun)
-                ->whereMonth('tgl_surat_pembuatan', $now->month)
-                ->orderBy('id_surat_penempatan', 'desc')
-                ->first();
-
-            if ($lastSurat) {
-                $lastNumber = (int) substr($lastSurat->nomor_surat, 0, 3);
-                $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
-            } else {
-                $newNumber = '001'; 
-            }
-
-            $nomorSurat = "{$newNumber}/PI-SBY/Mandiri/{$bulanRomawi}/{$tahun}";
-            $resultCreate = SuratTugasMandiriModel::create([
-                'nomor_surat' => $nomorSurat,
-                'nama_kandidat' => $request->nama_kandidat,
-                'jabatan_kandidat' => $request->jabatan_kandidat,
-                'tgl_mulai_penempatan' => $request->tgl_mulai_penempatan,
-                'tgl_surat_pembuatan' => $now->format('Y-m-d'),
+        return redirect()->route('surat-tugas-mandiri.index')
+            ->with([
+                'success' => 'Surat Tugas Mandiri berhasil dibuat',
+                'action' => 'generate_surat',
+                'id_generate' => $resultCreate->id_surat_penempatan
             ]);
 
-            return redirect()->route('surat-tugas-mandiri.index')
-                ->with([
-                    'success' => 'Surat Tugas Mandiri berhasil dibuat',
-                    'action' => 'generate_surat',
-                    'id_generate' => $resultCreate->id_surat_penempatan
-                ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
-        }
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+        ], 500);
     }
+}
 
-    private function convertToRoman($month)
-    {
-        $romawi = [
-            1 => 'I', 2 => 'II', 3 => 'III', 4 => 'IV', 5 => 'V', 6 => 'VI',
-            7 => 'VII', 8 => 'VIII', 9 => 'IX', 10 => 'X', 11 => 'XI', 12 => 'XII'
-        ];
-        return $romawi[$month];
-    }
 
     public function edit($id)
     {
