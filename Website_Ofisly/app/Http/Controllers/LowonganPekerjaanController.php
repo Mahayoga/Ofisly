@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\LowonganPekerjaanModel;
 use Illuminate\Support\Facades\Storage;
+use Mews\Purifier\Facades\Purifier;
 
 class LowonganPekerjaanController extends Controller
 {
@@ -18,7 +19,7 @@ class LowonganPekerjaanController extends Controller
     {
         $request->validate([
             'judul' => 'required|string|max:255',
-            'deskripsi' => 'required|string',
+            'content_add' => 'required|string',
             'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ], [
             'gambar.max' => 'Ukuran file tidak boleh lebih dari 2MB',
@@ -28,7 +29,7 @@ class LowonganPekerjaanController extends Controller
         try {
             $data = [
                 'judul'        => $request->judul,
-                'deskripsi'    => $request->deskripsi,
+                'deskripsi'    => Purifier::clean($request->content_add),
                 'tanggal_post' => now(), 
             ];
 
@@ -73,7 +74,7 @@ class LowonganPekerjaanController extends Controller
     {
         $request->validate([
             'edit_judul'     => 'required|string|max:255',
-            'edit_deskripsi' => 'required|string',
+            'content_edit' => 'required|string',
             'edit_gambar'    => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ], [
             'edit_gambar.max'   => 'Ukuran file tidak boleh lebih dari 2MB',
@@ -85,7 +86,7 @@ class LowonganPekerjaanController extends Controller
 
             $data = [
                 'judul'     => $request->edit_judul,
-                'deskripsi' => $request->edit_deskripsi,
+                'deskripsi' => Purifier::clean($request->content_edit),
             ];
 
             if ($request->hasFile('edit_gambar')) {
