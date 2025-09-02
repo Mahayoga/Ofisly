@@ -15,9 +15,21 @@ class SuratTugasMandiriController extends Controller
 {
     public function index()
     {
-        $suratPenempatan = SuratTugasMandiriModel::latest()->orderBy('created_at', 'desc')->get();
-        return view('admin.surat-tugas-mandiri.index', compact('suratPenempatan'));
+    $suratPenempatan = SuratTugasMandiriModel::latest()->orderBy('created_at', 'desc')->get();
+    $lastNomor = SuratTugasMandiriModel::latest('created_at')->value('nomor_surat');
+    if ($lastNomor) {
+        $parts = explode('/', $lastNomor);
+        $lastNumber = (int)$parts[0];
+        $newNumber = str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+        $newNomor = $newNumber . '/' . $parts[1] . '/' . $parts[2] . '/' . $parts[3] . '/' . $parts[4];
+    } else {
+        $newNomor = '001/PI-SBY/Mandiri/' . date('m') . '/' . date('Y');
     }
+
+    return view('admin.surat-tugas-mandiri.index', compact('suratPenempatan', 'lastNomor', 'newNomor'));
+}
+
+
 
     public function store(Request $request)
 {
@@ -75,7 +87,7 @@ class SuratTugasMandiriController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            // 'nomor_surat' => 'required|string|max:30',
+            'edit_nomor_surat' => 'required|string|max:30',
             'edit_nama_kandidat' => 'required|string|max:255',
             'edit_jabatan_kandidat' => 'required|string|max:255',
             'edit_tgl_mulai_penempatan' => 'required|date',
@@ -84,7 +96,7 @@ class SuratTugasMandiriController extends Controller
         try {
             $suratPenempatan = SuratTugasMandiriModel::findOrFail($id);
             $suratPenempatan->update([
-                // 'nomor_surat' => $request->nomor_surat,
+                'nomor_surat' => $request->edit_nomor_surat,
                 'nama_kandidat' => $request->edit_nama_kandidat,
                 'jabatan_kandidat' => $request->edit_jabatan_kandidat,
                 'tgl_mulai_penempatan' => $request->edit_tgl_mulai_penempatan,
