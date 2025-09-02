@@ -36,13 +36,8 @@ Route::middleware(['role.auth', 'auth'])->group(function () {
         });
 
     Route::resource('surat-tugas', SuratTugasPenggantiDriverController::class);
-        Route::get('/get-data/surat-tugas', [SuratTugasPenggantiDriverController::class, 'getData'])->name('surat-tugas.getData');
         Route::prefix('surat-tugas')->group(function () {
-            Route::get('/', [SuratTugasPenggantiDriverController::class, 'index'])->name('surat-tugas.index');
-            Route::post('/', [SuratTugasPenggantiDriverController::class, 'store'])->name('surat-tugas.store');
-            Route::get('/{id}/edit', [SuratTugasPenggantiDriverController::class, 'edit'])->name('surat-tugas.edit');
-            Route::put('/{id}', [SuratTugasPenggantiDriverController::class, 'update'])->name('surat-tugas.update');
-            Route::delete('/{id}', [SuratTugasPenggantiDriverController::class, 'destroy'])->name('surat-tugas.destroy');
+            Route::get('/get/latest/data', [SuratTugasPenggantiDriverController::class, 'fetchRowData'])->name('surat-tugas.fetchRowData');
             Route::get('/generate-pdf/{id}', [SuratTugasPenggantiDriverController::class, 'generatePDF'])->name('surat-tugas.generate-pdf');
             Route::get('/generate-word/{id}', [SuratTugasPenggantiDriverController::class, 'generateWord'])->name('surat-tugas.generate-word');
             Route::post('/generate/file', [SuratTugasPenggantiDriverController::class, 'generateFile'])->name('surat-tugas.generate-file');
