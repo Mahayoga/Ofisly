@@ -127,7 +127,6 @@ class SuratTugasPenggantiDriverController extends Controller
 
     public function update(Request $request, $id)
     {
-        // dd($request->all());
         $request->validate([
             'edit_nama_kandidat' => 'required|string|max:255',
             "edit_nik_kandidat" => "required|string|max:16",
@@ -137,6 +136,7 @@ class SuratTugasPenggantiDriverController extends Controller
             "edit_tgl_mulai_penugasan" => "required|date",
             "edit_tgl_selesai_penugasan" => "required|date",
         ]);
+
 
         try {
             $surat = SuratTugasPenggantiDriverModel::findOrFail($id);
@@ -161,19 +161,18 @@ class SuratTugasPenggantiDriverController extends Controller
                 Storage::disk('public')->delete(str_replace('/storage/', '', $pathPDF));
             }
 
-            return redirect()->route('surat-tugas.index')
-                ->with([
-                    'success' => 'Surat Tugas berhasil di edit, sabar ya masih di generate ulang!',
-                    'action' => true,
-                    'id_generate' => $surat->id_surat_tugas
-                ]);
+            // return redirect()->route('surat-tugas.index')
+            //     ->with([
+            //         'success' => 'Surat Tugas berhasil di edit, sabar ya masih di generate ulang!',
+            //         'action' => true,
+            //         'id_generate' => $surat->id_surat_tugas
+            //     ]);
 
-            // return response()->json([
-            //     'success' => true,
-            //     'action' => true,
-            //     'message' => 'Surat Tugas berhasil diperbarui',
-            //     ]
-            // );
+            return response()->json([
+                'status' => true,
+                'action' => true,
+                'id_generate' => $surat->id_surat_tugas
+            ]);
 
         } catch (\Exception $e) {
             return response()->json([

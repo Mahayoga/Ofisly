@@ -134,49 +134,45 @@
               </span>
             </button>
           </div>
-          <form id="editForm" action="{{ route('surat-tugas.update', ['__ID__']) }}" method="POST">
-            @csrf
-            @method('PUT')
-            <div class="modal-body">
-              <div class="row mb-3">
-                <div class="col-md-6">
-                  <label for="edit_nama_kandidat" class="form-label">Nama Kandidat</label>
-                  <input type="text" class="form-control" id="edit_nama_kandidat" name="edit_nama_kandidat" required>
-                </div>
-                <div class="col-md-6">
-                  <label for="edit_nik_kandidat" class="form-label">NIK Kandidat</label>
-                  <input type="text" class="form-control" id="edit_nik_kandidat" name="edit_nik_kandidat" required>
-                </div>
-                <div class="col-md-6">
-                  <label for="edit_jabatan_kandidat" class="form-label">Jabatan Kandidat</label>
-                  <input type="text" class="form-control" id="edit_jabatan_kandidat" name="edit_jabatan_kandidat" required>
-                </div>
-                <div class="col-md-6">
-                  <label for="edit_nama_pengganti_kandidat" class="form-label">Nama Pengganti Kandidat</label>
-                  <input type="text" class="form-control" id="edit_nama_pengganti_kandidat" name="edit_nama_pengganti_kandidat" required>
-                </div>
-                <div class="col-md-6">
-                  <label for="edit_daerah_penempatan" class="form-label">Daerah Penempatan</label>
-                  <input type="text" class="form-control" id="edit_daerah_penempatan" name="edit_daerah_penempatan" required>
-                </div>
-                <div class="col-md-6">
-                  <label for="edit_tgl_mulai_penugasan" class="form-label">Tanggal Mulai Penugasan</label>
-                  <input type="date" placeholder="Pilih" class="form-control" id="edit_tgl_mulai_penugasan" name="edit_tgl_mulai_penugasan" required min="{{ date('Y-m-d') }}">
-                </div>
-                <div class="col-md-6">
-                  <label for="edit_tgl_selesai_penugasan" class="form-label">Tanggal Selesai Penugasan</label>
-                  <input type="date" placeholder="Silahkan pilih tgl mulai penugasan dahulu" class="form-control" id="edit_tgl_selesai_penugasan" name="edit_tgl_selesai_penugasan" required min="{{ date('Y-m-d') }}">
-                </div>
+          <div class="modal-body">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="edit_nama_kandidat" class="form-label">Nama Kandidat</label>
+                <input type="text" class="form-control" id="edit_nama_kandidat" name="edit_nama_kandidat" required>
+              </div>
+              <div class="col-md-6">
+                <label for="edit_nik_kandidat" class="form-label">NIK Kandidat</label>
+                <input type="text" class="form-control" id="edit_nik_kandidat" name="edit_nik_kandidat" required>
+              </div>
+              <div class="col-md-6">
+                <label for="edit_jabatan_kandidat" class="form-label">Jabatan Kandidat</label>
+                <input type="text" class="form-control" id="edit_jabatan_kandidat" name="edit_jabatan_kandidat" required>
+              </div>
+              <div class="col-md-6">
+                <label for="edit_nama_pengganti_kandidat" class="form-label">Nama Pengganti Kandidat</label>
+                <input type="text" class="form-control" id="edit_nama_pengganti_kandidat" name="edit_nama_pengganti_kandidat" required>
+              </div>
+              <div class="col-md-6">
+                <label for="edit_daerah_penempatan" class="form-label">Daerah Penempatan</label>
+                <input type="text" class="form-control" id="edit_daerah_penempatan" name="edit_daerah_penempatan" required>
+              </div>
+              <div class="col-md-6">
+                <label for="edit_tgl_mulai_penugasan" class="form-label">Tanggal Mulai Penugasan</label>
+                <input type="date" placeholder="Pilih" class="form-control" id="edit_tgl_mulai_penugasan" name="edit_tgl_mulai_penugasan" required min="{{ date('Y-m-d') }}">
+              </div>
+              <div class="col-md-6">
+                <label for="edit_tgl_selesai_penugasan" class="form-label">Tanggal Selesai Penugasan</label>
+                <input type="date" placeholder="Silahkan pilih tgl mulai penugasan dahulu" class="form-control" id="edit_tgl_selesai_penugasan" name="edit_tgl_selesai_penugasan" required min="{{ date('Y-m-d') }}">
               </div>
             </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-              <button type="submit" class="btn btn-primary" id="editSubmitBtn">
-                <span id="editSubmitText">Simpan</span>
-                <span id="editSubmitSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-              </button>
-            </div>
-          </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+            <button type="button" onclick="editData()" class="btn btn-primary" id="editSubmitBtn">
+              <span id="editSubmitText">Simpan</span>
+              <span id="editSubmitSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -233,6 +229,8 @@
     let table = null;
     let tgl_penugasan_value = null;
     let tgl_penugasan_edit_value = null;
+    let idEdit = null;
+    let processedId = null;
     $(document).ready(function(){
       socket = io("http://localhost:5000");
       table = new DataTable('#suratTugasTable', {
@@ -313,6 +311,7 @@
 
       table.on('xhr', function(e, settings, json, xhr) {
         socket.emit('connect_after_fetch_table', true);
+        console.log('Connect After Fetch Table...');
       });
 
       socket.on("connect", () => {
@@ -320,6 +319,7 @@
         let arrTable = document.querySelectorAll('.info-status-file');
         arrTable.forEach(element => {
           socket.emit('get_info_process', element.getAttribute('data-id'));
+          console.log('Connecting and fetching status table (first time)...: ' + element.getAttribute('data-id'));
         });
       });
       socket.on("connect_after", () => {
@@ -327,34 +327,47 @@
         let arrTable = document.querySelectorAll('.info-status-file');
         arrTable.forEach(element => {
           socket.emit('get_info_process', element.getAttribute('data-id'));
+          console.log('Get Info Process...: ' + element.getAttribute('data-id'));
         });
       });
       socket.on('fetch_status', (data) => {
+        console.log('Fetch Status...: ' + data.id);
         document.querySelectorAll('.info-status-file').forEach(element => {
           if(element.getAttribute('data-id') == data.id && data.status) {
             element.removeAttribute('class');
             element.setAttribute('class', 'badge badge-success info-status-file');
             element.innerHTML = 'File siap';
+            console.log('Fetch Status Done (File Siap): ' + element.getAttribute('data-id'));
             return;
           } else if(element.getAttribute('data-id') == data.id && !data.status) {
+            if(element.getAttribute('data-id') == processedId) {
+              console.log('File hilang sudah diatasi karena file masih proses generate!')
+              processedId = null;
+              return;
+            }
             element.removeAttribute('class');
             element.setAttribute('class', 'badge badge-danger info-status-file');
             element.innerHTML = 'File hilang!';
+            console.log('Fetch Status Done (File Hilang): ' + element.getAttribute('data-id'));
+            console.log('Processed ID: ' + processedId);
             return;
           }
         });
       });
       socket.on("send_status_process", (msg) => {
+        console.log('Send Status Process...: ' + msg.id);
         document.querySelectorAll('.info-status-file').forEach(element => {
-          if(element.getAttribute('data-id') == msg.id && msg.status) {
+          if(element.getAttribute('data-id') == msg.id && !msg.status) {
             element.removeAttribute('class');
             element.setAttribute('class', 'badge badge-success info-status-file');
             element.innerHTML = 'File siap';
+            console.log('Send Status Process Done (File Siap): ' + element.getAttribute('data-id'));
             return;
-          } else if(element.getAttribute('data-id') == msg.id && !msg.status) {
+          } else if(element.getAttribute('data-id') == msg.id && msg.status) {
             element.removeAttribute('class');
             element.setAttribute('class', 'badge badge-warning info-status-file');
             element.innerHTML = 'File masih dalam proses';
+            console.log('Send Status Process Done (File dalam proses): ' + element.getAttribute('data-id'));
             return;
           }
         });
@@ -370,6 +383,11 @@
     }
 
     function addData() {
+      Swal.fire({
+        title: "Status Data",
+        text: "Data sedang ditambahkan...",
+        icon: "info"
+      });
       let nama_kandidat = document.getElementById('nama_kandidat');
       let nik_kandidat = document.getElementById('nik_kandidat');
       let jabatan_kandidat = document.getElementById('jabatan_kandidat');
@@ -388,8 +406,14 @@
         'tgl_selesai_penugasan': tgl_selesai_penugasan.value,
       }, function(data, status) {
         if(data.status) {
+          $('#createModal').modal('hide');
+          Swal.fire({
+            title: "Status Data",
+            text: "Data berhasil ditambahkan!",
+            icon: "success"
+          });
+          processedId = data.id_generate;
           fetchRowData();
-          console.log('Generating...');
           let urlGenerate = '{{ route('surat-tugas.generate-file') }}'
           $.post(urlGenerate, {
             '_token': '{{ csrf_token() }}',
@@ -401,8 +425,62 @@
       });
     }
 
+    function editData() {
+      if(idEdit != null) {
+        Swal.fire({
+          title: "Status Data",
+          text: "Data sedang diedit...",
+          icon: "info"
+        });
+        let nama_kandidat = document.getElementById('edit_nama_kandidat');
+        let nik_kandidat = document.getElementById('edit_nik_kandidat');
+        let jabatan_kandidat = document.getElementById('edit_jabatan_kandidat');
+        let nama_pengganti_kandidat = document.getElementById('edit_nama_pengganti_kandidat');
+        let daerah_penempatan = document.getElementById('edit_daerah_penempatan');
+        let tgl_mulai_penugasan = document.getElementById('edit_tgl_mulai_penugasan');
+        let tgl_selesai_penugasan = document.getElementById('edit_tgl_selesai_penugasan');
+        
+        let urlUpdate = '{{ route('surat-tugas.update', ['__ID__']) }}'
+        $.post(urlUpdate.replace('__ID__', idEdit), {
+          '_token': '{{ csrf_token() }}',
+          '_method': 'PUT',
+          'edit_nama_kandidat': nama_kandidat.value,
+          'edit_nik_kandidat': nik_kandidat.value,
+          'edit_jabatan_kandidat': jabatan_kandidat.value,
+          'edit_nama_pengganti_kandidat': nama_pengganti_kandidat.value,
+          'edit_daerah_penempatan': daerah_penempatan.value,
+          'edit_tgl_mulai_penugasan': tgl_mulai_penugasan.value,
+          'edit_tgl_selesai_penugasan': tgl_selesai_penugasan.value,
+        }, function(data, status) {
+          if(data.status) {
+            $('#editModal').modal('hide');
+            Swal.fire({
+              title: "Status Data",
+              text: "Data berhasil diedit!",
+              icon: "success"
+            });
+            processedId = data.id_generate;
+            fetchRowData();
+            let urlGenerate = '{{ route('surat-tugas.generate-file') }}'
+            $.post(urlGenerate, {
+              '_token': '{{ csrf_token() }}',
+              'id': data.id_generate
+            }, function(data, status) {
+              console.log(data);
+            });
+          }
+        });
+      } else {
+        Swal.fire({
+          title: "Status Data",
+          text: "Kesalahan saat mengedit data!",
+          icon: "error"
+        });
+      }
+    }
+
     function getDataEdit(element) {
-      let idEdit = element.getAttribute('data-id');
+      idEdit = element.getAttribute('data-id');
       let urlEdit = '{{ route('surat-tugas.edit', ['__ID__']) }}'
       let urlUpdate = '{{ route('surat-tugas.update', ['__ID__']) }}'
       $.get(urlEdit.replace('__ID__', idEdit), function(data, status) {

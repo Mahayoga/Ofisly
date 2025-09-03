@@ -94,7 +94,7 @@ def getInfoProcess(data):
     if requestPDF.json()['status'] and requestDOCX.json()['status']:
         emit('fetch_status', {
             'status': True,
-            'id': data
+            'id': data,
         }, broadcast=True)
     else:
         emit('fetch_status', {
@@ -107,7 +107,7 @@ def sendStatusProcess(id, status):
         'status': status,
         'id': id
     })
-    print('Send Status Process....')
+    print('Send Status Process....', status)
 
 @socketio.on('connect_after_fetch_table')
 def connect_after(data):
