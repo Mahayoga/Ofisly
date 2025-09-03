@@ -100,10 +100,10 @@
             @csrf
             <div class="modal-body">
               <div class="row mb-3">
-                {{-- <div class="col-md-6">
-                  <label>Nomor Surat</label>
-                  <input type="text" class="form-control" id="nomor_surat" name="nomor_surat" required>
-                </div> --}}
+                <div class="col-md-6">
+                <label>Nomor Surat</label>
+                  <input type="text" class="form-control" id="nomor_surat" name="nomor_surat" value="{{ $newNomor ?? '' }}">
+                </div>
                 <div class="col-md-6">
                   <label>Nama Kandidat</label>
                   <input type="text" class="form-control" id="nama_kandidat" name="nama_kandidat" required>
@@ -148,10 +148,10 @@
             @method('PUT')
             <div class="modal-body">
               <div class="row mb-3">
-                {{-- <div class="col-md-6">
+                <div class="col-md-6">
                   <label>Nomor Surat</label>
-                  <input type="text" class="form-control" id="edit_nomor_surat" name="nomor_surat" required>
-                </div> --}}
+                  <input type="text" class="form-control" id="edit_nomor_surat" name="edit_nomor_surat" required>
+                </div>
                 <div class="col-md-6">
                   <label>Nama Kandidat</label>
                   <input type="text" class="form-control" id="edit_nama_kandidat" name="edit_nama_kandidat" required>
@@ -248,7 +248,7 @@
       $.get(urlEdit.replace('__ID__', idEdit), function(data) {
         $('#editForm').attr('action', urlUpdate.replace('__ID__', idEdit));
         if(data.success) {
-          // $('#edit_nomor_surat').val(data.data.nomor_surat);
+          $('#edit_nomor_surat').val(data.data.nomor_surat);
           $('#edit_nama_kandidat').val(data.data.nama_kandidat);
           $('#edit_jabatan_kandidat').val(data.data.jabatan_kandidat);
           $('#edit_tgl_mulai_penempatan').val(data.data.tgl_mulai_penempatan.substring(0, 10));
