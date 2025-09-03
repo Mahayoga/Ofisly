@@ -46,8 +46,39 @@
           <h6 class="collapse-header">Daftar Menu:</h6>
           <a class="collapse-item active" href="{{ route('surat-tugas.index') }}">Surat Pengganti Driver</a>
           <a class="collapse-item" href="{{ route('surat-tugas-mandiri.index') }}">Surat Tugas Mandiri</a>
-          <a class="collapse-item" href="{{ route('blank.index') }}">Surat Penugasan C</a>
-          <a class="collapse-item" href="{{ route('blank.index') }}">Surat Penugasan D</a>
+          <a class="collapse-item" href="{{ route('surat-tugas-promotor.index') }}">Surat Tugas Promotor</a>
+        </div>
+      </div>
+    </li>
+  @elseif(Route::currentRouteName() == 'surat-tugas-mandiri.index')
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSurat" aria-expanded="true"
+        aria-controls="collapseSurat">
+        <i class="fas fa-fw fa-folder"></i>
+        <span>Surat</span>
+      </a>
+      <div id="collapseSurat" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+        <div class="bg-white py-2 collapse-inner rounded">
+          <h6 class="collapse-header">Daftar Menu:</h6>
+          <a class="collapse-item" href="{{ route('surat-tugas.index') }}">Surat Pengganti Driver</a>
+          <a class="collapse-item active" href="{{ route('surat-tugas-mandiri.index') }}">Surat Tugas Mandiri</a>
+          <a class="collapse-item" href="{{ route('surat-tugas-promotor.index') }}">Surat Tugas Promotor</a>
+        </div>
+      </div>
+    </li>
+  @elseif(Route::currentRouteName() == 'surat-tugas-promotor.index')
+    <li class="nav-item">
+      <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSurat" aria-expanded="true"
+        aria-controls="collapseSurat">
+        <i class="fas fa-fw fa-folder"></i>
+        <span>Surat</span>
+      </a>
+      <div id="collapseSurat" class="collapse" aria-labelledby="headingPages" data-parent="#accordionSidebar">
+        <div class="bg-white py-2 collapse-inner rounded">
+          <h6 class="collapse-header">Daftar Menu:</h6>
+          <a class="collapse-item" href="{{ route('surat-tugas.index') }}">Surat Pengganti Driver</a>
+          <a class="collapse-item" href="{{ route('surat-tugas-mandiri.index') }}">Surat Tugas Mandiri</a>
+          <a class="collapse-item active" href="{{ route('surat-tugas-promotor.index') }}">Surat Tugas Promotor</a>
         </div>
       </div>
     </li>
@@ -63,8 +94,7 @@
           <h6 class="collapse-header">Daftar Menu:</h6>
           <a class="collapse-item" href="{{ route('surat-tugas.index') }}">Surat Pengganti Driver</a>
           <a class="collapse-item" href="{{ route('surat-tugas-mandiri.index') }}">Surat Tugas Mandiri</a>
-          <a class="collapse-item" href="{{ route('blank.index') }}">Surat Penugasan C</a>
-          <a class="collapse-item" href="{{ route('blank.index') }}">Surat Penugasan D</a>
+          <a class="collapse-item" href="{{ route('surat-tugas-promotor.index') }}">Surat Tugas Promotor</a>
         </div>
       </div>
     </li>

@@ -1,9 +1,32 @@
 <?php
 
+use App\Models\SuratTugasPenggantiDriverModel;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
+Route::post('/get/info/file', function(Request $request) {
+    $dataSurat = SuratTugasPenggantiDriverModel::findOrFail($request->id);
+    $pathDocx = $dataSurat->file_path_docx;
+    $pathPDF = $dataSurat->file_path_pdf;
+    if($request->type == 'pdf') {
+        if(is_file(public_path() . $pathPDF)) {
+            return response()->json([
+                'status' => true,
+            ]);
+        }
+    } else if($request->type == 'docx') {
+        if(is_file(public_path() . $pathDocx)) {
+            return response()->json([
+                'status' => true,
+            ]);
+        }
+    }
+
+    return response()->json([
+        'status' => false,
+    ]);
+});
 
 Route::post('/send/surat/pengganti/driver', function(Request $request) {
     $savedFiles = [];

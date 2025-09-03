@@ -18,6 +18,7 @@ return new class extends Migration
             $table->char('nik_kandidat', 16);
             $table->string('jabatan_kandidat');
             $table->string('nama_pengganti_kandidat');
+            $table->string('daerah_penempatan');
             $table->date('tgl_mulai_penugasan');
             $table->date('tgl_selesai_penugasan');
             $table->date('tgl_surat_pembuatan');

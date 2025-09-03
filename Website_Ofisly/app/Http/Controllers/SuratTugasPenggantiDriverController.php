@@ -13,10 +13,29 @@ use PhpOffice\PhpWord\IOFactory;
 
 class SuratTugasPenggantiDriverController extends Controller
 {
+
+    public function fetchRowData() {
+        $suratTugas = SuratTugasPenggantiDriverModel::latest()->get();
+        // dd($suratTugas->toArray());
+        // return response()->json([
+        //     'status' => true,
+        //     'data' => $suratTugas
+        // ]);
+        return response()->json([
+            'status' => true,
+            'data' => $suratTugas->toArray()
+        ]);
+    }
+
     public function index()
     {
         $suratTugas = SuratTugasPenggantiDriverModel::latest()->get();
         return view('admin.surat_tugas.index', compact('suratTugas'));
+    }
+
+    public function show($id)
+    {
+
     }
 
     public function store(Request $request)
@@ -26,6 +45,7 @@ class SuratTugasPenggantiDriverController extends Controller
             "nik_kandidat" => "required|string|max:16",
             "jabatan_kandidat" => "required|string|max:255",
             "nama_pengganti_kandidat" => "required|string|max:255",
+            "daerah_penempatan" => "required|string|max:255",
             "tgl_mulai_penugasan" => "required|date",
             "tgl_selesai_penugasan" => "required|date",
         ]);
@@ -56,21 +76,23 @@ class SuratTugasPenggantiDriverController extends Controller
                 'nik_kandidat' => $request->nik_kandidat,
                 'jabatan_kandidat' => $request->jabatan_kandidat,
                 'nama_pengganti_kandidat' => $request->nama_pengganti_kandidat,
+                'daerah_penempatan' => $request->daerah_penempatan,
                 'tgl_mulai_penugasan' => $request->tgl_mulai_penugasan,
                 'tgl_selesai_penugasan' => $request->tgl_selesai_penugasan,
                 'tgl_surat_pembuatan' => Carbon::now()->format('Y-m-d'),
             ]);
 
-            return redirect()->route('surat-tugas.index')
-                ->with([
-                    'success' => 'Surat Tugas berhasil dibuat',
-                    'action' => true,
-                    'id_generate' => $resultCreate->id_surat_tugas
-                ]);
-            // return response()->json([
-            //     'success' => true,
-            //     'message' => 'Surat Tugas berhasil dibuat',
-            // ]);
+            // return redirect()->route('surat-tugas.index')
+            //     ->with([
+            //         'success' => 'Surat Tugas berhasil dibuat',
+            //         'action' => true,
+            //         'id_generate' => $resultCreate->id_surat_tugas
+            //     ]);
+            return response()->json([
+                'status' => true,
+                'action' => true,
+                'id_generate' => $resultCreate->id_surat_tugas
+            ]);
 
         } catch (\Exception $e) {
             return response()->json([
@@ -91,6 +113,7 @@ class SuratTugasPenggantiDriverController extends Controller
                 'nik_kandidat' => $surat->nik_kandidat,
                 'jabatan_kandidat' => $surat->jabatan_kandidat,
                 'nama_pengganti_kandidat' => $surat->nama_pengganti_kandidat,
+                'daerah_penempatan' => $surat->daerah_penempatan,
                 'tgl_mulai_penugasan' => $surat->tgl_mulai_penugasan,
                 'tgl_selesai_penugasan' => $surat->tgl_selesai_penugasan,
                 'tgl_surat_pembuatan' => $surat->tgl_surat_pembuatan,
@@ -104,15 +127,16 @@ class SuratTugasPenggantiDriverController extends Controller
 
     public function update(Request $request, $id)
     {
-        // dd($request->all());
         $request->validate([
             'edit_nama_kandidat' => 'required|string|max:255',
             "edit_nik_kandidat" => "required|string|max:16",
             "edit_jabatan_kandidat" => "required|string|max:255",
+            'edit_daerah_penempatan' => "required|string|max:255",
             "edit_nama_pengganti_kandidat" => "required|string|max:255",
             "edit_tgl_mulai_penugasan" => "required|date",
             "edit_tgl_selesai_penugasan" => "required|date",
         ]);
+
 
         try {
             $surat = SuratTugasPenggantiDriverModel::findOrFail($id);
@@ -122,6 +146,7 @@ class SuratTugasPenggantiDriverController extends Controller
                 'nik_kandidat' => $request->edit_nik_kandidat,
                 'jabatan_kandidat' => $request->edit_jabatan_kandidat,
                 'nama_pengganti_kandidat' => $request->edit_nama_pengganti_kandidat,
+                'daerah_penempatan' => $request->edit_daerah_penempatan,
                 'tgl_mulai_penugasan' => $request->edit_tgl_mulai_penugasan,
                 'tgl_selesai_penugasan' => $request->edit_tgl_selesai_penugasan,
                 'tgl_surat_pembuatan' => Carbon::now()->format('Y-m-d'),
@@ -136,19 +161,18 @@ class SuratTugasPenggantiDriverController extends Controller
                 Storage::disk('public')->delete(str_replace('/storage/', '', $pathPDF));
             }
 
-            return redirect()->route('surat-tugas.index')
-                ->with([
-                    'success' => 'Surat Tugas berhasil di edit, sabar ya masih di generate ulang!',
-                    'action' => true,
-                    'id_generate' => $surat->id_surat_tugas
-                ]);
+            // return redirect()->route('surat-tugas.index')
+            //     ->with([
+            //         'success' => 'Surat Tugas berhasil di edit, sabar ya masih di generate ulang!',
+            //         'action' => true,
+            //         'id_generate' => $surat->id_surat_tugas
+            //     ]);
 
-            // return response()->json([
-            //     'success' => true,
-            //     'action' => true,
-            //     'message' => 'Surat Tugas berhasil diperbarui',
-            //     ]
-            // );
+            return response()->json([
+                'status' => true,
+                'action' => true,
+                'id_generate' => $surat->id_surat_tugas
+            ]);
 
         } catch (\Exception $e) {
             return response()->json([

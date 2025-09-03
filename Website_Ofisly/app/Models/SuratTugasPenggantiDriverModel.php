@@ -17,6 +17,7 @@ class SuratTugasPenggantiDriverModel extends Model
         'nik_kandidat',
         'jabatan_kandidat',
         'nama_pengganti_kandidat',
+        'daerah_penempatan',
         'tgl_mulai_penugasan',
         'tgl_selesai_penugasan',
         'tgl_surat_pembuatan',

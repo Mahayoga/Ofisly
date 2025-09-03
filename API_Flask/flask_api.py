@@ -8,6 +8,7 @@ import time
 from docx import Document
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from flask_socketio import SocketIO, emit
 from datetime import datetime
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 import requests
@@ -19,6 +20,7 @@ import json
 
 app = Flask(__name__)
 CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
 load_dotenv()
 wdFormatPDF = 17
 bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
@@ -52,6 +54,11 @@ async def generateFile(filename_docx, filename_pdf, laravel_url, id_surat, table
     mydb.commit()
     f.close()
     pdf.close()
+    t = threading.Thread(
+        target=sendStatusProcess,
+        args=(id_surat, False)
+    )
+    t.start()
 
     try:
         processesId.remove(id_surat)
@@ -66,6 +73,45 @@ async def generateFile(filename_docx, filename_pdf, laravel_url, id_surat, table
         print(filename_pdf)
         os.remove(filename_pdf)
 
+@socketio.on("connect")
+def handle_connect():
+    print("Client terhubung")
+    emit("message", "Koneksi WebSocket Berhasil!", broadcast=True)
+
+@socketio.on('get_info_process')
+def getInfoProcess(data):
+    print('Get Info Process....')
+    laravel_url = f'{os.getenv("LARAVEL_ENDPOINT")}/api/get/info/file'
+    requestPDF = requests.post(laravel_url, {
+        'id': data,
+        'type': 'pdf'
+    })
+    requestDOCX = requests.post(laravel_url, {
+        'id': data,
+        'type': 'docx'
+    })
+
+    if requestPDF.json()['status'] and requestDOCX.json()['status']:
+        emit('fetch_status', {
+            'status': True,
+            'id': data,
+        }, broadcast=True)
+    else:
+        emit('fetch_status', {
+            'status': False,
+            'id': data
+        }, broadcast=True)
+
+def sendStatusProcess(id, status):
+    socketio.emit('send_status_process', {
+        'status': status,
+        'id': id
+    })
+    print('Send Status Process....', status)
+
+@socketio.on('connect_after_fetch_table')
+def connect_after(data):
+    emit('connect_after', True)
 
 @app.route('/check/generate/run', methods=['POST'])
 def checkGenerateFiles():
@@ -80,7 +126,13 @@ def checkGenerateFiles():
     }
 
 @app.route('/generate/surat/penggati/driver', methods=['POST'])
-def nyoba_file():
+def surat_penggati_driver():
+    t = threading.Thread(
+        target=sendStatusProcess,
+        args=(request.json['id_surat_tugas'], True)
+    )
+    t.start()
+
     laravel_url = f'{os.getenv("LARAVEL_ENDPOINT")}/api/send/surat/pengganti/driver'
     file_template_path = 'Contoh Template/template_surat_pengganti_driver.docx'
     pythoncom.CoInitialize()
@@ -106,16 +158,18 @@ def nyoba_file():
         __PENGGANTIKANDIDAT__
         __TANGGALMULAI__
         __TANGGALSELESAI__
+        __DAERAHBANK__
         """
 
         for i in range(len(document.paragraphs)):
-            document.paragraphs[i].text = document.paragraphs[i].text.replace('__TANGGALPEMBUATAN__', f'{str(myresult[7]).split("-")[2]} {bulan[int(str(myresult[7]).split("-")[1]) - 1]} {str(myresult[7]).split("-")[0]}')
+            document.paragraphs[i].text = document.paragraphs[i].text.replace('__TANGGALPEMBUATAN__', f'{str(myresult[8]).split("-")[2]} {bulan[int(str(myresult[8]).split("-")[1]) - 1]} {str(myresult[8]).split("-")[0]}')
             document.paragraphs[i].text = document.paragraphs[i].text.replace('__NAMAKANDIDAT__', myresult[1])
             document.paragraphs[i].text = document.paragraphs[i].text.replace('__NIKKANDIDAT__', myresult[2])
             document.paragraphs[i].text = document.paragraphs[i].text.replace('__JABATANKANDIDAT__', myresult[3])
             document.paragraphs[i].text = document.paragraphs[i].text.replace('__PENGGANTIKANDIDAT__', myresult[4])
-            document.paragraphs[i].text = document.paragraphs[i].text.replace('__TANGGALMULAI__', f'{str(myresult[5]).split("-")[2]} {bulan[int(str(myresult[5]).split("-")[1]) - 1]} {str(myresult[5]).split("-")[0]}')
-            document.paragraphs[i].text = document.paragraphs[i].text.replace('__TANGGALSELESAI__', f'{str(myresult[6]).split("-")[2]} {bulan[int(str(myresult[6]).split("-")[1]) - 1]} {str(myresult[6]).split("-")[0]}')
+            document.paragraphs[i].text = document.paragraphs[i].text.replace('__DAERAHBANK__', myresult[5])
+            document.paragraphs[i].text = document.paragraphs[i].text.replace('__TANGGALMULAI__', f'{str(myresult[6]).split("-")[2]} {bulan[int(str(myresult[6]).split("-")[1]) - 1]} {str(myresult[6]).split("-")[0]}')
+            document.paragraphs[i].text = document.paragraphs[i].text.replace('__TANGGALSELESAI__', f'{str(myresult[7]).split("-")[2]} {bulan[int(str(myresult[7]).split("-")[1]) - 1]} {str(myresult[7]).split("-")[0]}')
 
         table = document.tables[0]
         cell1 = table.rows[1].cells[0]
