@@ -46,6 +46,9 @@ async def generateFile(filename_docx, filename_pdf, laravel_url, id_surat, table
     }
 
     res = requests.post(laravel_url, files=files, stream=True)
+    print(res.text)
+    print(res.status_code)
+
     dataJsonFromRes = res.json()
 
     mycursor = mydb.cursor()
@@ -233,6 +236,16 @@ def driver_mandiri():
     print(myresult)
     if myresult is not None:
 
+        id_surat = request.json['id_surat_penempatan']
+        processesId.append(id_surat)
+
+        t_status = threading.Thread(
+            target=sendStatusProcess,
+            args=(id_surat, True)
+        )
+
+        t_status.start()
+
         """
         __NOMORSURAT__
         __TANGGALPEMBUATAN__
@@ -286,6 +299,10 @@ def driver_mandiri():
         return jsonify({'status': 'success'})
     else:
         return jsonify({'status': 'error'})
+
+
+
+        
     
 # Surat Tugas Promotor Indosat
 @app.route('/generate/surat/promotor', methods=['POST'])
@@ -476,6 +493,7 @@ def generate_surat_promotor():
         )
         t.daemon = True
         t.start()
+        print(filename_docx, filename_pdf, laravel_url, id_surat)
         
         # Add to processes list
         processesId.append(id_surat)
