@@ -46,6 +46,7 @@
                 <th>Jabatan</th>
                 <th>Tanggal Pembuatan</th>
                 <th>Tanggal Penempatan</th>
+                <th>Status</th>
                 <th>Aksi</th>
               </tr>
             </thead>
@@ -61,6 +62,11 @@
                   <td class="jabatan-kandidat">{{ $surat->jabatan_kandidat }}</td>
                   <td>{{ \Carbon\Carbon::parse($surat->tgl_surat_pembuatan)->format('d/m/Y') }}</td>
                   <td class="tgl-penempatan">{{ \Carbon\Carbon::parse($surat->tgl_mulai_penempatan)->format('d/m/Y') }}</td>
+                  <td>
+                    <span id="status-mandiri{{ $surat->id_surat_penempatan }} class="badge bg-secondary">
+                      Proses
+                    </span>
+                  </td>
                   <td class="text-center">
                     <div class="btn-group">
                       <a href="{{ route('surat-tugas-mandiri.generate-pdf', $surat->id_surat_penempatan) }}" class="btn btn-sm btn-danger" target="_blank">
@@ -268,5 +274,26 @@
         }
       });
     }
+
+    const socket = io("http://127.0.0.1:5000");
+
+    socket.on("connect", function(){
+      console.log("Connected to Flask-SocketIO server");
+    });
+
+    socket.on("send_satus_process", function(data){
+      console.log("status mandiri updated", data);
+
+      let statusElement =document.getElementById('status-mandiri' + data.id_surat_penempatan);
+      if (statusElement) {
+        if(data.status === true){
+          statusElement.className = "badge badge-warning";
+          statusElement.textContent = "Proses";
+        }else{
+          statusElement.className = "badge badge-success";
+          statusElement.textContent = "Selesai";
+        }
+      }
+    });
   </script>
 @endsection

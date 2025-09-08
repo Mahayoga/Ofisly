@@ -68,10 +68,10 @@ Route::post('/send/surat/pengganti/driver', function(Request $request) {
 });
 
 Route::post('/send/surat/promotor', function(Request $request) {
-    $request->validate([
-        'file_docx' => 'required|file|mimes:docx',
-        'file_pdf' => 'required|file|mimes:pdf'
-    ]);
+    // $request->validate([
+    //     'file_docx' => 'required|file|mimes:docx',
+    //     'file_pdf' => 'required|file|mimes:pdf'
+    // ]);
 
     $savedFiles = [];
 

@@ -28,7 +28,7 @@ Route::middleware(['role.auth', 'auth'])->group(function () {
             Route::get('/{id}/edit', [SuratTugasPromotorController::class, 'edit'])->name('surat-tugas-promotor.edit');
             Route::put('/{id}', [SuratTugasPromotorController::class, 'update'])->name('surat-tugas-promotor.update');
             Route::delete('/{id}', [SuratTugasPromotorController::class, 'destroy'])->name('surat-tugas-promotor.destroy');
-            // Route::post('/send/surat/promotor', [SuratTugasPromotorController::class, 'receiveFiles']);
+            Route::post('/send/surat/promotor', [SuratTugasPromotorController::class, 'receiveFiles']);
             Route::get('/generate-pdf/{id}', [SuratTugasPromotorController::class, 'generatePDF'])->name('surat-tugas-promotor.generate-pdf');
             Route::get('/generate-word/{id}', [SuratTugasPromotorController::class, 'generateWord'])->name('surat-tugas-promotor.generate-word');
             Route::post('/generate/file', [SuratTugasPromotorController::class, 'generateFile'])->name('surat-tugas-promotor.generate-file');
