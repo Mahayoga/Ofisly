@@ -19,13 +19,12 @@ class LowonganPekerjaanModel extends Model
         'judul',
         'deskripsi',
         'gambar',
-        'tgl_post',
+        'tanggal_post',
     ];
 
     protected $casts = [
         'id_lowongan_pekerjaan' => 'string',
-        'tgl_post' => 'date',
-
+        'tanggal_post' => 'datetime',
     ];
 
     protected static function boot()
@@ -38,8 +37,8 @@ class LowonganPekerjaanModel extends Model
         });
     }
 
-    public function getTanggalPostRelativeAttribute()
+    public function pendaftar()
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->hasMany(PendaftarLowonganModel::class, 'id_lowongan_pekerjaan');
     }
 }
