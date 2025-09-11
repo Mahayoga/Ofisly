@@ -28,8 +28,8 @@
           <div class="card-body p-2"> 
             <h3 class="card-title">{{ $lowongan->judul }}</h3>
             <div class="card-text mb-3">{!! $lowongan->deskripsi !!}</div>
-            <a href="{{ route('daftar-lowongan.create', $lowongan->id) }}" class="btn btn-primary">
-              <i class="bi bi-pencil-square"></i> Daftar
+            <a href="{{ route('daftar-lowongan.create', $lowongan->id_lowongan_pekerjaan) }}" class="btn btn-primary">
+            <i class="bi bi-pencil-square"></i> Daftar
             </a>
           </div>
         </div>

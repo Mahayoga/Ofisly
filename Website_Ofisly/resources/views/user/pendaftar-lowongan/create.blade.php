@@ -1,0 +1,29 @@
+@extends('user.layouts.app')
+
+@section('title', 'Form Pendaftaran')
+
+@section('content')
+<div class="container mt-5">
+    <h3>Form Pendaftaran - {{ $lowongan->judul }}</h3>
+    <form action="{{ route('daftar-lowongan.store', $lowongan->id_lowongan_pekerjaan) }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        <div class="mb-3">
+            <label class="form-label">Nama</label>
+            <input type="text" class="form-control" name="nama" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" name="email" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">No. Telepon</label>
+            <input type="text" class="form-control" name="no_telp">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Upload CV</label>
+            <input type="file" class="form-control" name="cv" required>
+        </div>
+        <button type="submit" class="btn btn-success">Kirim Pendaftaran</button>
+    </form>
+</div>
+@endsection

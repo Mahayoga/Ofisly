@@ -16,7 +16,9 @@ Route::get('/', function () {
     return view('landing-page');
 })->name('welcome');
 
-Route::resource('daftar-lowongan', DaftarLowonganController::class);
+Route::resource('daftar-lowongan', DaftarLowonganController::class)->only(['index','show']);
+Route::get('daftar-lowongan/{id_lowongan_pekerjaan}/daftar', [DaftarLowonganController::class, 'create'])->name('daftar-lowongan.create');
+Route::post('daftar-lowongan/{id_lowongan_pekerjaan}/daftar', [DaftarLowonganController::class, 'store'])->name('daftar-lowongan.store');
 
 
 Route::middleware(['role.auth', 'auth'])->group(function () {
