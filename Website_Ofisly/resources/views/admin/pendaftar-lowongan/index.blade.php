@@ -33,6 +33,7 @@
             <thead class="bg-light">
               <tr>
                 <th>No</th>
+                <th>Nama Lowongan</th>
                 <th>Nama Pendaftar</th>
                 <th>Email</th>
                 <th>No. Telp</th>
@@ -45,15 +46,48 @@
               @php $i = 1; @endphp
               @foreach ($pendaftar as $data)
                 <tr>
-                    <td>{{ $i }}</td>
+                    <td>{{ $i }}</td> 
+                    <td>{{ $data->lowongan->judul }}</td>
                     <td>{{ $data->nama }}</td>
                     <td>{{ $data->email }}</td>
                     <td>{{ $data->no_telp }}</td>
                     <td>
                       @if ($data->cv)
-                        <img src="{{ asset('storage/' . $data->cv) }}" alt="Gambar CV" width="100">
+                        <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#cvModal{{ $data->id_pendaftar }}">
+                          Lihat CV
+                        </button>
+                        <a href="{{ asset('storage/' . $data->cv) }}" download class="btn btn-sm btn-primary mt-1">
+                          Download
+                        </a>
+
+                        <!-- Modal CV -->
+                        <div class="modal fade" id="cvModal{{ $data->id_pendaftar }}" tabindex="-1" role="dialog">
+                          <div class="modal-dialog modal-xl" role="document">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title">CV {{ $data->nama }}</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                                </button>
+                              </div>
+                              <div class="modal-body text-center">
+                                @php
+                                  $extension = pathinfo($data->cv, PATHINFO_EXTENSION);
+                                @endphp
+
+                                @if (in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif']))
+                                  <img src="{{ asset('storage/' . $data->cv) }}" alt="CV {{ $data->nama }}" class="img-fluid rounded shadow">
+                                @elseif (strtolower($extension) === 'pdf')
+                                  <iframe src="{{ asset('storage/' . $data->cv) }}" width="100%" height="600px"></iframe>
+                                @else
+                                  <p>File tidak dapat ditampilkan di sini. Silakan unduh untuk melihat.</p>
+                                @endif
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       @else
-                        Tidak ada gambar yang ditambahkan
+                        <span class="text-muted">Tidak ada CV</span>
                       @endif
                     </td>
                     <td>
