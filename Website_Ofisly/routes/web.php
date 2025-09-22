@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CutiKaryawanController;
+use App\Http\Controllers\DaftarLowonganAdminController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SuratTugasPromotorController;
@@ -59,7 +60,7 @@ Route::middleware(['role.auth', 'auth'])->group(function () {
 
     //lowongan pekerjaan
     Route::resource('lowongan-pekerjaan', LowonganPekerjaanController::class);
-    Route::resource('pendaftar-lowongan', LowonganPekerjaanController::class);
+    Route::resource('pendaftar-lowongan', DaftarLowonganAdminController::class);
 
 
 
