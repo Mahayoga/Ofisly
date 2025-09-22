@@ -46,7 +46,13 @@ class DaftarLowonganAdminController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $pendaftar = PendaftarLowonganModel::findOrFail($id);
+
+        return response()->json([
+            'status' => true,
+            'dataPendaftar' => $pendaftar,
+            'dataLowongan' => $pendaftar->lowongan
+        ]);
     }
 
     /**
@@ -54,7 +60,16 @@ class DaftarLowonganAdminController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $validate = $request->validate([
+            'status_pendaftaran' => 'required'
+        ]);
+
+        $pendaftar = PendaftarLowonganModel::findOrFail($id);
+        $pendaftar->update([
+            'status' => $request->status_pendaftaran
+        ]);
+
+        return redirect()->route('pendaftar-lowongan.index')->with(['success' => 'Data Berhasil Disimpan']);
     }
 
     /**

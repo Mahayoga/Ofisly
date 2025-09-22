@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\LowonganPekerjaanModel;
 use App\Models\PendaftarLowonganModel;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class DaftarLowonganController extends Controller
 {

@@ -9,11 +9,6 @@
       <li class="breadcrumb-item">Kumpulan data pendaftar lowongan pekerjaan</li>
     </ol>
     <div class="card border-0 mb-4">
-      <div class="card-header py-3 d-flex justify-content-between align-items-center">
-        <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#createModal">
-          <i class="fas fa-plus"></i> Tambah Data
-        </button>
-      </div>
       <div class="card-body border">
         @if (session('success'))
           <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -27,15 +22,6 @@
         @if (session('error'))
           <div class="alert alert-danger alert-dismissible fade show" role="alert">
             {{ session('error') }}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-        @endif
-
-        @if (session('delete_success'))
-          <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            {{ session('delete_success') }}
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
@@ -63,8 +49,31 @@
                     <td>{{ $data->nama }}</td>
                     <td>{{ $data->email }}</td>
                     <td>{{ $data->no_telp }}</td>
-                    <td>{{ $data->cv }}</td>
-                    <td>{{ $data->status }}</td>
+                    <td>
+                      @if ($data->cv)
+                        <img src="{{ asset('storage/' . $data->cv) }}" alt="Gambar CV" width="100">
+                      @else
+                        Tidak ada gambar yang ditambahkan
+                      @endif
+                    </td>
+                    <td>
+                      @if ($data->status == 'Pending')
+                        <div class="btn btn-sm btn-warning">{{ $data->status }}</div>
+                      @elseif ($data->status == 'Diterima')
+                        <div class="btn btn-sm btn-success">{{ $data->status }}</div>
+                      @elseif($data->status == 'Ditolak')
+                        <div class="btn btn-sm btn-danger">{{ $data->status }}</div>
+                      @else
+                        <div class="btn btn-sm btn-warning">Pending?</div>
+                      @endif
+                    </td>
+                    <td>
+                      <div class="btn-group">
+                        <button class="btn btn-sm btn-info edit-btn" data-toggle="modal" data-target="#editModal" onclick="getDataEdit(this)" data-id="{{ $data->id_pendaftar }}">
+                          <i class="fas fa-edit"></i>
+                        </button>
+                      </div>
+                    </td>
                 </tr>
               @php $i++; @endphp
               @endforeach
@@ -75,8 +84,8 @@
     </div>
   </div>
 
-  <!-- Create Modal -->
-  <div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+  <!-- Edit Modal -->
+  <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
       <div class="modal-content">
         <div class="modal-header bg-primary text-white">
@@ -85,28 +94,35 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <form id="createForm" action="{{ route('lowongan-pekerjaan.store') }}" method="POST" enctype="multipart/form-data">
+        <form id="editForm" action="{{ route('pendaftar-lowongan.update', ['pendaftar_lowongan' => '__ID__']) }}" method="POST" enctype="multipart/form-data">
           @csrf
+          @method('PUT')
           <div class="modal-body">
             <div class="row mb-3">
-              <div class="col-md-6 mt-2">
-                <div class="form-group">
-                  <label for="gambar" class="font-weight-bold">Upload Poster Lowongan</label>
-                  <input type="file" class="form-control-file" id="gambar" name="gambar" accept="image/*" required>
-                </div>
-              </div>
-              <div class="col-md-6">
+              <div class="col-md-12">
                 <div class="row">
-                  <div class="col-md-12">
-                    <label for="judul" class="form-label font-weight-bold">Judul</label>
-                    <input type="text" class="form-control" id="judul" name="judul" required>
+                  <div class="col-md-6">
+                    <label for="">Nama Pendaftar</label>
+                    <input class="form-control" type="text" id="nama_pendaftar" name="" value="" disabled>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="">Mendaftar di lowongan:</label>
+                    <input class="form-control" type="text" id="lowongan_dituju" name="" value="" disabled>
                   </div>
                 </div>
               </div>
-              <div class="col-md-12" style="padding-bottom: 20vh">
-                <label for="deskripsi" class="form-label font-weight-bold">Deskripsi</label>
-                <input type="hidden" name="content_add", id="content_add">
-                <div id="quill-desc-add" name="deskripsi"></div>
+              <div class="col-md-12 mt-4">
+                <div class="row">
+                  <div class="col-md-6">
+                    <label for="">Status Pendaftaran</label>
+                    <select class="form-control" name="status_pendaftaran" id="status_pendaftaran">
+                      <option value="not-set">Tidak diisi (Pending)</option>
+                      <option value="Pending">Pending</option>
+                      <option value="Diterima">Diterima</option>
+                      <option value="Ditolak">Ditolak</option>
+                    </select>
+                  </div>
+                </div>
               </div>
               <div class="col-md-12">
                 <div class="modal-footer">
@@ -118,79 +134,6 @@
                 </div>
               </div>
             </div>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- Edit Modal -->
-  <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-      <div class="modal-content">
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title" id="editModalLabel">Edit Data Lowongan Pekerjaan</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <form id="editForm" action="{{ route('lowongan-pekerjaan.update', ['lowongan_pekerjaan' => '__ID__']) }}" method="POST" enctype="multipart/form-data">
-          @csrf
-          @method('PUT')
-          <div class="modal-body">
-            <div class="row mb-3">
-              <div class="col-md-6">
-                <label for="edit_gambar" class="form-label font-weight-bold">Gambar</label>
-                <input type="file" class="form-control" id="edit_gambar" name="edit_gambar" accept="image/*">
-                <img id="preview_gambar" src="" alt="Preview" class="mt-2 d-none" width="150">
-              </div>
-              <div class="col-md-6">
-                <label for="edit_judul" class="form-label font-weight-bold">Judul</label>
-                <input type="text" class="form-control" id="edit_judul" name="edit_judul" required>
-              </div>
-              <div class="col-md-12 mt-4" style="padding-bottom: 20vh">
-                <label for="deskripsi" class="form-label font-weight-bold">Deskripsi</label>
-                <input type="hidden" name="content_edit", id="content_edit">
-                <div id="quill-desc-edit" name="deskripsi"></div>
-              </div>
-              <div class="col-md-12">
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                  <button type="submit" class="btn btn-primary" id="editSubmitBtn">
-                    <span id="editSubmitText">Simpan</span>
-                    <span id="editSubmitSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- Delete Modal -->
-  <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-      <div class="modal-content">
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title" id="deleteModalLabel">Hapus Lowongan Pekerjaan</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <form id="deleteForm" action="{{ route('lowongan-pekerjaan.destroy', ['lowongan_pekerjaan' => '__ID__']) }}" method="POST">
-          @csrf
-          @method('DELETE')
-          <div class="modal-body">
-            Apakah anda akan menghapus data Lowongan Pekerjaan <span id="hapus_judul"></span>?
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal" id="deleteCancelBtn">Batal</button>
-            <button type="submit" class="btn btn-danger" id="deleteSubmitBtn" disabled>
-              <span id="deleteSubmitText">Hapus</span>
-              <span id="deleteSubmitSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
-            </button>
           </div>
         </form>
       </div>
@@ -236,32 +179,16 @@
 
     function getDataEdit(element) {
       let idEdit = element.getAttribute('data-id');
-      let urlEdit   = '{{ route('lowongan-pekerjaan.edit', ['lowongan_pekerjaan' => '__ID__']) }}';
-      let urlUpdate = '{{ route('lowongan-pekerjaan.update', ['lowongan_pekerjaan' => '__ID__']) }}';
+      let urlEdit   = '{{ route('pendaftar-lowongan.edit', ['pendaftar_lowongan' => '__ID__']) }}';
+      let urlUpdate = '{{ route('pendaftar-lowongan.update', ['pendaftar_lowongan' => '__ID__']) }}';
       $.get(urlEdit.replace('__ID__', idEdit), function(data) {
+        console.log(data);
         $('#editForm').attr('action', urlUpdate.replace('__ID__', idEdit));
 
-        if(data.success) {
-          $('#edit_judul').val(data.data.judul);
-          quillEdit.root.innerHTML = data.data.deskripsi;
-          if (data.data.gambar) {
-            $('#preview_gambar').attr('src', '/storage/' + data.data.gambar).removeClass('d-none');
-          } else {
-            $('#preview_gambar').addClass('d-none');
-          }
-        }
-      });
-    }
-
-    function getDataHapus(element) {
-      let idEdit    = element.getAttribute('data-id');
-      let urlEdit   = '{{ route('lowongan-pekerjaan.edit', ['lowongan_pekerjaan' => '__ID__']) }}';
-      let urlDelete = '{{ route('lowongan-pekerjaan.destroy', ['lowongan_pekerjaan' => '__ID__']) }}';
-      $.get(urlEdit.replace('__ID__', idEdit), function(data) {
-        $('#deleteForm').attr('action', urlDelete.replace('__ID__', idEdit));
-        if(data.success) {
-          $('#hapus_judul').text(data.data.judul);
-          $('#deleteSubmitBtn').removeAttr('disabled');
+        if(data.status) {
+          $('#nama_pendaftar').attr('value', data.dataPendaftar.nama);
+          $('#lowongan_dituju').attr('value', data.dataPendaftar.lowongan.judul);
+          document.getElementById('status_pendaftaran').value = data.dataPendaftar.status;
         }
       });
     }
