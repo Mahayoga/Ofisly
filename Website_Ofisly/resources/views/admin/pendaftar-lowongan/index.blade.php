@@ -8,46 +8,49 @@
     <ol class="breadcrumb mb-4">
       <li class="breadcrumb-item">Kumpulan data pendaftar lowongan pekerjaan</li>
     </ol>
-    <div class="card border-0 mb-4">
-      <div class="card-body border">
-        @if (session('success'))
-          <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-        @endif
 
-        @if (session('error'))
-          <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            {{ session('error') }}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-        @endif
+    @if (session('success'))
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ session('success') }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+    @endif
 
-        <div class="table-responsive">
-          <table class="table table-bordered table-hover" id="lowonganPekerjaanTable" width="100%" cellspacing="0">
-            <thead class="bg-light">
-              <tr>
-                <th>No</th>
-                <th>Nama Lowongan</th>
-                <th>Nama Pendaftar</th>
-                <th>Email</th>
-                <th>No. Telp</th>
-                <th>CV Pendaftar</th>
-                <th>Status</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              @php $i = 1; @endphp
-              @foreach ($pendaftar as $data)
+    @if (session('error'))
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ session('error') }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+    @endif
+
+    {{-- Loop per lowongan --}}
+    @foreach ($pendaftar as $idLowongan => $listPendaftar)
+      <div class="card border-0 mb-4">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">{{ $listPendaftar->first()->lowongan->judul }}</h5>
+        </div>
+        <div class="card-body border">
+          <div class="table-responsive">
+            <table class="table table-bordered table-hover" id="lowonganPekerjaanTable{{ $idLowongan }}" width="100%" cellspacing="0">
+              <thead class="bg-light">
                 <tr>
-                    <td>{{ $i }}</td> 
-                    <td>{{ $data->lowongan->judul }}</td>
+                  <th>No</th>
+                  <th>Nama Pendaftar</th>
+                  <th>Email</th>
+                  <th>No. Telp</th>
+                  <th>CV Pendaftar</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                @foreach ($listPendaftar as $i => $data)
+                  <tr>
+                    <td>{{ $i + 1 }}</td>
                     <td>{{ $data->nama }}</td>
                     <td>{{ $data->email }}</td>
                     <td>{{ $data->no_telp }}</td>
@@ -71,10 +74,7 @@
                                 </button>
                               </div>
                               <div class="modal-body text-center">
-                                @php
-                                  $extension = pathinfo($data->cv, PATHINFO_EXTENSION);
-                                @endphp
-
+                                @php $extension = pathinfo($data->cv, PATHINFO_EXTENSION); @endphp
                                 @if (in_array(strtolower($extension), ['jpg', 'jpeg', 'png', 'gif']))
                                   <img src="{{ asset('storage/' . $data->cv) }}" alt="CV {{ $data->nama }}" class="img-fluid rounded shadow">
                                 @elseif (strtolower($extension) === 'pdf')
@@ -95,7 +95,7 @@
                         <div class="btn btn-sm btn-warning">{{ $data->status }}</div>
                       @elseif ($data->status == 'Diterima')
                         <div class="btn btn-sm btn-success">{{ $data->status }}</div>
-                      @elseif($data->status == 'Ditolak')
+                      @elseif ($data->status == 'Ditolak')
                         <div class="btn btn-sm btn-danger">{{ $data->status }}</div>
                       @else
                         <div class="btn btn-sm btn-warning">Pending?</div>
@@ -108,17 +108,17 @@
                         </button>
                       </div>
                     </td>
-                </tr>
-              @php $i++; @endphp
-              @endforeach
-            </tbody>
-          </table>
+                  </tr>
+                @endforeach
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </div>
+    @endforeach
   </div>
 
-  <!-- Edit Modal -->
+  <!-- Edit Modal (tetap sama) -->
   <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
       <div class="modal-content">
@@ -137,11 +137,11 @@
                 <div class="row">
                   <div class="col-md-6">
                     <label for="">Nama Pendaftar</label>
-                    <input class="form-control" type="text" id="nama_pendaftar" name="" value="" disabled>
+                    <input class="form-control" type="text" id="nama_pendaftar" disabled>
                   </div>
                   <div class="col-md-6">
                     <label for="">Mendaftar di lowongan:</label>
-                    <input class="form-control" type="text" id="lowongan_dituju" name="" value="" disabled>
+                    <input class="form-control" type="text" id="lowongan_dituju" disabled>
                   </div>
                 </div>
               </div>
@@ -177,38 +177,11 @@
 
 @section('script')
   <script>
-    let quillAdd = null;
-    let quillEdit = null;
     $(document).ready(function(){
-      new DataTable('#lowonganPekerjaanTable');
-      $('#deleteCancelBtn').on('click', function() {
-        $('#deleteSubmitBtn').attr('disabled', '');
-      });
-
-      quillAdd = new Quill('#quill-desc-add', {
-        modules: { 
-          toolbar: true 
-        },
-        placeholder: 'Deskripsi lowongan, seperti jumlah lowongan dan alamat...',
-        theme: 'snow'
-      });
-
-      let createForm = document.getElementById('createForm');
-      createForm.onsubmit = function() {
-        document.getElementById('content_add').value = quillAdd.root.innerHTML;
-      };
-
-      quillEdit = new Quill('#quill-desc-edit', {
-        modules: { 
-          toolbar: true 
-        },
-        placeholder: 'Deskripsi lowongan, seperti jumlah lowongan dan alamat...',
-        theme: 'snow'
-      });
-      let editForm = document.getElementById('editForm');
-      editForm.onsubmit = function() {
-        document.getElementById('content_edit').value = quillEdit.root.innerHTML;
-      };
+      // aktifkan DataTable per tabel lowongan
+      @foreach ($pendaftar as $idLowongan => $listPendaftar)
+        new DataTable('#lowonganPekerjaanTable{{ $idLowongan }}');
+      @endforeach
     });
 
     function getDataEdit(element) {
@@ -216,13 +189,11 @@
       let urlEdit   = '{{ route('pendaftar-lowongan.edit', ['pendaftar_lowongan' => '__ID__']) }}';
       let urlUpdate = '{{ route('pendaftar-lowongan.update', ['pendaftar_lowongan' => '__ID__']) }}';
       $.get(urlEdit.replace('__ID__', idEdit), function(data) {
-        console.log(data);
         $('#editForm').attr('action', urlUpdate.replace('__ID__', idEdit));
-
         if(data.status) {
-          $('#nama_pendaftar').attr('value', data.dataPendaftar.nama);
-          $('#lowongan_dituju').attr('value', data.dataPendaftar.lowongan.judul);
-          document.getElementById('status_pendaftaran').value = data.dataPendaftar.status;
+          $('#nama_pendaftar').val(data.dataPendaftar.nama);
+          $('#lowongan_dituju').val(data.dataPendaftar.lowongan.judul);
+          $('#status_pendaftaran').val(data.dataPendaftar.status);
         }
       });
     }

@@ -12,8 +12,8 @@ class DaftarLowonganAdminController extends Controller
      */
     public function index()
     {
-        $pendaftar = PendaftarLowonganModel::all();
-        // dd($pendaftar);
+        $pendaftar = PendaftarLowonganModel::with('lowongan')->get()->groupBy('id_lowongan_pekerjaan');
+        
         return view('admin.pendaftar-lowongan.index', compact(['pendaftar']));
     }
 
