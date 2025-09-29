@@ -8,6 +8,7 @@
       margin: 0;
     }
   </style>
+
   <div class="container mt-5">
     <div class="mb-3">
       <a href="{{ route('daftar-lowongan.index') }}" class="btn btn-outline-secondary">
@@ -36,4 +37,30 @@
       </div>
     </div>
   </div>
+@endsection
+
+@section('script')
+    @if(session('success'))
+        <script>
+        $(document).ready(function(){
+          Swal.fire({
+          title: "Pendaftaran",
+          text: "{{ session('success') }}",
+          icon: "success"
+          });
+        });
+        </script>
+    @endif
+
+    @if(session('error'))
+        <script>
+        $(document).ready(function(){
+          Swal.fire({
+            title: "Peringatan",
+            text: "{{ session('error') }}",
+            icon: "error"
+          });
+        });
+        </script>
+    @endif
 @endsection
