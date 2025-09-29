@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CutiKaryawanController;
+use App\Http\Controllers\DaftarLowonganAdminController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SuratTugasPromotorController;
@@ -15,7 +16,11 @@ use Illuminate\Http\Request;
 Route::get('/', function () {
     return view('landing-page');
 })->name('welcome');
-Route::resource('daftar-lowongan', DaftarLowonganController::class);
+
+Route::resource('daftar-lowongan', DaftarLowonganController::class)->only(['index','show']);
+Route::get('daftar-lowongan/{id_lowongan_pekerjaan}/daftar', [DaftarLowonganController::class, 'create'])->name('daftar-lowongan.create');
+Route::post('daftar-lowongan/{id_lowongan_pekerjaan}/daftar', [DaftarLowonganController::class, 'store'])->name('daftar-lowongan.store');
+
 
 Route::middleware(['role.auth', 'auth'])->group(function () {
     Route::resource('dashboard', DashboardController::class);
@@ -55,7 +60,9 @@ Route::middleware(['role.auth', 'auth'])->group(function () {
 
     //lowongan pekerjaan
     Route::resource('lowongan-pekerjaan', LowonganPekerjaanController::class);
-    // Route::resource('daftar-lowongan-pekerjaan', controller: LowonganPekerjaanController::class)
+    Route::resource('pendaftar-lowongan', DaftarLowonganAdminController::class);
+
+
 
     // Blank Page
     Route::get('/blank', function() {
