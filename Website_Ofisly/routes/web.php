@@ -67,6 +67,9 @@ Route::middleware(['role.auth', 'auth'])->group(function () {
 
     // Arsip Data
     Route::resource('arsip-data-surat-tugas-driver', ArsipSuratTugasDriverController::class);
+        Route::prefix('arsip-data-surat-tugas-driver')->group(function() {
+            Route::get('/get/latest/data', [ArsipSuratTugasDriverController::class, 'fetchRowData'])->name('arsip-data-surat-tugas-driver.fetchRowData');
+        });
     Route::resource('arsip-data-surat-tugas-mandiri', ArsipSuratTugasMandiriController::class);
     Route::resource('arsip-data-surat-tugas-promotor', ArsipSuratTugasPromotorController::class);
      

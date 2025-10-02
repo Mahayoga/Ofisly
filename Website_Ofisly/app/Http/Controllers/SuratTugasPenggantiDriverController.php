@@ -15,12 +15,7 @@ class SuratTugasPenggantiDriverController extends Controller
 {
 
     public function fetchRowData() {
-        $suratTugas = SuratTugasPenggantiDriverModel::latest()->get();
-        // dd($suratTugas->toArray());
-        // return response()->json([
-        //     'status' => true,
-        //     'data' => $suratTugas
-        // ]);
+        $suratTugas = SuratTugasPenggantiDriverModel::where('is_arsip', '=', '0')->latest()->get();
         return response()->json([
             'status' => true,
             'data' => $suratTugas->toArray()
