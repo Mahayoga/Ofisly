@@ -1,53 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="utf-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-  <meta name="description" content="" />
-  <meta name="author" content="" />
-  <title>404 Error - SB Admin</title>
-  <link href="{{ asset('admin/css/styles.css') }}" rel="stylesheet" />
-  <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>SB Admin 2 - 401</title>
+
+  <!-- Custom fonts for this template-->
+  <link href="{{ asset('admin/vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet" type="text/css">
+  <link
+    href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+    rel="stylesheet">
+
+  <!-- Custom styles for this template-->
+  <link href="{{ asset('admin/css/sb-admin-2.min.css') }}" rel="stylesheet">
+
 </head>
-<body>
-  <div id="layoutError">
-    <div id="layoutError_content">
-      <main>
-        <div class="container">
-          <div class="row justify-content-center">
-            <div class="col-lg-6">
-              <div class="text-center mt-4">
-                <h1 class="display-1">500</h1>
-                <p class="lead">Internal Server Error</p>
-                <a href="index.html">
-                  <i class="fas fa-arrow-left me-1"></i>
-                  Return to Dashboard
-                </a>
-              </div>
-            </div>
+
+<body id="page-top">
+
+  <!-- Page Wrapper -->
+  <div id="wrapper">
+
+    <!-- Content Wrapper -->
+    <div id="content-wrapper" class="d-flex flex-column">
+
+      <!-- Main Content -->
+      <div id="content">
+
+        <!-- Begin Page Content -->
+        <div class="container-fluid">
+
+          <!-- 404 Error Text -->
+          <div class="text-center">
+            <div class="error mx-auto" data-text="500">500</div>
+            @if ($exception->getMessage() != '')
+              <p class="lead text-gray-800 mb-5">Internal Server Error (Generate file gagal)</p>
+              <p class="text-gray-500 mb-0">File ini masih proses generate atau file memang tidak ada. Jika file surat tidak ada, buatlah surat yang baru</p>
+            @else
+              <p class="lead text-gray-800 mb-5">Internal Server Error</p>
+              <p class="text-gray-500 mb-0">It looks like you found a glitch in the matrix...</p>
+            @endif
+            <a href="{{ route('welcome') }}">&larr; Back to Dashboard</a>
           </div>
+
         </div>
-      </main>
-    </div>
-    <div id="layoutError_footer">
-      <footer class="py-4 bg-light mt-auto">
-        <div class="container-fluid px-4">
-          <div class="d-flex align-items-center justify-content-between small">
-            <div class="text-muted">Copyright &copy; Ofisly {{ date('Y') }}</div>
-            <div>
-              <a href="#">Privacy Policy</a>
-              &middot;
-              <a href="#">Terms &amp; Conditions</a>
-            </div>
+        <!-- /.container-fluid -->
+
+      </div>
+      <!-- End of Main Content -->
+
+      <!-- Footer -->
+      <footer class="sticky-footer bg-white">
+        <div class="container my-auto">
+          <div class="copyright text-center my-auto">
+            <span>Copyright &copy; Ofisly {{ date('Y') }}</span>
           </div>
         </div>
       </footer>
+      <!-- End of Footer -->
+
     </div>
+    <!-- End of Content Wrapper -->
+
   </div>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
-    crossorigin="anonymous"></script>
-  <script src="{{ asset('admin/js/scripts.js') }}"></script>
+  <!-- End of Page Wrapper -->
+
+  <!-- Bootstrap core JavaScript-->
+  <script src="{{ asset('admin/vendor/jquery/jquery.min.js') }}"></script>
+  <script src="{{ asset('admin/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+
+  <!-- Core plugin JavaScript-->
+  <script src="{{ asset('admin/vendor/jquery-easing/jquery.easing.min.js') }}"></script>
+
+  <!-- Custom scripts for all pages-->
+  <script src="{{ asset('admin/js/sb-admin-2.min.js') }}"></script>
+
 </body>
 
 </html>

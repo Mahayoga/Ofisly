@@ -1382,75 +1382,39 @@ section,
 }
 
 /*--------------------------------------------------------------
-# Team Section
+# lowongan Section
 --------------------------------------------------------------*/
-.team .member {
-  position: relative;
-}
-
-.team .member .pic {
-  overflow: hidden;
-  margin-bottom: 50px;
-}
-
-.team .member .member-info {
-  background-color: var(--surface-color);
-  color: color-mix(in srgb, var(--default-color), transparent 20%);
-  box-shadow: 0px 2px 15px rgba(0, 0, 0, 0.1);
-  position: absolute;
-  bottom: -50px;
-  left: 20px;
-  right: 20px;
-  padding: 20px 15px;
-  overflow: hidden;
-  transition: 0.5s;
-}
-
-.team .member h4 {
+.lowongan .content h3 {
+  font-size: 1.75rem;
   font-weight: 700;
-  margin-bottom: 10px;
-  font-size: 16px;
-  position: relative;
-  padding-bottom: 10px;
 }
 
-.team .member h4::after {
-  content: "";
-  position: absolute;
-  display: block;
-  width: 50px;
-  height: 1px;
-  background: color-mix(in srgb, var(--default-color), transparent 60%);
-  bottom: 0;
-  left: 0;
+.lowongan .content ul {
+  list-style: none;
+  padding: 0;
 }
 
-.team .member span {
-  font-style: italic;
-  display: block;
-  font-size: 13px;
+.lowongan .content ul li {
+  padding: 10px 0 0 0;
+  display: flex;
 }
 
-.team .member .social {
-  position: absolute;
-  right: 15px;
-  bottom: 15px;
-}
-
-.team .member .social a {
-  transition: color 0.3s;
-  color: color-mix(in srgb, var(--default-color), transparent 70%);
-}
-
-.team .member .social a:hover {
+.lowongan .content ul i {
   color: var(--accent-color);
+  margin-right: 0.5rem;
+  line-height: 1.2;
+  font-size: 1.25rem;
 }
 
-.team .member .social i {
-  font-size: 16px;
-  margin: 0 2px;
+.lowongan .content p:last-child {
+  margin-bottom: 0;
 }
 
+.lowongan .pulsating-play-btn {
+  position: absolute;
+  left: calc(50% - 47px);
+  top: calc(50% - 47px);
+  
 /*--------------------------------------------------------------
 # Contact Section
 --------------------------------------------------------------*/
@@ -1753,4 +1717,5 @@ section,
 --------------------------------------------------------------*/
 .starter-section {
   /* Add your styles here */
+}
 }
