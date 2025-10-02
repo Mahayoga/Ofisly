@@ -69,6 +69,7 @@ Route::middleware(['role.auth', 'auth'])->group(function () {
     Route::resource('arsip-data-surat-tugas-driver', ArsipSuratTugasDriverController::class);
     Route::resource('arsip-data-surat-tugas-mandiri', ArsipSuratTugasMandiriController::class);
     Route::resource('arsip-data-surat-tugas-promotor', ArsipSuratTugasPromotorController::class);
+     
 
     // Blank Page
     Route::get('/blank', function() {

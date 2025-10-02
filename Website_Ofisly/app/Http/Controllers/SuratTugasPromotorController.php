@@ -17,13 +17,14 @@ class SuratTugasPromotorController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {
-        $suratTugasPromotor = SuratTugasPromotor::latest()
-            ->paginate(10)
-            ->withQueryString();
+{
+    $suratTugasPromotor = SuratTugasPromotor::where('is_arsip', 0)
+        ->latest()
+        ->paginate(10)
+        ->withQueryString();
 
-        return view('admin.surat_tugas_promotor.index', compact('suratTugasPromotor'));
-    }
+    return view('admin.surat_tugas_promotor.index', compact('suratTugasPromotor'));
+}
 
     /**
      * Show the form for creating a new resource.
@@ -217,26 +218,21 @@ class SuratTugasPromotorController extends Controller
         try {
             $surat = SuratTugasPromotor::findOrFail($id);
 
-            // Hapus file terkait jika ada
-            $this->deleteAssociatedFiles($surat);
-
-            $surat->delete();
-
-            Log::info('Surat tugas promotor deleted', [
-                'id' => $id,
-                'by' => auth()->id()
-            ]);
+            // Tandai sebagai arsip
+            $surat->is_arsip = 1;
+            $surat->save();
 
             return redirect()
                 ->route('surat-tugas-promotor.index')
-                ->with('success', 'Surat Tugas Promotor berhasil dihapus');
+                ->with('success', 'Surat Tugas Promotor berhasil dipindahkan ke arsip');
 
         } catch (\Exception $e) {
-            Log::error('Error deleting surat tugas promotor: ' . $e->getMessage());
+            Log::error('Error archiving surat tugas promotor: ' . $e->getMessage());
             return back()
                 ->with('error', 'Terjadi kesalahan sistem. Silakan coba lagi.');
         }
     }
+
 
     /**
      * Generate PDF

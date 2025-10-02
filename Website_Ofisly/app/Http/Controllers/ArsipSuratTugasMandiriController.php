@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
+use App\Models\SuratTugasMandiriModel;
 class ArsipSuratTugasMandiriController extends Controller
 {
     /**
@@ -11,7 +11,8 @@ class ArsipSuratTugasMandiriController extends Controller
      */
     public function index()
     {
-        //
+        $arsipMandiri = SuratTugasMandiriModel::where('is_arsip', 1)->get();
+        return view('admin.arsip.surat-tugas-mandiri.index', compact('arsipMandiri'));
     }
 
     /**
@@ -21,6 +22,18 @@ class ArsipSuratTugasMandiriController extends Controller
     {
         //
     }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    // public function restore($id)
+    // {
+    //     // $surat = SuratTugasMandiriModel::findOrFail($id);
+    //     // $surat->is_arsip = 0;
+    //     // $surat->save();
+
+    //     // return redirect()->route('arsip.surat-tugas-mandiri.index')->with('success', 'Data berhasil direstore.');
+    // }
 
     /**
      * Store a newly created resource in storage.
@@ -59,6 +72,16 @@ class ArsipSuratTugasMandiriController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $surat = SuratTugasMandiriModel::findOrFail($id);
+        if($surat->file_path_docx && file_exists(public_path($surat->file_path_docx))){
+            unlink(public_path($surat->file_path_docx));
+        }
+        if($surat->file_path_pdf && file_exists(public_path($surat->file_path_pdf))){
+            unlink(public_path($surat->file_path_pdf));
+        }
+
+        $surat->delete();
+
+        return redirect()->route('arsip.surat-tugas-mandiri.index')->with('success', 'Data berhasil dihapus permanen.');
     }
 }

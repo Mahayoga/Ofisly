@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
+use App\Models\SuratTugasPenggantiDriverModel;
 class ArsipSuratTugasDriverController extends Controller
 {
     /**
@@ -11,7 +11,8 @@ class ArsipSuratTugasDriverController extends Controller
      */
     public function index()
     {
-        //
+        $arsipDriver = SuratTugasPenggantiDriverModel::where('is_arsip', 1)->get();
+        return view('admin.arsip.surat-tugas-driver.index', compact('arsipDriver'));
     }
 
     /**
@@ -59,6 +60,16 @@ class ArsipSuratTugasDriverController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $surat = SuratTugasPenggantiDriverModel::findOrFail($id);
+        if($surat->file_path_docx && file_exists(public_path($surat->file_path_docx))){
+            unlink(public_path($surat->file_path_docx));
+        }
+        if($surat->file_path_pdf && file_exists(public_path($surat->file_path_pdf))){
+            unlink(public_path($surat->file_path_pdf));
+        }
+
+        $surat->delete();
+
+        return redirect()->route('arsip.surat-tugas-driver.index')->with('success', 'Data berhasil dihapus permanen.');
     }
 }

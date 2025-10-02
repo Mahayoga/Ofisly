@@ -29,7 +29,7 @@ class SuratTugasPenggantiDriverController extends Controller
 
     public function index()
     {
-        $suratTugas = SuratTugasPenggantiDriverModel::latest()->get();
+        $suratTugas = SuratTugasPenggantiDriverModel::where('is_arsip', 0)->latest()->get();
         return view('admin.surat_tugas.index', compact('suratTugas'));
     }
 
@@ -185,30 +185,18 @@ class SuratTugasPenggantiDriverController extends Controller
     public function destroy($id)
     {
         try {
-            $surat = SuratTugasPenggantiDriverModel::findOrFail($id);
-            if($surat->delete()) {
-                $pathDocx = $surat->file_path_docx;
-                $pathPDF = $surat->file_path_pdf;
-                if(is_file(public_path() . $pathDocx)) {
-                    Storage::disk('public')->delete(str_replace('/storage/', '', $pathDocx));
-                }
-                if(is_file(public_path() . $pathPDF)) {
-                    Storage::disk('public')->delete(str_replace('/storage/', '', $pathPDF));
-                }
-            }
+        $surat = SuratTugasPenggantiDriverModel::findOrFail($id);
+        $surat->is_arsip = 1;
+        $surat->save();
 
-            // return response()->json([
-            //     'success' => true,
-            //     'message' => 'Surat Tugas berhasil dihapus'
-            // ]);
-            return redirect()->route('surat-tugas.index')
-                ->with('delete_success', 'Surat Tugas berhasil dihapus');
+        return redirect()->route('surat-tugas.index')
+            ->with('success', 'Surat Tugas berhasil dipindahkan ke arsip.');
 
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+        ], 500);
         }
     }
 

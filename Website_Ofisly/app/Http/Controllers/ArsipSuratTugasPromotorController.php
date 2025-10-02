@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\SuratTugasPromotor;
 
 class ArsipSuratTugasPromotorController extends Controller
 {
@@ -11,7 +12,8 @@ class ArsipSuratTugasPromotorController extends Controller
      */
     public function index()
     {
-        //
+        $arsipPromotor = SuratTugasPromotor::where('is_arsip', 1)->get();
+        return view('admin.arsip.surat-tugas-promotor.index', compact('arsipPromotor'));
     }
 
     /**
@@ -57,8 +59,18 @@ class ArsipSuratTugasPromotorController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+     public function destroy(string $id)
     {
-        //
+        $surat = SuratTugasPromotor::findOrFail($id);
+        if($surat->file_path_docx && file_exists(public_path($surat->file_path_docx))){
+            unlink(public_path($surat->file_path_docx));
+        }
+        if($surat->file_path_pdf && file_exists(public_path($surat->file_path_pdf))){
+            unlink(public_path($surat->file_path_pdf));
+        }
+
+        $surat->delete();
+
+        return redirect()->route('arsip.surat-tugas-promotor.index')->with('success', 'Data berhasil dihapus permanen.');
     }
 }

@@ -15,8 +15,9 @@ class SuratTugasMandiriController extends Controller
 {
     public function index()
     {
-    $suratPenempatan = SuratTugasMandiriModel::latest()->orderBy('created_at', 'desc')->get();
-    $lastNomor = SuratTugasMandiriModel::latest('created_at')->value('nomor_surat');
+        $suratPenempatan = SuratTugasMandiriModel::where('is_arsip', 0)->latest()->orderBy('created_at', 'desc')->get();
+        $lastNomor = SuratTugasMandiriModel::where('is_arsip', 0)->latest('created_at')->value('nomor_surat');
+
     if ($lastNomor) {
         $parts = explode('/', $lastNomor);
         $lastNumber = (int)$parts[0];
@@ -24,12 +25,10 @@ class SuratTugasMandiriController extends Controller
         $newNomor = $newNumber . '/' . $parts[1] . '/' . $parts[2] . '/' . $parts[3] . '/' . $parts[4];
     } else {
         $newNomor = '001/PI-SBY/Mandiri/' . date('m') . '/' . date('Y');
+        }
+
+        return view('admin.surat-tugas-mandiri.index', compact('suratPenempatan', 'lastNomor', 'newNomor'));    
     }
-
-    return view('admin.surat-tugas-mandiri.index', compact('suratPenempatan', 'lastNomor', 'newNomor'));
-}
-
-
 
     public function store(Request $request)
 {
@@ -130,30 +129,19 @@ class SuratTugasMandiriController extends Controller
     public function destroy($id)
     {
         try {
-            $suratPenempatan = SuratTugasMandiriModel::findOrFail($id);
-            $suratPenempatan->delete();
+        $suratPenempatan = SuratTugasMandiriModel::findOrFail($id);
+        $suratPenempatan->is_arsip = 1;
+        $suratPenempatan->save();
 
-            if($suratPenempatan->delete()) {
-                $pathDocx = $suratPenempatan->file_path_docx;
-                $pathPDF = $suratPenempatan->file_path_pdf;
-                if(is_file(public_path() . $pathDocx)) {
-                    Storage::disk('public')->delete(str_replace('/storage/', '', $pathDocx));
-                }
-                if(is_file(public_path() . $pathPDF)) {
-                    Storage::disk('public')->delete(str_replace('/storage/', '', $pathPDF));
-                }
-            }
+        return redirect()->route('surat-tugas-mandiri.index')
+            ->with('delete_success', 'Surat Tugas Mandiri berhasil dipindahkan ke arsip');
 
-            return redirect()->route('surat-tugas-mandiri.index')
-                ->with('delete_success', 'Surat Penempatan Driver Mandiri berhasil dihapus');
-
-                
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
-        }
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+        ], 500);
+     }
     }
 
     public function generatePDF($id)
