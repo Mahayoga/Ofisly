@@ -157,6 +157,77 @@
     </li>
 @endif
 
+    <!-- Nav Item - Arsip Data -->
+@if (Route::currentRouteName() == 'arsip-data-surat-tugas-driver.index')
+    <li class="nav-item active">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseArsip"
+            aria-expanded="true" aria-controls="collapseArsip">
+            <i class="fas fa-fw fa-briefcase"></i>
+            <span>Arsip Data</span>
+        </a>
+        <div id="collapseArsip" class="collapse show" aria-labelledby="headingPages"
+            data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded" style="max-height: 250px; overflow-y: auto;">
+                <h6 class="collapse-header">Daftar Menu:</h6>
+                <a class="collapse-item active" href="{{ route('arsip-data-surat-tugas-driver.index') }}">Surat Tugas Driver</a>
+                <a class="collapse-item" href="{{ route('arsip-data-surat-tugas-mandiri.index') }}">Surat Tugas Mandiri</a>
+                <a class="collapse-item" href="{{ route('arsip-data-surat-tugas-promotor.index') }}">Surat Tugas Promotor</a>
+            </div>
+        </div>
+    </li>
+@elseif(Route::currentRouteName() == 'arsip-data-surat-tugas-mandiri.index')
+    <li class="nav-item active">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseArsip"
+            aria-expanded="true" aria-controls="collapseArsip">
+            <i class="fas fa-fw fa-briefcase"></i>
+            <span>Arsip Data</span>
+        </a>
+        <div id="collapseArsip" class="collapse show" aria-labelledby="headingPages"
+            data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded" style="max-height: 250px; overflow-y: auto;">
+                <h6 class="collapse-header">Daftar Menu:</h6>
+                <a class="collapse-item" href="{{ route('arsip-data-surat-tugas-driver.index') }}">Surat Tugas Driver</a>
+                <a class="collapse-item active" href="{{ route('arsip-data-surat-tugas-mandiri.index') }}">Surat Tugas Mandiri</a>
+                <a class="collapse-item" href="{{ route('arsip-data-surat-tugas-promotor.index') }}">Surat Tugas Promotor</a>
+            </div>
+        </div>
+    </li>
+@elseif(Route::currentRouteName() == 'arsip-data-surat-tugas-promotor.index')
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseArsip"
+            aria-expanded="true" aria-controls="collapseArsip">
+            <i class="fas fa-fw fa-briefcase"></i>
+            <span>Arsip Data</span>
+        </a>
+        <div id="collapseArsip" class="collapse" aria-labelledby="headingPages"
+            data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded" style="max-height: 250px; overflow-y: auto;">
+                <h6 class="collapse-header">Daftar Menu:</h6>
+                <a class="collapse-item" href="{{ route('arsip-data-surat-tugas-driver.index') }}">Surat Tugas Driver</a>
+                <a class="collapse-item" href="{{ route('arsip-data-surat-tugas-mandiri.index') }}">Surat Tugas Mandiri</a>
+                <a class="collapse-item active" href="{{ route('arsip-data-surat-tugas-promotor.index') }}">Surat Tugas Promotor</a>
+            </div>
+        </div>
+    </li>
+@else
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseArsip"
+            aria-expanded="true" aria-controls="collapseArsip">
+            <i class="fas fa-fw fa-briefcase"></i>
+            <span>Arsip Data</span>
+        </a>
+        <div id="collapseArsip" class="collapse" aria-labelledby="headingPages"
+            data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded" style="max-height: 250px; overflow-y: auto;">
+                <h6 class="collapse-header">Daftar Menu:</h6>
+                <a class="collapse-item" href="{{ route('arsip-data-surat-tugas-driver.index') }}">Surat Tugas Driver</a>
+                <a class="collapse-item" href="{{ route('arsip-data-surat-tugas-mandiri.index') }}">Surat Tugas Mandiri</a>
+                <a class="collapse-item" href="{{ route('arsip-data-surat-tugas-promotor.index') }}">Surat Tugas Promotor</a>
+            </div>
+        </div>
+    </li>
+@endif
+
     <!-- Divider -->
     <hr class="sidebar-divider d-none d-md-block">
 

@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\ArsipSuratTugasDriverController;
+use App\Http\Controllers\ArsipSuratTugasMandiriController;
+use App\Http\Controllers\ArsipSuratTugasPromotorController;
 use App\Http\Controllers\CutiKaryawanController;
 use App\Http\Controllers\DaftarLowonganAdminController;
 use App\Http\Controllers\DashboardController;
@@ -62,7 +65,10 @@ Route::middleware(['role.auth', 'auth'])->group(function () {
     Route::resource('lowongan-pekerjaan', LowonganPekerjaanController::class);
     Route::resource('pendaftar-lowongan', DaftarLowonganAdminController::class);
 
-
+    // Arsip Data
+    Route::resource('arsip-data-surat-tugas-driver', ArsipSuratTugasDriverController::class);
+    Route::resource('arsip-data-surat-tugas-mandiri', ArsipSuratTugasMandiriController::class);
+    Route::resource('arsip-data-surat-tugas-promotor', ArsipSuratTugasPromotorController::class);
 
     // Blank Page
     Route::get('/blank', function() {
