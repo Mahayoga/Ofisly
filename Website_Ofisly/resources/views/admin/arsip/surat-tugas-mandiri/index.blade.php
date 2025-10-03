@@ -35,6 +35,7 @@
               <th>Jabatan</th>
               <th>Tanggal Pembuatan</th>
               <th>Tanggal Penempatan</th>
+              <th>Status File</th>
               <th>Aksi</th>
             </tr>
           </thead>
