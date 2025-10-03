@@ -6,6 +6,13 @@ use Illuminate\Http\Request;
 use App\Models\SuratTugasMandiriModel;
 class ArsipSuratTugasMandiriController extends Controller
 {
+    public function fetchRowData(){
+        $suratTugas = SuratTugasMandiriModel::where('is_arsip', '=','1')->latest()->get();
+        return response()->json([
+            'status' => true,
+            'data' => $suratTugas
+        ]);
+    }
     /**
      * Display a listing of the resource.
      */
@@ -22,18 +29,6 @@ class ArsipSuratTugasMandiriController extends Controller
     {
         //
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    // public function restore($id)
-    // {
-    //     // $surat = SuratTugasMandiriModel::findOrFail($id);
-    //     // $surat->is_arsip = 0;
-    //     // $surat->save();
-
-    //     // return redirect()->route('arsip.surat-tugas-mandiri.index')->with('success', 'Data berhasil direstore.');
-    // }
 
     /**
      * Store a newly created resource in storage.
@@ -64,7 +59,14 @@ class ArsipSuratTugasMandiriController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $dataSurat = SuratTugasMandiriModel::findOrFail($id);
+        $dataSurat->update([
+            'is_arsip' => 0
+        ]);
+        return response()->json([
+            'status' => true,
+            'id' => $id
+        ]);
     }
 
     /**
@@ -72,16 +74,26 @@ class ArsipSuratTugasMandiriController extends Controller
      */
     public function destroy(string $id)
     {
-        $surat = SuratTugasMandiriModel::findOrFail($id);
-        if($surat->file_path_docx && file_exists(public_path($surat->file_path_docx))){
-            unlink(public_path($surat->file_path_docx));
-        }
-        if($surat->file_path_pdf && file_exists(public_path($surat->file_path_pdf))){
-            unlink(public_path($surat->file_path_pdf));
-        }
+        try{
+            $surat = SuratTugasMandiriModel::findOrFail($id);
+            if($surat->file_path_docx && file_exists(public_path($surat->file_path_docx))){
+                unlink(public_path($surat->file_path_docx));
+            }
+            if($surat->file_path_pdf && file_exists(public_path($surat->file_path_pdf))){
+                unlink(public_path($surat->file_path_pdf));
+            }
 
-        $surat->delete();
+            $surat->delete();
 
-        return redirect()->route('arsip.surat-tugas-mandiri.index')->with('success', 'Data berhasil dihapus permanen.');
+            return response()->json([
+                    'status' => true,
+                    'id' => $id
+                ]);
+        } catch (\Exception $e){
+                return response()->json([
+                    'status' => false,
+                    'id' => $id
+                ]);
+        }
     }
 }

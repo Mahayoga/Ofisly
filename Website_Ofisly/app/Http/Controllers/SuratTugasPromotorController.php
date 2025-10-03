@@ -13,6 +13,15 @@ use Illuminate\Validation\Rule;
 
 class SuratTugasPromotorController extends Controller
 {
+
+    public function fetchRowData() {
+        $suratTugas = SuratTugasPromotor::where('is_arsip', '=', '0')->latest()->get();
+        return response()->json([
+            'status' => true,
+            'data' => $suratTugas->toArray()
+        ]);
+    }
+
     /**
      * Display a listing of the resource.
      */

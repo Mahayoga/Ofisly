@@ -13,6 +13,15 @@ use PhpOffice\PhpWord\IOFactory;
 
 class SuratTugasMandiriController extends Controller
 {
+    
+    public function fetchRowData() {
+        $suratTugas = SuratTugasMandiriModel::where('is_arsip', '=', '0')->latest()->get();
+        return response()->json([
+            'status' => true,
+            'data' => $suratTugas->toArray()
+        ]);
+    }
+    
     public function index()
     {
         $suratPenempatan = SuratTugasMandiriModel::where('is_arsip', 0)->latest()->orderBy('created_at', 'desc')->get();
