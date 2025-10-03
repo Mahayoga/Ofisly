@@ -1,12 +1,16 @@
 <?php
 
+use App\Models\SuratTugasMandiriModel;
 use App\Models\SuratTugasPenggantiDriverModel;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 Route::post('/get/info/file', function(Request $request) {
-    $dataSurat = SuratTugasPenggantiDriverModel::findOrFail($request->id);
+    $dataSurat = SuratTugasPenggantiDriverModel::find($request->id);
+    if($dataSurat == null) {
+        $dataSurat = SuratTugasMandiriModel::findOrFail($request->id);
+    }
     $pathDocx = $dataSurat->file_path_docx;
     $pathPDF = $dataSurat->file_path_pdf;
     if($request->type == 'pdf') {

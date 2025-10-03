@@ -54,6 +54,13 @@ Route::middleware(['role.auth', 'auth'])->group(function () {
 
     //route penempatan driver mandiri
     Route::resource('surat-tugas-mandiri', SuratTugasMandiriController::class);
+        Route::prefix('surat-tugas-mandiri')->group(function () {
+                Route::get('/get/latest/data', [SuratTugasMandiriController::class, 'fetchRowData'])->name('surat-tugas-mandiri.fetchRowData');
+                Route::get('/generate-pdf/{id}', [SuratTugasMandiriController::class, 'generatePDF'])->name('surat-tugas-mandiri.generate-pdf');
+                Route::get('/generate-word/{id}', [SuratTugasMandiriController::class, 'generateWord'])->name('surat-tugas-mandiri.generate-word');
+                Route::post('/generate/file', [SuratTugasMandiriController::class, 'generateFile'])->name('surat-tugas-mandiri.generate-file');
+                Route::get('/file/check/{id}/{type}', [SuratTugasMandiriController::class, 'fileCheck'])->name('surat-tugas-mandiri.file-check');
+            });
     Route::get('/generate-pdf/{id}', [SuratTugasMandiriController::class, 'generatePDF'])->name('surat-tugas-mandiri.generate-pdf');
     Route::get('/generate-word/{id}', [SuratTugasMandiriController::class, 'generateWord'])->name('surat-tugas-mandiri.generate-word');
     Route::post('/generate/file', [SuratTugasMandiriController::class, 'generateFile'])->name('surat-tugas-mandiri.generate-file');
