@@ -4,72 +4,235 @@
 
 @section('content')
 <div class="container-fluid">
-    <h1 class="h3 text-gray-800">Arsip Surat Tugas Mandiri</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item">Kumpulan surat yang sudah dipindahkan ke arsip</li>
-    </ol>
+  <h1 class="h3 text-gray-800">Arsip Surat Tugas Mandiri</h1>
+  <ol class="breadcrumb mb-4">
+    <li class="breadcrumb-item">Kumpulan surat yang sudah dipindahkan ke arsip</li>
+  </ol>
 
-    <div class="card border-0 mb-4">
-        <div class="card-body border">
-            @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ session('success') }}
-                    <button type="button" class="close" data-dismiss="alert">&times;</button>
-                </div>
-            @endif
-
-            @if(session('error'))
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    {{ session('error') }}
-                    <button type="button" class="close" data-dismiss="alert">&times;</button>
-                </div>
-            @endif
-
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover" id="arsipMandiriTable" width="100%" cellspacing="0">
-                    <thead class="bg-light">
-                        <tr>
-                            <th>No.</th>
-                            <th>Nomor Surat</th>
-                            <th>Nama Kandidat</th>
-                            <th>Jabatan</th>
-                            <th>Tanggal Pembuatan</th>
-                            <th>Tanggal Penempatan</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @php $i = 1; @endphp
-                        @forelse($arsipMandiri as $surat)
-                        <tr>
-                            <td>{{ $i }}</td>
-                            <td>{{ $surat->nomor_surat }}</td>
-                            <td>{{ $surat->nama_kandidat }}</td>
-                            <td>{{ $surat->jabatan_kandidat }}</td>
-                            <td>{{ \Carbon\Carbon::parse($surat->tgl_surat_pembuatan)->format('d/m/Y') }}</td>
-                            <td>{{ \Carbon\Carbon::parse($surat->tgl_mulai_penempatan)->format('d/m/Y') }}</td>
-                            <td class="text-center">
-                                {{-- Aksi akan diisi nanti --}}
-                            </td>
-                        </tr>
-                        @php $i++; @endphp
-                        @empty
-                        <tr>
-                            <td colspan="7" class="text-center">Tidak ada data arsip.</td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+  <div class="card border-0 mb-4">
+    <div class="card-body border">
+      @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+          {{ session('success') }}
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
         </div>
+      @endif
+
+      @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+          {{ session('error') }}
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+      @endif
+
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover" id="arsipMandiriTable" width="100%" cellspacing="0">
+          <thead class="bg-light">
+            <tr>
+              <th>No.</th>
+              <th>Nomor Surat</th>
+              <th>Nama Kandidat</th>
+              <th>Jabatan</th>
+              <th>Tanggal Pembuatan</th>
+              <th>Tanggal Penempatan</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+        </table>
+      </div>
     </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="editModalLabe">Edit Surat Tugas</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span class="material-symbols-outlined">
+            close
+          </span>
+          </button>
+      </div>
+      <div class="modal-body">
+        <p>Apakah anda ingin keluarkan data ini dari arsip</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+        <button type="button" onclick="editData(this)" class="btn btn-primary" id="editSubmitBtn" data-id="null">
+          <span id="editSubmitText">Ya</span>
+          <span id="editSubmitSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="editModalLabel">Hapus Permanen surat Tugas</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span class="material-symbols-outlined">
+            close
+          </span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Apakah anda ingin hapus data ini secara permanen</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+        <button type="button" onclick="deleteData(this)" class="btn btn-danger" id="deleteSubmitBtn" data-id="null">
+          <span id="deleteSubmitText">Ya</span>
+          <span id="deleteSubmitSpinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 @endsection
 
 @section('script')
-<script>
+  <script>
+    let table = null
     $(document).ready(function(){
-        new DataTable('#arsipMandiriTable');
+      table = new DataTable('#arsipMandiriTable', {
+        ajax: '{{route('arsip-data-surat-tugas-mandiri.fetchRowData') }}',
+        columns: [
+          {
+            data: null,
+            render: function (data, type, row, meta) {
+              return meta.row + 1;
+            }
+          },
+          { data: 'nomor_surat'},
+          { data: 'nama_kandidat'},
+          { data: 'jabatan_kandidat'},
+          {
+            data: function(data, type, row) {
+              return data.tgl_surat_pembuatan.split('T')[0];
+            }
+          },
+          {
+            data: function(data, type, row) {
+              return data.tgl_mulai_penempatan.split('T')[0];
+            }
+          },
+          {
+            data: function(data, type, row) {
+              if(data.is_arsip == 0) {
+                return 'Tidak diarsipkan';
+              }else if(data.is_arsip == 1) {
+                return 'Diarsipkan';
+              } else {
+                return 'Status tidak Valid!'
+              }
+            }
+          },
+          {
+            data: null,
+            render: function(data, type, row) {
+              return `
+                <div class="btn-group">
+                  <button class="btn btn-sm btn-info edit-btn" data-toggle="modal" data-target="#editModal" onclick="getDataEdit(this)" data-id="${row.id_surat_penempatan}">
+                    <i class="fas fa-trash-restore"></i>
+                  </button>
+                  <button class="btn btn-sm btn-danger delete-btn" data-toggle="modal" data-target="#deleteModal" onclick="getDataHapus(this)" data-id="${row.id_surat_penempatan}">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              `;
+            }
+          }
+        ]
+      });
     });
-</script>
+
+ function fetchRowData() {
+      table.ajax.reload(null, false);
+    }
+
+    function getDataEdit(btn) {
+      $('#editSubmitBtn').attr('data-id', btn.getAttribute('data-id'));
+    }
+
+    function getDataHapus(btn) {
+      $('#deleteSubmitBtn').attr('data-id', btn.getAttribute('data-id'));
+    }
+
+    function editData(btn) {
+      if(btn.getAttribute('data-id') == "null" || btn.getAttribute('data-id') == null) {
+        Swal.fire({
+          title: "Status Data",
+          text: "Kesalahan terjadi, coba lagi nanti!",
+          icon: "error"
+        });
+      } else {
+        let urlUpdate = '{{ route('arsip-data-surat-tugas-mandiri.update', ['__ID__']) }}';
+        $.post(urlUpdate.replace('__ID__', btn.getAttribute('data-id')), {
+          '_token': '{{ csrf_token() }}',
+          '_method': 'PUT',
+          'id': btn.getAttribute('data-id')
+        }, function(data, status) {
+          if(data.status) {
+            $('#editModal').modal('hide');
+            Swal.fire({
+              title: "Status Data",
+              text: "Data berhasil dikeluarkan dari arsip!",
+              icon: "success"
+            });
+            fetchRowData();
+          } else {
+            Swal.fire({
+              title: "Status Data",
+              text: "Kesalahan dari server!",
+              icon: "error"
+            });
+            fetchRowData();
+          }
+        });
+      }
+      btn.setAttribute('data-id', 'null');
+    }
+
+    function deleteData(btn) {
+      if(btn.getAttribute('data-id') == "null" || btn.getAttribute('data-id') == null) {
+        Swal.fire({
+          title: "Status Data",
+          text: "Kesalahan terjadi, coba lagi nanti!",
+          icon: "error"
+        });
+      } else {
+        let urlDelete = '{{ route('arsip-data-surat-tugas-mandiri.destroy', ['__ID__']) }}';
+        $.post(urlDelete.replace('__ID__', btn.getAttribute('data-id')), {
+          '_token': '{{ csrf_token() }}',
+          '_method': 'DELETE'
+        }, function(data, status) {
+          if(data.status) {
+            $('#deleteModal').modal('hide');
+            Swal.fire({
+              title: "Status Data",
+              text: "Data berhasil dihapus permanen!",
+              icon: "success"
+            });
+            fetchRowData();
+          } else {
+            Swal.fire({
+              title: "Status Data",
+              text: "Kesalahan dari server!",
+              icon: "error"
+            });
+            fetchRowData();
+          }
+        });
+      }
+      btn.setAttribute('data-id', 'null');
+    }
+  </script>
 @endsection
+

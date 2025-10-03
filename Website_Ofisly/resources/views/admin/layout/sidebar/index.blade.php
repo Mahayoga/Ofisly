@@ -103,9 +103,6 @@
         </li>
     @endif
 
-    <!-- Divider -->
-    <hr class="sidebar-divider">
-
     <!-- Nav Item - Lowongan Pekerjaan -->
 @if (Route::currentRouteName() == 'lowongan-pekerjaan.index')
     <li class="nav-item active">

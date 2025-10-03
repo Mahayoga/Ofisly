@@ -7,6 +7,15 @@ use App\Models\SuratTugasPromotor;
 
 class ArsipSuratTugasPromotorController extends Controller
 {
+
+    public function fetchRowData() {
+        $suratTugas = SuratTugasPromotor::where('is_arsip', '=', '1')->latest()->get();
+        return response()->json([
+            'status' => true,
+            'data' => $suratTugas
+        ]);
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -53,24 +62,41 @@ class ArsipSuratTugasPromotorController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $dataSurat = SuratTugasPromotor::findOrFail($id);
+        $dataSurat->update( [
+            'is_arsip' => 0
+        ]);
+        return response()->json([
+            'status' => true,
+            'id' => $id 
+        ]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
      public function destroy(string $id)
-    {
-        $surat = SuratTugasPromotor::findOrFail($id);
-        if($surat->file_path_docx && file_exists(public_path($surat->file_path_docx))){
-            unlink(public_path($surat->file_path_docx));
-        }
-        if($surat->file_path_pdf && file_exists(public_path($surat->file_path_pdf))){
-            unlink(public_path($surat->file_path_pdf));
-        }
+    {   
+        try {
+            $surat = SuratTugasPromotor::findOrFail($id);
+            if($surat->file_path_docx && file_exists(public_path($surat->file_path_docx))){
+                unlink(public_path($surat->file_path_docx));
+            }
+            if($surat->file_path_pdf && file_exists(public_path($surat->file_path_pdf))){
+                unlink(public_path($surat->file_path_pdf));
+            }
 
-        $surat->delete();
+            $surat->delete();
 
-        return redirect()->route('arsip.surat-tugas-promotor.index')->with('success', 'Data berhasil dihapus permanen.');
+            return response()->json([
+                    'status' => true,
+                    'id' => $id
+                ]);
+            } catch(\Exception $e) {
+                return response()->json([
+                    'status' => false,
+                    'id' => $id
+            ]);
+        }
     }
 }

@@ -78,7 +78,13 @@ Route::middleware(['role.auth', 'auth'])->group(function () {
             Route::get('/get/latest/data', [ArsipSuratTugasDriverController::class, 'fetchRowData'])->name('arsip-data-surat-tugas-driver.fetchRowData');
         });
     Route::resource('arsip-data-surat-tugas-mandiri', ArsipSuratTugasMandiriController::class);
+        Route::prefix('arsip-data-surat-tugas-mandiri')->group(function(){
+            Route::get('/get/latest/data', [ArsipSuratTugasMandiriController::class, 'fetchRowData'])->name('arsip-data-surat-tugas-mandiri.fetchRowData');
+        });
     Route::resource('arsip-data-surat-tugas-promotor', ArsipSuratTugasPromotorController::class);
+        Route::prefix('arsip-data-surat-tugas-promotor')->group(function(){
+            Route::get('/get/latest/data', [ArsipSuratTugasPromotorController::class, 'fetchRowData'])->name('arsip-data-surat-tugas-promotor.fetchRowData');
+        });
      
 
     // Blank Page
