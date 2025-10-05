@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\ArsipSuratTugasDriverController;
+use App\Http\Controllers\ArsipSuratTugasMandiriController;
+use App\Http\Controllers\ArsipSuratTugasPromotorController;
 use App\Http\Controllers\CutiKaryawanController;
 use App\Http\Controllers\DaftarLowonganAdminController;
 use App\Http\Controllers\DashboardController;
@@ -60,6 +63,13 @@ Route::middleware(['role.auth', 'auth'])->group(function () {
 
     //route penempatan driver mandiri
     Route::resource('surat-tugas-mandiri', SuratTugasMandiriController::class);
+        Route::prefix('surat-tugas-mandiri')->group(function () {
+                Route::get('/get/latest/data', [SuratTugasMandiriController::class, 'fetchRowData'])->name('surat-tugas-mandiri.fetchRowData');
+                Route::get('/generate-pdf/{id}', [SuratTugasMandiriController::class, 'generatePDF'])->name('surat-tugas-mandiri.generate-pdf');
+                Route::get('/generate-word/{id}', [SuratTugasMandiriController::class, 'generateWord'])->name('surat-tugas-mandiri.generate-word');
+                Route::post('/generate/file', [SuratTugasMandiriController::class, 'generateFile'])->name('surat-tugas-mandiri.generate-file');
+                Route::get('/file/check/{id}/{type}', [SuratTugasMandiriController::class, 'fileCheck'])->name('surat-tugas-mandiri.file-check');
+            });
     Route::get('/generate-pdf/{id}', [SuratTugasMandiriController::class, 'generatePDF'])->name('surat-tugas-mandiri.generate-pdf');
     Route::get('/generate-word/{id}', [SuratTugasMandiriController::class, 'generateWord'])->name('surat-tugas-mandiri.generate-word');
     Route::post('/generate/file', [SuratTugasMandiriController::class, 'generateFile'])->name('surat-tugas-mandiri.generate-file');
@@ -71,7 +81,20 @@ Route::middleware(['role.auth', 'auth'])->group(function () {
     Route::resource('lowongan-pekerjaan', LowonganPekerjaanController::class);
     Route::resource('pendaftar-lowongan', DaftarLowonganAdminController::class);
 
-
+    // Arsip Data
+    Route::resource('arsip-data-surat-tugas-driver', ArsipSuratTugasDriverController::class);
+        Route::prefix('arsip-data-surat-tugas-driver')->group(function() {
+            Route::get('/get/latest/data', [ArsipSuratTugasDriverController::class, 'fetchRowData'])->name('arsip-data-surat-tugas-driver.fetchRowData');
+        });
+    Route::resource('arsip-data-surat-tugas-mandiri', ArsipSuratTugasMandiriController::class);
+        Route::prefix('arsip-data-surat-tugas-mandiri')->group(function(){
+            Route::get('/get/latest/data', [ArsipSuratTugasMandiriController::class, 'fetchRowData'])->name('arsip-data-surat-tugas-mandiri.fetchRowData');
+        });
+    Route::resource('arsip-data-surat-tugas-promotor', ArsipSuratTugasPromotorController::class);
+        Route::prefix('arsip-data-surat-tugas-promotor')->group(function(){
+            Route::get('/get/latest/data', [ArsipSuratTugasPromotorController::class, 'fetchRowData'])->name('arsip-data-surat-tugas-promotor.fetchRowData');
+        });
+     
 
     // Blank Page
     Route::get('/blank', function() {

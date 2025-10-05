@@ -19,7 +19,8 @@ class SuratTugasPromotorController extends Controller
      */
     public function index()
     {
-        $suratTugasPromotor = SuratTugasPromotor::latest()
+        $suratTugasPromotor = SuratTugasPromotor::where('is_arsip', 0)
+            ->latest()
             ->paginate(10)
             ->withQueryString();
 
@@ -41,7 +42,7 @@ class SuratTugasPromotorController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'nama_kandidat' => 'required|string|max:255',
-            'penempatan' => 'required|string', // Terima sebagai string
+            'penempatan' => 'required|string',
             'tgl_penugasan' => 'required|date|after_or_equal:today',
         ], [
             'tgl_penugasan.after_or_equal' => 'Tanggal penugasan harus hari ini atau setelahnya',
@@ -55,26 +56,27 @@ class SuratTugasPromotorController extends Controller
         try {
             $validated = $validator->validated();
 
-            // ## PERBAIKAN STORE ##
-            // Ubah string "a, b, c" menjadi array ["a", "b", "c"]
-            // Cast di model akan mengubah array ini menjadi JSON saat disimpan
+            // Process penempatan
             $penempatanArray = array_filter(array_map('trim', explode(',', $validated['penempatan'])));
 
             $resultCreate = SuratTugasPromotor::create([
                 'nama_kandidat' => $validated['nama_kandidat'],
                 'tgl_penugasan' => $validated['tgl_penugasan'],
-                'penempatan' => $penempatanArray, // Simpan sebagai array
+                'penempatan' => $penempatanArray,
                 'tgl_surat_pembuatan' => Carbon::now()->format('Y-m-d'),
                 'created_by' => auth()->id(),
             ]);
 
-            Log::info('Surat tugas promotor created', ['id' => $resultCreate->id_surat_tugas_promotor, 'by' => auth()->id()]);
+            Log::info('Surat tugas promotor created', [
+                'id' => $resultCreate->id_surat_tugas_promotor,
+                'by' => auth()->id()
+            ]);
 
             $this->triggerFileGeneration($resultCreate->id_surat_tugas_promotor);
 
             return redirect()
                 ->route('surat-tugas-promotor.index')
-                ->with(['success' => 'Surat Tugas Promotor berhasil dibuat']);
+                ->with('success', 'Surat Tugas Promotor berhasil dibuat');
 
         } catch (\Exception $e) {
             Log::error('Error creating surat tugas promotor: ' . $e->getMessage());
@@ -88,10 +90,17 @@ class SuratTugasPromotorController extends Controller
     public function fetchRowData()
     {
         try {
-            $suratTugas = SuratTugasPromotor::latest()->get();
-            return response()->json(['status' => true, 'data' => $suratTugas->toArray()]);
+            $suratTugas = SuratTugasPromotor::where('is_arsip', 0)->latest()->get();
+            return response()->json([
+                'status' => true,
+                'data' => $suratTugas->toArray()
+            ]);
         } catch (\Exception $e) {
-            return response()->json(['status' => false, 'message' => 'Error fetching data: ' . $e->getMessage()], 500);
+            Log::error('Error fetching row data: ' . $e->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => 'Error fetching data: ' . $e->getMessage()
+            ], 500);
         }
     }
 
@@ -103,9 +112,12 @@ class SuratTugasPromotorController extends Controller
         try {
             $surat = SuratTugasPromotor::findOrFail($id);
             return view('admin.surat_tugas_promotor.show', compact('surat'));
+        } catch (ModelNotFoundException $e) {
+            Log::error('Surat tugas promotor not found: ' . $e->getMessage());
+            return back()->with('error', 'Data tidak ditemukan');
         } catch (\Exception $e) {
             Log::error('Error showing surat tugas promotor: ' . $e->getMessage());
-            return back()->with('error', 'Data tidak ditemukan');
+            return back()->with('error', 'Terjadi kesalahan sistem');
         }
     }
 
@@ -116,10 +128,29 @@ class SuratTugasPromotorController extends Controller
     {
         try {
             $surat = SuratTugasPromotor::findOrFail($id);
-            return response()->json(['success' => true, 'data' => $surat->only(['nama_kandidat', 'penempatan', 'tgl_penugasan', 'tgl_surat_pembuatan', 'file_path_docx', 'file_path_pdf'])]);
+            return response()->json([
+                'success' => true,
+                'data' => $surat->only([
+                    'nama_kandidat',
+                    'penempatan',
+                    'tgl_penugasan',
+                    'tgl_surat_pembuatan',
+                    'file_path_docx',
+                    'file_path_pdf'
+                ])
+            ]);
+        } catch (ModelNotFoundException $e) {
+            Log::error('Surat tugas promotor not found for edit: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak ditemukan'
+            ], 404);
         } catch (\Exception $e) {
             Log::error('Error editing surat tugas promotor: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Data tidak ditemukan'], 404);
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan sistem'
+            ], 500);
         }
     }
 
@@ -130,24 +161,30 @@ class SuratTugasPromotorController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'edit_nama_kandidat' => 'required|string|max:255',
-            'edit_penempatan' => 'required|string', // Terima sebagai string JSON
+            'edit_penempatan' => 'required|string',
             'edit_tgl_penugasan' => 'required|date',
             'edit_tgl_surat_pembuatan' => 'required|date',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
         }
 
         try {
             $surat = SuratTugasPromotor::findOrFail($id);
-            $penempatanArray = json_decode($request->edit_penempatan, true);
 
+            // Process penempatan from string to array
+            $penempatanArray = array_filter(array_map('trim', explode(',', $request->edit_penempatan)));
+
+            // Delete old files before update
             $this->deleteAssociatedFiles($surat);
 
             $surat->update([
                 'nama_kandidat' => $request->edit_nama_kandidat,
-                'penempatan' => $penempatanArray, // Simpan sebagai array
+                'penempatan' => $penempatanArray,
                 'tgl_penugasan' => $request->edit_tgl_penugasan,
                 'tgl_surat_pembuatan' => $request->edit_tgl_surat_pembuatan,
                 'updated_by' => auth()->id(),
@@ -155,33 +192,65 @@ class SuratTugasPromotorController extends Controller
                 'file_path_pdf' => null,
             ]);
 
-            Log::info('Surat tugas promotor updated', ['id' => $id, 'by' => auth()->id()]);
+            Log::info('Surat tugas promotor updated', [
+                'id' => $id,
+                'by' => auth()->id()
+            ]);
+
+            // Regenerate files
             $this->triggerFileGeneration($id);
 
-            return response()->json(['success' => true, 'message' => 'Surat Tugas Promotor berhasil diperbarui']);
+            return response()->json([
+                'success' => true,
+                'message' => 'Surat Tugas Promotor berhasil diperbarui'
+            ]);
+
+        } catch (ModelNotFoundException $e) {
+            Log::error('Surat tugas promotor not found for update: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak ditemukan'
+            ], 404);
         } catch (\Exception $e) {
             Log::error('Error updating surat tugas promotor: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Terjadi kesalahan sistem.'], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan sistem'
+            ], 500);
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id)
-    {
-        try {
-            $surat = SuratTugasPromotor::findOrFail($id);
-            $this->deleteAssociatedFiles($surat);
-            $surat->delete();
-            Log::info('Surat tugas promotor deleted', ['id' => $id, 'by' => auth()->id()]);
+/**
+ * Remove the specified resource from storage.
+ */
+public function destroy($id)
+{
+    try {
+        $surat = SuratTugasPromotor::findOrFail($id);
 
-            return redirect()->route('surat-tugas-promotor.index')->with('success', 'Surat Tugas Promotor berhasil dihapus');
-        } catch (\Exception $e) {
-            Log::error('Error deleting surat tugas promotor: ' . $e->getMessage());
-            return back()->with('error', 'Terjadi kesalahan sistem. Silakan coba lagi.');
-        }
+        // Hanya tandai sebagai arsip, TIDAK PERLU soft delete di sini
+        $surat->update([
+            'is_arsip' => 1,
+            'updated_by' => auth()->id()
+        ]);
+
+        Log::info('Surat tugas promotor moved to archive', [
+            'id' => $id,
+            'by' => auth()->id()
+        ]);
+
+        return redirect()
+            ->route('surat-tugas-promotor.index')
+            ->with('success', 'Surat Tugas Promotor berhasil dipindahkan ke arsip');
+
+    } catch (ModelNotFoundException $e) {
+        Log::error('Surat tugas promotor not found for archive: ' . $e->getMessage());
+        return back()->with('error', 'Data tidak ditemukan');
+    } catch (\Exception $e) {
+        Log::error('Error archiving surat tugas promotor: ' . $e->getMessage());
+        return back()->with('error', 'Terjadi kesalahan sistem. Silakan coba lagi.');
     }
+}
 
     /**
      * Generate PDF for download.
@@ -191,7 +260,6 @@ class SuratTugasPromotorController extends Controller
         try {
             $surat = SuratTugasPromotor::findOrFail($id);
 
-            // FIX: Path conversion yang sama
             if ($surat->file_path_pdf) {
                 $storagePath = str_replace('/storage/', '', $surat->file_path_pdf);
 
@@ -208,6 +276,9 @@ class SuratTugasPromotorController extends Controller
                 'message' => 'File sedang diproses, silakan coba lagi dalam beberapa saat'
             ], 202);
 
+        } catch (ModelNotFoundException $e) {
+            Log::error('Surat tugas promotor not found for PDF generation: ' . $e->getMessage());
+            abort(404, 'Data tidak ditemukan');
         } catch (\Exception $e) {
             Log::error('Error generating PDF', [
                 'id' => $id,
@@ -225,7 +296,6 @@ class SuratTugasPromotorController extends Controller
         try {
             $surat = SuratTugasPromotor::findOrFail($id);
 
-            // FIX: Path conversion yang sama
             if ($surat->file_path_docx) {
                 $storagePath = str_replace('/storage/', '', $surat->file_path_docx);
 
@@ -242,6 +312,9 @@ class SuratTugasPromotorController extends Controller
                 'message' => 'File sedang diproses, silakan coba lagi dalam beberapa saat'
             ], 202);
 
+        } catch (ModelNotFoundException $e) {
+            Log::error('Surat tugas promotor not found for Word generation: ' . $e->getMessage());
+            abort(404, 'Data tidak ditemukan');
         } catch (\Exception $e) {
             Log::error('Error generating Word', [
                 'id' => $id,
@@ -265,7 +338,10 @@ class SuratTugasPromotorController extends Controller
 
             if ($validator->fails()) {
                 Log::error('Upload final validation failed', ['errors' => $validator->errors()]);
-                return response()->json(['success' => false, 'message' => 'Validasi gagal'], 422);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validasi gagal'
+                ], 422);
             }
 
             $suratId = $request->surat_id;
@@ -289,14 +365,17 @@ class SuratTugasPromotorController extends Controller
                 'pdf_path' => '/storage/' . $pdfPath
             ]);
 
-            // 🔥 KIRIM NOTIFIKASI MELALUI WebSocket/Pusher (jika menggunakan)
-            // broadcast(new FileGeneratedEvent($suratId, 'completed'))->toOthers();
-
             return response()->json([
                 'success' => true,
                 'message' => 'File berhasil diupload dan database diperbarui'
             ]);
 
+        } catch (ModelNotFoundException $e) {
+            Log::error('Surat tugas promotor not found for upload final: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak ditemukan'
+            ], 404);
         } catch (\Exception $e) {
             Log::error('Error in upload final', [
                 'id' => $request->surat_id,
@@ -312,7 +391,7 @@ class SuratTugasPromotorController extends Controller
     }
 
     /**
-     * Trigger File Generation - UPDATE UNTUK WEBSOCKET
+     * Trigger File Generation
      */
     protected function triggerFileGeneration($id)
     {
@@ -332,7 +411,6 @@ class SuratTugasPromotorController extends Controller
 
             $responseData = $response->json();
 
-            // PERBAIKAN: Handle response dengan konsisten
             if (isset($responseData['success']) && $responseData['success'] === true) {
                 return [
                     'success' => true,
@@ -342,7 +420,6 @@ class SuratTugasPromotorController extends Controller
                 ];
             }
 
-            // Fallback untuk response lama
             if (isset($responseData['status']) && $responseData['status'] == 'success') {
                 return [
                     'success' => true,
@@ -397,26 +474,10 @@ class SuratTugasPromotorController extends Controller
         try {
             $dataSurat = SuratTugasPromotor::findOrFail($id);
 
-            // DEBUG: Log untuk troubleshooting
-            Log::debug('File Check Debug', [
-                'id' => $id,
-                'type' => $type,
-                'db_docx_path' => $dataSurat->file_path_docx,
-                'db_pdf_path' => $dataSurat->file_path_pdf
-            ]);
-
             $pathToCheck = ($type == 'pdf') ? $dataSurat->file_path_pdf : $dataSurat->file_path_docx;
 
             if ($pathToCheck) {
-                // FIX: Convert URL path to storage path yang benar
                 $storagePath = str_replace('/storage/', '', $pathToCheck);
-
-                Log::debug('Path Conversion', [
-                    'url_path' => $pathToCheck,
-                    'storage_path' => $storagePath,
-                    'exists' => Storage::disk('public')->exists($storagePath)
-                ]);
-
                 $fileExists = Storage::disk('public')->exists($storagePath);
 
                 if ($fileExists) {
@@ -425,7 +486,10 @@ class SuratTugasPromotorController extends Controller
                         'type' => $type,
                         'path' => $storagePath
                     ]);
-                    return response()->json(['status' => true, 'message' => 'File siap diunduh']);
+                    return response()->json([
+                        'status' => true,
+                        'message' => 'File siap diunduh'
+                    ]);
                 }
             }
 
@@ -441,7 +505,10 @@ class SuratTugasPromotorController extends Controller
 
             if ($response->successful() && $response->json()['status'] === true) {
                 Log::info('Flask sedang memproses file', ['id' => $id]);
-                return response()->json(['status' => 'processing', 'message' => 'File masih dalam proses generate, mohon tunggu...']);
+                return response()->json([
+                    'status' => 'processing',
+                    'message' => 'File masih dalam proses generate, mohon tunggu...'
+                ]);
             }
 
             // File tidak ada dan Flask tidak memproses -> trigger regenerate
@@ -455,95 +522,128 @@ class SuratTugasPromotorController extends Controller
 
         } catch (ModelNotFoundException $e) {
             Log::error('Data surat tidak ditemukan', ['id' => $id]);
-            return response()->json(['status' => false, 'message' => 'Data surat tidak ditemukan.'], 404);
+            return response()->json([
+                'status' => false,
+                'message' => 'Data surat tidak ditemukan.'
+            ], 404);
         } catch (\Exception $e) {
             Log::error('Error dalam file check', [
                 'id' => $id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
-            return response()->json(['status' => false, 'message' => 'Terjadi kesalahan internal saat memeriksa file.'], 500);
+            return response()->json([
+                'status' => false,
+                'message' => 'Terjadi kesalahan internal saat memeriksa file.'
+            ], 500);
         }
     }
 
-/**
- * Update file paths after generation from Flask
- */
-public function updateFilePaths(Request $request, $id)
-{
-    try {
-        $validator = Validator::make($request->all(), [
-            'file_path_pdf' => 'nullable|string',
-            'file_path_docx' => 'nullable|string',
-        ]);
+    /**
+     * Update file paths after generation from Flask
+     */
+    public function updateFilePaths(Request $request, $id)
+    {
+        try {
+            $validator = Validator::make($request->all(), [
+                'file_path_pdf' => 'nullable|string',
+                'file_path_docx' => 'nullable|string',
+            ]);
 
-        if ($validator->fails()) {
-            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+
+            $surat = SuratTugasPromotor::findOrFail($id);
+
+            $updates = [];
+            if ($request->has('file_path_pdf')) {
+                $updates['file_path_pdf'] = $request->file_path_pdf;
+            }
+            if ($request->has('file_path_docx')) {
+                $updates['file_path_docx'] = $request->file_path_docx;
+            }
+
+            $surat->update($updates);
+
+            Log::info('File paths updated', [
+                'id' => $id,
+                'pdf_path' => $request->file_path_pdf,
+                'docx_path' => $request->file_path_docx
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'File paths updated successfully'
+            ]);
+
+        } catch (ModelNotFoundException $e) {
+            Log::error('Surat tugas promotor not found for update file paths: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak ditemukan'
+            ], 404);
+        } catch (\Exception $e) {
+            Log::error('Error updating file paths: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan sistem.'
+            ], 500);
         }
-
-        $surat = SuratTugasPromotor::findOrFail($id);
-
-        $updates = [];
-        if ($request->has('file_path_pdf')) {
-            $updates['file_path_pdf'] = $request->file_path_pdf;
-        }
-        if ($request->has('file_path_docx')) {
-            $updates['file_path_docx'] = $request->file_path_docx;
-        }
-
-        $surat->update($updates);
-
-        Log::info('File paths updated', [
-            'id' => $id,
-            'pdf_path' => $request->file_path_pdf,
-            'docx_path' => $request->file_path_docx
-        ]);
-
-        return response()->json(['success' => true, 'message' => 'File paths updated successfully']);
-
-    } catch (\Exception $e) {
-        Log::error('Error updating file paths: ' . $e->getMessage());
-        return response()->json(['success' => false, 'message' => 'Terjadi kesalahan sistem.'], 500);
     }
-}
 
-/**
- * Get current file status
- */
-public function getFileStatus($id)
-{
-    try {
-        $surat = SuratTugasPromotor::findOrFail($id);
+    /**
+     * Get current file status
+     */
+    public function getFileStatus($id)
+    {
+        try {
+            $surat = SuratTugasPromotor::findOrFail($id);
 
-        // Check if files actually exist in storage
-        $pdfExists = false;
-        $docxExists = false;
+            // Check if files actually exist in storage
+            $pdfExists = false;
+            $docxExists = false;
 
-        if ($surat->file_path_pdf) {
-            $pdfPath = str_replace('/storage/', '', $surat->file_path_pdf);
-            $pdfExists = Storage::disk('public')->exists($pdfPath);
+            if ($surat->file_path_pdf) {
+                $pdfPath = str_replace('/storage/', '', $surat->file_path_pdf);
+                $pdfExists = Storage::disk('public')->exists($pdfPath);
+            }
+
+            if ($surat->file_path_docx) {
+                $docxPath = str_replace('/storage/', '', $surat->file_path_docx);
+                $docxExists = Storage::disk('public')->exists($docxPath);
+            }
+
+            $status = [
+                'pdf' => $pdfExists,
+                'docx' => $docxExists,
+                'id' => $id,
+                'file_path_pdf' => $surat->file_path_pdf,
+                'file_path_docx' => $surat->file_path_docx
+            ];
+
+            return response()->json([
+                'success' => true,
+                'status' => $status
+            ]);
+
+        } catch (ModelNotFoundException $e) {
+            Log::error('Surat tugas promotor not found for file status: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Data tidak ditemukan'
+            ], 404);
+        } catch (\Exception $e) {
+            Log::error('Error getting file status: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error getting file status'
+            ], 500);
         }
-
-        if ($surat->file_path_docx) {
-            $docxPath = str_replace('/storage/', '', $surat->file_path_docx);
-            $docxExists = Storage::disk('public')->exists($docxPath);
-        }
-
-        $status = [
-            'pdf' => $pdfExists,
-            'docx' => $docxExists,
-            'id' => $id,
-            'file_path_pdf' => $surat->file_path_pdf,
-            'file_path_docx' => $surat->file_path_docx
-        ];
-
-        return response()->json(['success' => true, 'status' => $status]);
-
-    } catch (\Exception $e) {
-        Log::error('Error getting file status: ' . $e->getMessage());
-        return response()->json(['success' => false, 'message' => 'Error getting file status'], 500);
     }
-}
 
     /**
      * Check Flask Status - UNTUK FALLBACK
@@ -558,12 +658,20 @@ public function getFileStatus($id)
                 return response()->json($response->json());
             }
 
-            return response()->json(['status' => 'unknown', 'message' => 'Unable to reach Flask server']);
+            return response()->json([
+                'status' => 'unknown',
+                'message' => 'Unable to reach Flask server'
+            ]);
 
         } catch (\Exception $e) {
-            Log::error('Error checking Flask status', ['id' => $id, 'error' => $e->getMessage()]);
-            return response()->json(['status' => 'error', 'message' => 'Check failed']);
+            Log::error('Error checking Flask status', [
+                'id' => $id,
+                'error' => $e->getMessage()
+            ]);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Check failed'
+            ]);
         }
     }
-
 }
