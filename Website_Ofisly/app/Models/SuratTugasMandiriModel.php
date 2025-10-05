@@ -20,6 +20,7 @@ class SuratTugasMandiriModel extends Model
         'tgl_surat_pembuatan',
         'file_path_docx',
         'file_path_pdf',
+        'is_arsip',
     ];
 
     protected $casts = [

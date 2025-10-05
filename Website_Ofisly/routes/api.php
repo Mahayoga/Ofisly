@@ -1,12 +1,18 @@
 <?php
 
+use App\Models\SuratTugasMandiriModel;
 use App\Models\SuratTugasPenggantiDriverModel;
+use App\Models\SuratTugasPromotor;
+use App\Http\Controllers\SuratTugasPromotorController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 Route::post('/get/info/file', function(Request $request) {
-    $dataSurat = SuratTugasPenggantiDriverModel::findOrFail($request->id);
+    $dataSurat = SuratTugasPenggantiDriverModel::find($request->id);
+    if($dataSurat == null) {
+        $dataSurat = SuratTugasMandiriModel::findOrFail($request->id);
+    }
     $pathDocx = $dataSurat->file_path_docx;
     $pathPDF = $dataSurat->file_path_pdf;
     if($request->type == 'pdf') {
@@ -67,62 +73,59 @@ Route::post('/send/surat/pengganti/driver', function(Request $request) {
     ]);
 });
 
-Route::post('/send/surat/promotor', function(Request $request) {
-    $request->validate([
-        'file_docx' => 'required|file|mimes:docx',
-        'file_pdf' => 'required|file|mimes:pdf'
-    ]);
+// ======================================================================
+// ROUTES UNTUK SURAT TUGAS PROMOTOR - API
+// ======================================================================
 
-    $savedFiles = [];
+// ✅ TAMBAHKAN ROUTE INI - File Check untuk API calls
+Route::get('/surat-promotor/{id}/file-check/{type}', [SuratTugasPromotorController::class, 'fileCheck'])
+    ->name('api.surat-promotor.file-check');
 
+// Endpoint untuk upload final file dari Flask
+Route::post('/surat-promotor/upload-final', [SuratTugasPromotorController::class, 'uploadFinal'])
+    ->name('api.surat-promotor.upload-final');
+
+// Endpoint untuk update file paths (alternatif)
+Route::post('/surat-promotor/{id}/update-file-paths', [SuratTugasPromotorController::class, 'updateFilePaths'])
+    ->name('api.surat-promotor.update-file-paths');
+
+// Endpoint untuk check file status
+Route::get('/surat-promotor/{id}/file-status', [SuratTugasPromotorController::class, 'getFileStatus'])
+    ->name('api.surat-promotor.file-status');
+
+// Endpoint untuk check generation status (fallback)
+Route::get('/surat-promotor/{id}/generation-status', function($id) {
     try {
-        // Handle DOCX file
-        if ($request->hasFile('file_docx')) {
-            $docxFile = $request->file('file_docx');
-            $docxName = 'promotor_'.time().'_'.uniqid().'.'.$docxFile->extension();
+        $surat = \App\Models\SuratTugasPromotor::findOrFail($id);
 
-            $docxPath = $docxFile->storeAs(
-                'uploads/surat_tugas_promotor',
-                $docxName,
-                'public'
-            );
-            $savedFiles['docx'] = Storage::url($docxPath);
-        }
+        $status = [
+            'id' => $id,
+            'pdf_exists' => !empty($surat->file_path_pdf),
+            'docx_exists' => !empty($surat->file_path_docx),
+            'status' => (!empty($surat->file_path_pdf) && !empty($surat->file_path_docx)) ? 'completed' : 'processing'
+        ];
 
-        // Handle PDF file
-        if ($request->hasFile('file_pdf')) {
-            $pdfFile = $request->file('file_pdf');
-            $pdfName = 'promotor_'.time().'_'.uniqid().'.'.$pdfFile->extension();
-
-            $pdfPath = $pdfFile->storeAs(
-                'uploads/surat_tugas_promotor',
-                $pdfName,
-                'public'
-            );
-            $savedFiles['pdf'] = Storage::url($pdfPath);
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Files uploaded successfully',
-            'files' => $savedFiles
-        ]);
-
+        return response()->json(['success' => true, 'status' => $status]);
     } catch (\Exception $e) {
-        // Delete files if error occurs
-        foreach ($savedFiles as $type => $url) {
-            $path = str_replace('/storage', '', parse_url($url, PHP_URL_PATH));
-            Storage::disk('public')->delete($path);
-        }
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to upload files',
-            'error' => $e->getMessage()
-        ], 500);
+        return response()->json(['success' => false, 'message' => 'Record not found'], 404);
     }
 });
 
+// ✅ TAMBAHKAN ROUTE INI - Health check untuk Flask
+Route::get('/flask-health', function() {
+    try {
+        $apiURL = env('FLASK_API_URL') . '/health';
+        $response = Http::timeout(5)->get($apiURL);
+
+        if ($response->successful()) {
+            return response()->json(['status' => 'connected', 'flask_status' => $response->json()]);
+        }
+
+        return response()->json(['status' => 'error', 'message' => 'Flask server not responding'], 503);
+    } catch (\Exception $e) {
+        return response()->json(['status' => 'error', 'message' => 'Cannot connect to Flask server'], 503);
+    }
+});
 
 Route::get('/nyoba/ajax', function() {
     $apiURL = env('FLASK_API_URL') . '/nyoba/ajax';

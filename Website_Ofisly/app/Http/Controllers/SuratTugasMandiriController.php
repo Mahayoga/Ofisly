@@ -13,10 +13,18 @@ use PhpOffice\PhpWord\IOFactory;
 
 class SuratTugasMandiriController extends Controller
 {
+    public function fetchRowData() {
+        $suratTugas = SuratTugasMandiriModel::where('is_arsip', 0)->latest()->get();
+        return response()->json([
+            'status' => true,
+            'data' => $suratTugas
+        ]);
+    }
     public function index()
     {
-    $suratPenempatan = SuratTugasMandiriModel::latest()->orderBy('created_at', 'desc')->get();
-    $lastNomor = SuratTugasMandiriModel::latest('created_at')->value('nomor_surat');
+        $suratPenempatan = SuratTugasMandiriModel::where('is_arsip', 0)->latest()->orderBy('created_at', 'desc')->get();
+        $lastNomor = SuratTugasMandiriModel::where('is_arsip', 0)->latest('created_at')->value('nomor_surat');
+
     if ($lastNomor) {
         $parts = explode('/', $lastNomor);
         $lastNumber = (int)$parts[0];
@@ -24,12 +32,10 @@ class SuratTugasMandiriController extends Controller
         $newNomor = $newNumber . '/' . $parts[1] . '/' . $parts[2] . '/' . $parts[3] . '/' . $parts[4];
     } else {
         $newNomor = '001/PI-SBY/Mandiri/' . date('m') . '/' . date('Y');
+        }
+
+        return view('admin.surat-tugas-mandiri.index', compact('suratPenempatan', 'lastNomor', 'newNomor'));    
     }
-
-    return view('admin.surat-tugas-mandiri.index', compact('suratPenempatan', 'lastNomor', 'newNomor'));
-}
-
-
 
     public function store(Request $request)
 {
@@ -51,12 +57,17 @@ class SuratTugasMandiriController extends Controller
             'tgl_surat_pembuatan' => $now->format('Y-m-d'),
         ]);
 
-        return redirect()->route('surat-tugas-mandiri.index')
-            ->with([
-                'success' => 'Surat Tugas Mandiri berhasil dibuat',
-                'action' => 'generate_surat',
-                'id_generate' => $resultCreate->id_surat_penempatan
-            ]);
+        // return redirect()->route('surat-tugas-mandiri.index')
+        //     ->with([
+        //         'success' => 'Surat Tugas Mandiri berhasil dibuat',
+        //         'action' => 'generate_surat',
+        //         'id_generate' => $resultCreate->id_surat_penempatan
+        //     ]);
+
+        return response()->json([
+            'status' => true,
+            'id_generate' => $resultCreate->id_surat_penempatan
+        ]);
 
     } catch (\Exception $e) {
         return response()->json([
@@ -112,12 +123,11 @@ class SuratTugasMandiriController extends Controller
                 Storage::disk('public')->delete(str_replace('/storage/', '', $pathPDF));
             }
 
-            return redirect()->route('surat-tugas-mandiri.index')
-                ->with([
-                    'success' => 'Surat Tugas berhasil di edit',
-                    'action' => true,
-                    'id_generate' => $suratPenempatan->id_surat_penempatan
-                ]);
+            return response()->json([
+                'status' => true,
+                'action' => true,
+                'id_generate' => $suratPenempatan->id_surat_penempatan
+            ]);
 
         } catch (\Exception $e) {
             return response()->json([
@@ -130,30 +140,19 @@ class SuratTugasMandiriController extends Controller
     public function destroy($id)
     {
         try {
-            $suratPenempatan = SuratTugasMandiriModel::findOrFail($id);
-            $suratPenempatan->delete();
+        $suratPenempatan = SuratTugasMandiriModel::findOrFail($id);
+        $suratPenempatan->is_arsip = 1;
+        $suratPenempatan->save();
 
-            if($suratPenempatan->delete()) {
-                $pathDocx = $suratPenempatan->file_path_docx;
-                $pathPDF = $suratPenempatan->file_path_pdf;
-                if(is_file(public_path() . $pathDocx)) {
-                    Storage::disk('public')->delete(str_replace('/storage/', '', $pathDocx));
-                }
-                if(is_file(public_path() . $pathPDF)) {
-                    Storage::disk('public')->delete(str_replace('/storage/', '', $pathPDF));
-                }
-            }
+        return redirect()->route('surat-tugas-mandiri.index')
+            ->with('delete_success', 'Surat Tugas Mandiri berhasil dipindahkan ke arsip');
 
-            return redirect()->route('surat-tugas-mandiri.index')
-                ->with('delete_success', 'Surat Penempatan Driver Mandiri berhasil dihapus');
-
-                
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ], 500);
-        }
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+        ], 500);
+     }
     }
 
     public function generatePDF($id)
@@ -200,6 +199,68 @@ class SuratTugasMandiriController extends Controller
         }
         return response()->json([
             'status' => 'error',
+            'msg' => 'Mboh'
+        ]);
+    }
+
+    public function fileCheck($id, $type) {
+        $apiURL = env('FLASK_API_URL') . '/check/generate/run';
+        $dataSurat = SuratTugasMandiriModel::findOrFail($id);
+        $pathDocx = $dataSurat->file_path_docx;
+        $pathPDF = $dataSurat->file_path_pdf;
+        if($type == 'pdf') {
+            if(is_file(public_path() . $pathPDF)) {
+                return response()->json([
+                    'status' => true,
+                ]);
+            } else {
+                $responses = Http::post($apiURL, [
+                    'id' => $id
+                ]);
+                $responsesData = $responses->json();
+                if($responses->successful()) {
+                    if($responsesData['status']) {
+                        return response()->json([
+                            'status' => true,
+                            'msg' => 'File ini masih proses generate yaa, mohon bersabar!'
+                        ]);
+                    } else {
+                        return response()->json([
+                            'status' => false,
+                            'msg' => 'File ini sepertinya terhapus, masukan datanya lagi yaa!'
+                        ]);
+                    }
+                }
+            }
+        } else if($type == 'docx') {
+            if(is_file(public_path() . $pathDocx)) {
+                return response()->json([
+                    'status' => true,
+                ]);
+            } else {
+                $responses = Http::post($apiURL, [
+                    'id' => $id
+                ]);
+                $responsesData = $responses->json();
+                if($responses->successful()) {
+                    if($responsesData['status']) {
+                        return response()->json([
+                            'status' => true,
+                        ]);
+                    } else {
+                        return response()->json([
+                            'status' => false,
+                            'msg' => 'File ini masih proses generate yaa, mohon bersabar!'
+                        ]);
+                    }
+                }
+            }
+        }
+
+        return response()->json([
+            'status' => false,
+            'data' => $dataSurat,
+            'type' => $type
         ]);
     }
 }
