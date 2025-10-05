@@ -5,6 +5,9 @@ import sys
 import asyncio
 import threading
 import time
+import tempfile
+import subprocess
+import traceback
 from docx import Document
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -15,6 +18,7 @@ import requests
 import mysql.connector
 from dotenv import load_dotenv
 import re
+from docx2pdf import convert
 from docx.shared import Pt
 import json
 
@@ -25,6 +29,7 @@ load_dotenv()
 wdFormatPDF = 17
 bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember']
 processesId = []
+process_status = {}
 
 mydb = mysql.connector.connect(
   host=os.getenv('DB_HOST'),
@@ -112,6 +117,14 @@ def sendStatusProcess(id, status):
 @socketio.on('connect_after_fetch_table')
 def connect_after(data):
     emit('connect_after', True)
+    
+@socketio.on('subscribe_to_progress')
+def handle_subscribe_promotor(data):
+    surat_id = data.get('surat_id')
+    if surat_id:
+        socketio.server.enter_room(request.sid, f'surat_{surat_id}')
+        emit('subscribed', {'surat_id': surat_id}, room=request.sid)
+        print(f'Client {request.sid} subscribed to surat_id: {surat_id}')
 
 @app.route('/check/generate/run', methods=['POST'])
 def checkGenerateFiles():
@@ -287,225 +300,231 @@ def driver_mandiri():
     else:
         return jsonify({'status': 'error'})
     
-# Surat Tugas Promotor Indosat
-@app.route('/generate/surat/promotor', methods=['POST'])
-def generate_surat_promotor():
-    laravel_url = f'{os.getenv("LARAVEL_ENDPOINT")}/api/send/surat/promotor'
-    file_template_path = 'Contoh Template/275-Surat Tugas Promotor Indosat-ahmad.docx'
+# ======================================================================
+# SURAT TUGAS PROMOTOR
+# ======================================================================
+def send_status_promotor(surat_id, status, message=None, progress=None, file_paths=None):
+    """Mengirim status update ke client melalui WebSocket"""
+    data = {
+        'surat_id': surat_id,
+        'status': status,
+        'timestamp': datetime.now().isoformat()
+    }
     
-    word = None
-    doc = None
-   
+    if message:
+        data['message'] = message
+    if progress is not None:
+        data['progress'] = progress
+    if file_paths:
+        data['file_paths'] = file_paths
+    
+    # Update status terbaru
+    process_status[surat_id] = data
+    
+    # Kirim ke room yang sesuai
+    socketio.emit('generation_status_promotor', data, room=f'surat_{surat_id}')
+    print(f"[{surat_id}] Status update: {status} - {message}")
+
+def background_task_promotor(surat_data):
+    """Fungsi background dengan progress reporting melalui WebSocket"""
+    surat_id = str(surat_data.get('id_surat_tugas_promotor', 'UNKNOWN'))
+    laravel_upload_url = f'{os.getenv("LARAVEL_ENDPOINT")}/api/surat-promotor/upload-final'
+    
+    filename_docx = None
+    filename_pdf = None
+    
     try:
-        # Initialize Word application
+        # Update status: Memulai proses
+        send_status_promotor(surat_id, 'processing', 'Memulai proses pembuatan surat...', 10)
+        
+        # 1. Persiapan data
         pythoncom.CoInitialize()
-        word = comtypes.client.CreateObject('Word.Application')
-        word.Visible = False
-       
-        # Get data from database
-        mycursor = mydb.cursor(dictionary=True)
-       
-        # Pastikan id_surat_tugas_promotor ada dalam request
-        if 'id_surat_tugas_promotor' not in request.json:
-            return jsonify({
-                'status': 'error',
-                'message': 'id_surat_tugas_promotor is required in request'
-            })
-       
-        id_surat = request.json['id_surat_tugas_promotor']
         
-        # Commit any pending transactions to ensure we get latest data
-        mydb.commit()
-        
-        sqlStr = f"SELECT * FROM surat_tugas_promotor WHERE id_surat_tugas_promotor = '{id_surat}'"
-       
-        print(f"Executing SQL: {sqlStr}")
-        mycursor.execute(sqlStr)
-        result = mycursor.fetchone()
-
-        if not result:
-            return jsonify({
-                'status': 'error',
-                'message': f'Data not found for id: {id_surat}'
-            })
-
-        # Load template document
-        if not os.path.exists(file_template_path):
-            return jsonify({
-                'status': 'error',
-                'message': f'Template file not found: {file_template_path}'
-            })
-
-        document = Document(file_template_path)
-
-        # Format date function
-        def format_date(date_str):
-            if not date_str:
+        def format_date_promotor(date_str):
+            """Fungsi untuk memformat tanggal dari ISO format ke format Indonesia."""
+            if not date_str: 
                 return ""
             try:
                 if isinstance(date_str, str):
+                    if 'T' in date_str:
+                        date_str = date_str.split('T')[0]
                     date_obj = datetime.strptime(date_str, '%Y-%m-%d')
                 else:
                     date_obj = date_str
-                return f"{date_obj.day} {bulan[date_obj.month-1]} {date_obj.year}"
-            except:
-                return ""
+                return f"{date_obj.day} {bulan[date_obj.month - 1]} {date_obj.year}"
+            except (ValueError, TypeError, IndexError) as e:
+                print(f"Error formatting date: {date_str}, Error: {e}")
+                return str(date_str)
 
-        # Process penempatan data - handle various formats
-        penempatan = result.get('penempatan', '[]')
-        print(f"Raw penempatan data: {penempatan} (type: {type(penempatan)})")
-        
+        # Process penempatan
+        penempatan_raw = surat_data.get('penempatan', '[]')
+        penempatan_list = []
         try:
-            # Handle different formats of penempatan data
-            if isinstance(penempatan, str):
-                # Try to parse as JSON first
-                if penempatan.startswith('[') and penempatan.endswith(']'):
-                    penempatan = json.loads(penempatan)
-                elif penempatan.startswith('"') and penempatan.endswith('"'):
-                    # Remove quotes and split by comma
-                    penempatan = penempatan.strip('"').split(',')
-                else:
-                    # Split by comma as fallback
-                    penempatan = [item.strip() for item in penempatan.split(',') if item.strip()]
-           
-            # Ensure we have a list
-            if not isinstance(penempatan, list):
-                penempatan = [str(penempatan)]
-                
-            # Clean each item
-            penempatan = [str(item).strip().strip('"\'[]') for item in penempatan if item and str(item).strip()]
-            
-        except Exception as e:
-            print(f"Error processing penempatan: {str(e)}")
-            penempatan = ["-"]
-
-        print(f"Processed penempatan: {penempatan}")
-
-        # Format penempatan
-        penempatan_text = ""
-        if penempatan and any(item.strip() for item in penempatan):
-            if len(penempatan) == 1:
-                penempatan_text = penempatan[0]
+            parsed_data = json.loads(penempatan_raw) if isinstance(penempatan_raw, str) else penempatan_raw
+            if isinstance(parsed_data, list):
+                 penempatan_list = [str(item).strip() for item in parsed_data if str(item).strip()]
             else:
-                numbered_list = []
-                for i, item in enumerate(penempatan, 1):
-                    if item.strip():  # Only add non-empty items
-                        numbered_list.append(f"{i}. {item.strip()}")
+                 penempatan_list = [str(parsed_data)]
+        except (json.JSONDecodeError, TypeError):
+            penempatan_list = [item.strip() for item in str(penempatan_raw).split(',') if item.strip()]
+
+        penempatan_text = "-"
+        if penempatan_list:
+            penempatan_text = penempatan_list[0] if len(penempatan_list) == 1 else "\n".join(f"{i}. {item}" for i, item in enumerate(penempatan_list, 1))
+
+        nama_kandidat = surat_data.get('nama_kandidat', '-').strip() or '-'
+        
+        send_status_promotor(surat_id, 'processing', 'Memproses data template...', 30)
+        
+        # 2. Manipulasi dokumen Word
+        file_template_path = os.getenv('TEMPLATE_PROMOTOR_PATH')
+        if not os.path.exists(file_template_path):
+            raise FileNotFoundError(f"Template tidak ditemukan di: {file_template_path}")
+        
+        document = Document(file_template_path)
+        
+        replacements = {
+            '__PENEMPATAN__': penempatan_text,
+            '__DATATGLSURATPEMBUATAN__': format_date_promotor(surat_data.get('tgl_surat_pembuatan')),
+            '__NAMAKANDIDAT__': nama_kandidat,
+            '__DATATGLPENUGASAN__': format_date_promotor(surat_data.get('tgl_penugasan')),
+        }
+        
+        for key, value in replacements.items():
+            for p in document.paragraphs: 
+                p.text = p.text.replace(key, str(value))
+            for t in document.tables:
+                for r in t.rows:
+                    for c in r.cells: 
+                        c.text = c.text.replace(key, str(value))
+        
+        send_status_promotor(surat_id, 'processing', 'Menyimpan dokumen Word...', 50)
+        
+        # 3. Simpan file DOCX
+        base_filename = f'Surat_Penempatan_Promotor_{nama_kandidat}_{surat_id}'
+        safe_filename = re.sub(r'[^\w\-_\. ]', '_', base_filename)
+        dirname = os.path.dirname(os.path.abspath(__file__))
+        temp_dir = os.path.join(dirname, 'temp')
+        os.makedirs(temp_dir, exist_ok=True)
+        filename_docx = os.path.join(temp_dir, f'{safe_filename}.docx')
+        filename_pdf = os.path.join(temp_dir, f'{safe_filename}.pdf')
+        
+        document.save(filename_docx)
+        
+        send_status_promotor(surat_id, 'processing', 'Mengonversi ke PDF...', 70)
+        
+        # 4. Konversi ke PDF menggunakan docx2pdf
+        try:
+            convert(filename_docx, filename_pdf)
+            send_status_promotor(surat_id, 'processing', 'Konversi PDF berhasil!', 80)
+        except Exception as pdf_error:
+            # Fallback: jika docx2pdf gagal, coba gunakan metode lain
+            send_status_promotor(surat_id, 'processing', 'Menggunakan metode alternatif untuk konversi PDF...', 75)
+            try:
+                # Alternatif: menggunakan LibreOffice via command line (jika tersedia)
+                result = subprocess.run([
+                    'soffice', '--headless', '--convert-to', 'pdf', 
+                    '--outdir', temp_dir, filename_docx
+                ], capture_output=True, text=True, timeout=60)
                 
-                if numbered_list:
-                    penempatan_text = "\n".join(numbered_list)
-                else:
-                    penempatan_text = "-"
-        else:
-            penempatan_text = "-"
-
-        # Get other data
-        nama_kandidat = result.get('nama_kandidat', '-') or '-'
-        tgl_surat_pembuatan = result.get('tgl_surat_pembuatan', '') or ''
-        tgl_penugasan = result.get('tgl_penugasan', '') or ''
-
-        print(f"Data used for generation:")
-        print(f"  Nama: {nama_kandidat}")
-        print(f"  Penempatan: {penempatan_text}")
-        print(f"  Tgl Pembuatan: {tgl_surat_pembuatan}")
-        print(f"  Tgl Penugasan: {tgl_penugasan}")
-
-        # Replace placeholders in paragraphs
-        for paragraph in document.paragraphs:
-            original_text = paragraph.text
-            new_text = original_text
-            
-            new_text = new_text.replace('__PENEMPATAN__', penempatan_text)
-            new_text = new_text.replace('__DATATGLSURATPEMBUATAN__', format_date(tgl_surat_pembuatan))
-            new_text = new_text.replace('__NAMAKANDIDAT__', nama_kandidat)
-            new_text = new_text.replace('__DATATGLPENUGASAN__', format_date(tgl_penugasan))
-            
-            if new_text != original_text:
-                paragraph.text = new_text
-                print(f"Replaced in paragraph: {original_text} -> {new_text}")
-
-        # Replace placeholders in tables
-        for table in document.tables:
-            for row in table.rows:
-                for cell in row.cells:
-                    original_text = cell.text
-                    new_text = original_text
+                if result.returncode != 0:
+                    raise Exception(f"LibreOffice conversion failed: {result.stderr}")
                     
-                    new_text = new_text.replace('__PENEMPATAN__', penempatan_text)
-                    new_text = new_text.replace('__DATATGLSURATPEMBUATAN__', format_date(tgl_surat_pembuatan))
-                    new_text = new_text.replace('__NAMAKANDIDAT__', nama_kandidat)
-                    new_text = new_text.replace('__DATATGLPENUGASAN__', format_date(tgl_penugasan))
-                    
-                    if new_text != original_text:
-                        cell.text = new_text
-                        print(f"Replaced in table cell: {original_text} -> {new_text}")
-
-        # Save documents
-        print('Saving Docx...')
-        output_filename = f'Surat_Penempatan_Promotor_{nama_kandidat}_{id_surat}.docx'
-        safe_filename = re.sub(r'[^\w\-_\. ]', '_', output_filename)
-        document.save(safe_filename)
-       
-        dirname = os.path.dirname(__file__)
-        filename_docx = os.path.join(dirname, safe_filename)
-        filename_pdf = os.path.join(dirname, f'Surat_Penempatan_Promotor_{nama_kandidat}_{id_surat}.pdf')
-       
-        # Convert to PDF
-        word.Visible = False
-        doc = word.Documents.Open(filename_docx, ReadOnly=True)
-        print('Saving PDF...')
-        doc.SaveAs(filename_pdf, FileFormat=wdFormatPDF)
-        doc.Close()
-        doc = None
-        word.Quit()
-        word = None
-        print('Conversion done!')
-
-        # Start background thread for file upload
-        print('Start threading in background...')
-        t = threading.Thread(
-            target=background_generate_file,
-            args=(
-                filename_docx,
-                filename_pdf,
-                laravel_url,
-                id_surat,
-                request.json.get('table', 'surat_tugas_promotor'),
-                "id_surat_tugas_promotor"
-            )
-        )
-        t.daemon = True
-        t.start()
+            except Exception as fallback_error:
+                raise Exception(f"Konversi PDF gagal: {pdf_error}. Fallback juga gagal: {fallback_error}")
         
-        # Add to processes list
-        processesId.append(id_surat)
+        send_status_promotor(surat_id, 'processing', 'Mengupload file ke server...', 90)
         
-        print('File generation process started successfully')
-        return jsonify({'status': 'success'})
-       
+        # 5. Upload ke Laravel
+        with open(filename_docx, 'rb') as f_docx, open(filename_pdf, 'rb') as f_pdf:
+            files = {
+                'file_docx': (os.path.basename(filename_docx), f_docx, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'),
+                'file_pdf': (os.path.basename(filename_pdf), f_pdf, 'application/pdf')
+            }
+            payload = {'surat_id': surat_id}
+            
+            res = requests.post(laravel_upload_url, files=files, data=payload, timeout=30)
+            res.raise_for_status()
+            
+            response_json = res.json()
+            if response_json.get('success'):
+                send_status_promotor(surat_id, 'completed', 'File berhasil digenerate dan diupload!', 100)
+            else:
+                raise Exception(f"Laravel error: {response_json.get('message')}")
+
     except Exception as e:
-        print(f"Error in generate_surat_promotor: {str(e)}")
-        import traceback
+        error_msg = f"Error dalam proses: {str(e)}"
+        print(f"[{surat_id}] ERROR: {error_msg}")
         traceback.print_exc()
+        send_status_promotor(surat_id, 'error', error_msg)
         
-        # Clean up
-        try:
-            if doc:
-                doc.Close()
-            if word:
-                word.Quit()
-        except:
-            pass
-            
-        return jsonify({
-            'status': 'error',
-            'message': str(e)
-        })
     finally:
+        # 6. Cleanup
         try:
+            if filename_docx and os.path.exists(filename_docx): 
+                os.remove(filename_docx)
+            if filename_pdf and os.path.exists(filename_pdf): 
+                os.remove(filename_pdf)
             pythoncom.CoUninitialize()
-        except:
-            pass
+        except Exception as cleanup_error:
+            print(f"[{surat_id}] Cleanup error: {cleanup_error}")
+
+@app.route('/generate/surat/promotor', methods=['POST'])
+def generate_surat_promotor():
+    try:
+        if not request.json or 'surat_data' not in request.json:
+            return jsonify({'status': 'error', 'message': 'Payload JSON atau surat_data tidak ditemukan.'}), 400
+        
+        surat_data = request.json['surat_data']
+        surat_id = str(surat_data.get('id_surat_tugas_promotor', 'UNKNOWN'))
+        
+        # Cek apakah proses sudah berjalan untuk surat_id ini
+        if surat_id in process_status and process_status[surat_id].get('status') == 'processing':
+            return jsonify({
+                'status': 'processing', 
+                'message': 'Proses untuk ID ini sudah berjalan.',
+                'websocket_required': True
+            })
+        
+        # Mulai background task tanpa parameter sid
+        socketio.start_background_task(background_task_promotor, surat_data)
+        
+        return jsonify({
+            'success': True,
+            'status': 'success', 
+            'message': 'Proses pembuatan file dimulai.',
+            'surat_id': surat_id,
+            'websocket_required': True
+        })
+        
+    except Exception as e:
+        error_msg = f"Error memulai proses: {str(e)}"
+        print(f"ERROR in generate_surat_promotor: {error_msg}")
+        return jsonify({
+            'success': False,
+            'status': 'error',
+            'message': error_msg
+        }), 500
+
+@app.route('/check/status/promotor/<surat_id>', methods=['GET'])
+def check_status_promotor(surat_id):
+    """Endpoint fallback untuk cek status (jika WebSocket tidak available)"""
+    status = process_status.get(surat_id, {'status': 'not_found'})
+    return jsonify(status)
+
+@app.route('/status/history/promotor', methods=['GET'])
+def status_history_promotor():
+    """Mendapatkan history status semua proses"""
+    return jsonify(process_status)
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    return jsonify({
+        'status': 'healthy',
+        'service': 'flask-doc-generator',
+        'timestamp': datetime.now().isoformat()
+    })
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    print("Starting Flask server with WebSocket support...")
+    socketio.run(app, debug=True, host='0.0.0.0', port=5000)

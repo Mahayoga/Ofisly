@@ -19,7 +19,9 @@ class SuratTugasPromotor extends Model
         'nama_kandidat',
         'penempatan',
         'tgl_penugasan',
-        'penempatan'
+        'penempatan',
+        'file_path_docx',
+        'file_path_pdf'
     ];
 
     protected $casts = [

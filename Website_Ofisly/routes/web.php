@@ -26,19 +26,28 @@ Route::middleware(['role.auth', 'auth'])->group(function () {
     Route::resource('dashboard', DashboardController::class);
 
     // Surat Tugas Promotor Routes
-    Route::resource('surat-tugas-promotor', SuratTugasPromotorController::class);
-        Route::prefix('surat-tugas-promotor')->group(function () {
-            Route::get('/', [SuratTugasPromotorController::class, 'index'])->name('surat-tugas-promotor.index');
-            Route::post('/', [SuratTugasPromotorController::class, 'store'])->name('surat-tugas-promotor.store');
-            Route::get('/{id}/edit', [SuratTugasPromotorController::class, 'edit'])->name('surat-tugas-promotor.edit');
-            Route::put('/{id}', [SuratTugasPromotorController::class, 'update'])->name('surat-tugas-promotor.update');
-            Route::delete('/{id}', [SuratTugasPromotorController::class, 'destroy'])->name('surat-tugas-promotor.destroy');
-            // Route::post('/send/surat/promotor', [SuratTugasPromotorController::class, 'receiveFiles']);
-            Route::get('/generate-pdf/{id}', [SuratTugasPromotorController::class, 'generatePDF'])->name('surat-tugas-promotor.generate-pdf');
-            Route::get('/generate-word/{id}', [SuratTugasPromotorController::class, 'generateWord'])->name('surat-tugas-promotor.generate-word');
-            Route::post('/generate/file', [SuratTugasPromotorController::class, 'generateFile'])->name('surat-tugas-promotor.generate-file');
-            Route::get('/file/check/{id}/{type}', [SuratTugasPromotorController::class, 'fileCheck'])->name('surat-tugas-promotor.file-check');
-        });
+    Route::prefix('surat-tugas-promotor')->name('surat-tugas-promotor.')->group(function () {
+        // CRUD Routes
+        Route::get('/', [SuratTugasPromotorController::class, 'index'])->name('index');
+        Route::get('/create', [SuratTugasPromotorController::class, 'create'])->name('create');
+        Route::post('/', [SuratTugasPromotorController::class, 'store'])->name('store');
+        Route::get('/{id}', [SuratTugasPromotorController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [SuratTugasPromotorController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [SuratTugasPromotorController::class, 'update'])->name('update');
+        Route::delete('/{id}', [SuratTugasPromotorController::class, 'destroy'])->name('destroy');
+
+        // File Generation Routes
+        Route::get('/{id}/download/pdf', [SuratTugasPromotorController::class, 'generatePDF'])->name('generate-pdf');
+        Route::get('/{id}/download/word', [SuratTugasPromotorController::class, 'generateWord'])->name('generate-word');
+        Route::post('/generate-file', [SuratTugasPromotorController::class, 'generateFile'])->name('generate-file');
+
+        // File Management Routes
+        // Di routes/web.php
+        Route::get('/check/flask-status/{id}', [SuratTugasPromotorController::class, 'checkFlaskStatus'])->name('check-flask-status');
+        Route::get('/{id}/file-check/{type}', [SuratTugasPromotorController::class, 'fileCheck'])->name('file-check');
+        Route::get('/{id}/file-status', [SuratTugasPromotorController::class, 'getFileStatus'])->name('file-status');
+        Route::post('/{id}/update-file-paths', [SuratTugasPromotorController::class, 'updateFilePaths'])->name('update-file-paths');
+    });
 
     Route::resource('surat-tugas', SuratTugasPenggantiDriverController::class);
         Route::prefix('surat-tugas')->group(function () {
