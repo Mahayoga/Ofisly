@@ -232,7 +232,7 @@
     let idEdit = null;
     let processedId = null;
     $(document).ready(function(){
-      socket = io("http://localhost:5000");
+      socket = io("{{ env('FLASK_API_URL') }}");
       table = new DataTable('#suratTugasTable', {
         ajax: '{{ route('surat-tugas.fetchRowData') }}',
         columns: [
@@ -243,8 +243,16 @@
             }
           },
           { data: 'nama_kandidat' },
-          { data: 'tgl_mulai_penugasan' },
-          { data: 'tgl_surat_pembuatan' },
+          { 
+            data: function(data, type, row) { // tgl_mulai_penugasan
+              return data.tgl_mulai_penugasan.split('T')[0];
+            }
+          }, 
+          { 
+            data: function(data, type, row) { // tgl_mulai_penugasan
+              return data.tgl_selesai_penugasan.split('T')[0];
+            }
+          },
           {
             data: null,
             render: function(data, type, row) {

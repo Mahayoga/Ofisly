@@ -24,6 +24,8 @@ return new class extends Migration
             $table->date('tgl_surat_pembuatan');
             $table->string('file_path_docx')->nullable();
             $table->string('file_path_pdf')->nullable();
+            $table->boolean('is_arsip')->default(0);
+
             /**
              * TANGGALPEMBUATAN .
              * NAMAKANDIDAT .

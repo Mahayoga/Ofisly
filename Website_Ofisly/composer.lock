@@ -4,7 +4,11 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
+<<<<<<< HEAD
     "content-hash": "11bf5bfc1b7f730d4262df8c79c0fbf3",
+=======
+    "content-hash": "9935327bbfec973e266807e67e4c1b08",
+>>>>>>> 941fbd8255138a853e03c4d809512f82fb0651be
     "packages": [
         {
             "name": "barryvdh/laravel-dompdf",
@@ -3009,6 +3013,7 @@
             "time": "2025-05-08T08:14:37+00:00"
         },
         {
+<<<<<<< HEAD
             "name": "phpoffice/math",
             "version": "0.3.0",
             "source": {
@@ -3169,6 +3174,8 @@
             "time": "2025-06-05T10:32:36+00:00"
         },
         {
+=======
+>>>>>>> 941fbd8255138a853e03c4d809512f82fb0651be
             "name": "phpoption/phpoption",
             "version": "1.9.4",
             "source": {

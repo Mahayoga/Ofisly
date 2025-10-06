@@ -20,6 +20,7 @@ return new class extends Migration
             $table->date('tgl_mulai_penempatan');
             $table->string('file_path_docx')->nullable();
             $table->string('file_path_pdf')->nullable();
+            $table->boolean('is_arsip')->default(0);
             $table->timestamps();
         });
     }

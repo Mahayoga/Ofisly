@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Models\DaftarLowongan;
 use App\Models\LowonganPekerjaanModel;
+use App\Models\PendaftarLowonganModel;
 use App\Models\SuratTugasPromotor;
 use App\Models\SuratTugasMandiriModel;
 use App\Models\SuratTugasPenggantiDriverModel;
@@ -88,7 +89,30 @@ class DashboardController extends Controller
         
 
         // Lowongan Pekerjaan
-        
+        $lowonganBulanSekarang = Carbon::now()->month;
+        $lowonganTahunSekarang = Carbon::now()->year;
+        $lowonganBulanan = [];
+        $pendaftarBulanan = [];
+        $totalLowonganTahunan = 0;
+        $totalPendaftarTahunan = 0;
+
+            // chart Lowongan Pekerjaan
+        for ($i = 1; $i <= 12; $i++) {
+            $lowonganCount = LowonganPekerjaanModel::whereYear('created_at', $lowonganTahunSekarang)
+                ->whereMonth('created_at', $i)
+                ->count();
+
+            $pendaftarCount = PendaftarLowonganModel::whereYear('created_at', $lowonganTahunSekarang)
+                ->whereMonth('created_at', $i)
+                ->count();
+
+            $lowonganBulanan[] = $lowonganCount;
+            $pendaftarBulanan[] = $pendaftarCount;
+
+            $totalLowonganTahunan += $lowonganCount;
+            $totalPendaftarTahunan += $pendaftarCount;
+        }
+
 
         return view('admin.dashboard.index', compact(
             'totalUser',
@@ -99,7 +123,11 @@ class DashboardController extends Controller
             'totalSuratPenggantiBulanan',
             'totalSuratBulanan',
             'totalSuratTahunan',
-            'daftarSuratTugas'
+            'daftarSuratTugas',
+            'lowonganBulanan',
+            'pendaftarBulanan',
+            'totalLowonganTahunan',
+            'totalPendaftarTahunan'
         ));
     }
 }
