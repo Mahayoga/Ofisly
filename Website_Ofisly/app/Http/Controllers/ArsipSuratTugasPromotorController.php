@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\SuratTugasPromotor;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class ArsipSuratTugasPromotorController extends Controller
 {
@@ -67,7 +68,7 @@ class ArsipSuratTugasPromotorController extends Controller
             $dataSurat = SuratTugasPromotor::findOrFail($id);
             $dataSurat->update([
                 'is_arsip' => 0,
-                'updated_by' => auth()->id()
+                'updated_by' => Auth::user()->id
             ]);
 
             Log::info('Surat tugas promotor restored from archive', ['id' => $id]);

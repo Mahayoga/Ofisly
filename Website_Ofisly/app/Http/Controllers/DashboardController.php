@@ -2,31 +2,132 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\SuratTugasPenggantiDriverModel;
-use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\User;
+use App\Models\DaftarLowongan;
+use App\Models\LowonganPekerjaanModel;
+use App\Models\PendaftarLowonganModel;
+use App\Models\SuratTugasPromotor;
+use App\Models\SuratTugasMandiriModel;
+use App\Models\SuratTugasPenggantiDriverModel;
+use App\Models\suratPenempatanPramubaktiMandiri;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $totalSurat = SuratTugasPenggantiDriverModel::count();
-        $totalUsers = User::count();
+        // card
+        $totalUser = User::count();
+        $totalLowongan = LowonganPekerjaanModel::count();
+        $totalSuratTugas = SuratTugasPromotor::count() + SuratTugasMandiriModel::count() + SuratTugasPenggantiDriverModel::count();
+        
 
-        $suratTerbaru = SuratTugasPenggantiDriverModel::orderBy('tgl_surat_pembuatan', 'desc')
-            ->take(5)
-            ->get();
-        $usersTerbaru = User::orderBy('created_at', 'desc')
-            ->take(5)
-            ->get();
+        // Surat Tugas
+        $totalSuratPromotorBulanan = [];
+        $totalSuratMandiriBulanan = [];
+        $totalSuratPenggantiBulanan = [];
+        $suratTugasBulanan = [];
 
-        return view('admin.dashboard.index2', compact(
-            'totalSurat',
-            'totalUsers',
-            'suratTerbaru',
-            'usersTerbaru'
+        $suratBulanan = Carbon::now()->month;
+        $totalSuratBulanan = 0;
+        $suratTahunan = Carbon::now()->year;
+        $totalSuratTahunan = 0;
+
+            // chart Surat Tugas
+        for ($i = 1; $i <= 12; $i++) {
+            $tp = (int) SuratTugasPromotor::whereYear('tgl_surat_pembuatan', $suratTahunan)->whereMonth('tgl_surat_pembuatan', $i)->count();
+            $tm = (int) SuratTugasMandiriModel::whereYear('tgl_surat_pembuatan', $suratTahunan)->whereMonth('tgl_surat_pembuatan', $i)->count();
+            $tpd = (int) SuratTugasPenggantiDriverModel::whereYear('tgl_surat_pembuatan', $suratTahunan)->whereMonth('tgl_surat_pembuatan', $i)->count();
+
+            $totalSuratPromotorBulanan[] = $tp;
+            $totalSuratMandiriBulanan[]  = $tm;
+            $totalSuratPenggantiBulanan[] = $tpd;
+
+            $totalSuratTahunan += $tp + $tm + $tpd;
+            if ($i == $suratBulanan) {
+                $totalSuratBulanan = $tp + $tm + $tpd;
+            }
+
+        }
+
+            // Daftar List Surat Tugas
+        
+        $suratPromotor = SuratTugasPromotor::select('tgl_surat_pembuatan')
+            ->get()
+            ->map(function($item){
+                return [
+                    'type' => 'Promotor',
+                    'tgl_surat_pembuatan' => $item->tgl_surat_pembuatan
+                ];
+            });
+        $suratMandiri = SuratTugasMandiriModel::select('tgl_surat_pembuatan')
+            ->get()
+            ->map(function($item){
+                return [
+                    'type' => 'Mandiri',
+                    'tgl_surat_pembuatan' => $item->tgl_surat_pembuatan
+                ];
+            });
+        $suratPengganti = SuratTugasPenggantiDriverModel::select('tgl_surat_pembuatan')
+            ->get()
+            ->map(function($item){
+                return [
+                    'type' => 'Pengganti Driver',
+                    'tgl_surat_pembuatan' => $item->tgl_surat_pembuatan
+                ];
+            });
+        
+        $daftarSuratTugas = collect()
+            ->merge($suratPromotor)
+            ->merge($suratMandiri)
+            ->merge($suratPengganti)
+            ->sortByDesc('tgl_surat_pembuatan')
+            ->take(5);
+        
+        
+
+        // Lowongan Pekerjaan
+        $lowonganBulanSekarang = Carbon::now()->month;
+        $lowonganTahunSekarang = Carbon::now()->year;
+        $lowonganBulanan = [];
+        $pendaftarBulanan = [];
+        $totalLowonganTahunan = 0;
+        $totalPendaftarTahunan = 0;
+
+            // chart Lowongan Pekerjaan
+        for ($i = 1; $i <= 12; $i++) {
+            $lowonganCount = LowonganPekerjaanModel::whereYear('created_at', $lowonganTahunSekarang)
+                ->whereMonth('created_at', $i)
+                ->count();
+
+            $pendaftarCount = PendaftarLowonganModel::whereYear('created_at', $lowonganTahunSekarang)
+                ->whereMonth('created_at', $i)
+                ->count();
+
+            $lowonganBulanan[] = $lowonganCount;
+            $pendaftarBulanan[] = $pendaftarCount;
+
+            $totalLowonganTahunan += $lowonganCount;
+            $totalPendaftarTahunan += $pendaftarCount;
+        }
+
+
+        return view('admin.dashboard.index', compact(
+            'totalUser',
+            'totalLowongan',
+            'totalSuratTugas',
+            'totalSuratPromotorBulanan',
+            'totalSuratMandiriBulanan',
+            'totalSuratPenggantiBulanan',
+            'totalSuratBulanan',
+            'totalSuratTahunan',
+            'daftarSuratTugas',
+            'lowonganBulanan',
+            'pendaftarBulanan',
+            'totalLowonganTahunan',
+            'totalPendaftarTahunan'
         ));
     }
 }

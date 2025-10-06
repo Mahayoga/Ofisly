@@ -1,0 +1,62 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use App\Models\User;
+use App\Models\DaftarLowongan;
+use App\Models\LowonganPekerjaanModel;
+use App\Models\SuratTugasPromotor;
+use App\Models\SuratTugasMandiriModel;
+use App\Models\SuratTugasPenggantiDriverModel;
+use App\Models\suratPenempatanPramubaktiMandiri;
+
+class DashboardController extends Controller
+{
+    public function index()
+    {
+        $totalUser = User::count();
+        $totalLowongan = LowonganPekerjaanModel::count();
+
+        $totalSuratTugas = SuratTugasPromotor::count() + SuratTugasMandiriModel::count() + SuratTugasPenggantiDriverModel::count();
+
+        
+        $totalSuratPromotorBulanan = [];
+        $totalSuratMandiriBulanan = [];
+        $totalSuratPenggantiBulanan = [];
+        $suratTugasBulanan = [];
+
+        // for ($i = 1; $i <= 12; $i++){
+        //     $totalSuratPromotorBulanan = SuratTugasPromotor::whereMonth('created_at', $i)->count();
+        //     $totalSuratMandiriBulanan = SuratTugasMandiriModel::whereMonth('created_at', $i)->count();
+        //     $totalSuratPenggantiBulanan = SuratTugasPenggantiDriverModel::whereMonth('created_at', $i)->count();
+            
+        //     $suratTugasBulanan[$i] = SuratTugasPromotor::whereMonth('created_at', $i)->count() + SuratTugasMandiriModel::whereMonth('created_at', $i)->count() + SuratTugasPenggantiDriverModel::whereMonth('created_at', $i)->count();
+        // }
+
+        for ($i = 1; $i <= 12; $i++) {
+        $promotor = SuratTugasPromotor::whereMonth('created_at', $i)->count();
+        $mandiri  = SuratTugasMandiriModel::whereMonth('created_at', $i)->count();
+        $pengganti = SuratTugasPenggantiDriverModel::whereMonth('created_at', $i)->count();
+
+        $suratTugasPromotorBulanan[] = $promotor;
+        $suratTugasMandiriBulanan[]  = $mandiri;
+        $suratTugasPenggantiBulanan[] = $pengganti;
+        $suratTugasTotalBulanan[] = $promotor + $mandiri + $pengganti;
+    }
+
+
+
+        return view('admin.dashboard.index2', compact(
+            'totalUser',
+            'totalLowongan',
+            'totalSuratTugas',
+            'totalSuratPromotorBulanan',
+            'totalSuratMandiriBulanan',
+            'totalSuratPenggantiBulanan',
+            'suratTugasBulanan'
+        ));
+    }
+}

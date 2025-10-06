@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 
 class SuratTugasPromotorController extends Controller
@@ -64,12 +65,12 @@ class SuratTugasPromotorController extends Controller
                 'tgl_penugasan' => $validated['tgl_penugasan'],
                 'penempatan' => $penempatanArray,
                 'tgl_surat_pembuatan' => Carbon::now()->format('Y-m-d'),
-                'created_by' => auth()->id(),
+                'created_by' => Auth::user()->id
             ]);
 
             Log::info('Surat tugas promotor created', [
                 'id' => $resultCreate->id_surat_tugas_promotor,
-                'by' => auth()->id()
+                'by' => Auth::user()->id
             ]);
 
             $this->triggerFileGeneration($resultCreate->id_surat_tugas_promotor);
@@ -187,14 +188,14 @@ class SuratTugasPromotorController extends Controller
                 'penempatan' => $penempatanArray,
                 'tgl_penugasan' => $request->edit_tgl_penugasan,
                 'tgl_surat_pembuatan' => $request->edit_tgl_surat_pembuatan,
-                'updated_by' => auth()->id(),
+                'updated_by' => Auth::user()->id,
                 'file_path_docx' => null,
                 'file_path_pdf' => null,
             ]);
 
             Log::info('Surat tugas promotor updated', [
                 'id' => $id,
-                'by' => auth()->id()
+                'by' => Auth::user()->id
             ]);
 
             // Regenerate files
@@ -231,12 +232,12 @@ public function destroy($id)
         // Hanya tandai sebagai arsip, TIDAK PERLU soft delete di sini
         $surat->update([
             'is_arsip' => 1,
-            'updated_by' => auth()->id()
+            'updated_by' => Auth::user()->id
         ]);
 
         Log::info('Surat tugas promotor moved to archive', [
             'id' => $id,
-            'by' => auth()->id()
+            'by' => Auth::user()->id
         ]);
 
         return redirect()
