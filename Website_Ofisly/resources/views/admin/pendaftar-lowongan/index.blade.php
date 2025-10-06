@@ -28,7 +28,7 @@
     @endif
 
     {{-- Loop per lowongan --}}
-    @foreach ($pendaftar as $idLowongan => $listPendaftar)
+    @forelse ($pendaftar as $idLowongan => $listPendaftar)
       <div class="card border-0 mb-4">
         <div class="card-header bg-primary text-white">
           <h5 class="mb-0">{{ $listPendaftar->first()->lowongan->judul }}</h5>
@@ -115,7 +115,16 @@
           </div>
         </div>
       </div>
-    @endforeach
+    @empty
+      <div class="card border-0 mb-4">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0">Tidak ada data</h5>
+        </div>
+        <div class="card-body border">
+          Tidak ada data
+        </div>
+      </div>
+    @endforelse
   </div>
 
   <!-- Edit Modal (tetap sama) -->
